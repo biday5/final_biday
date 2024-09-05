@@ -1,0 +1,3 @@
+interface AuctionModel {
+    id?: number;
+}
