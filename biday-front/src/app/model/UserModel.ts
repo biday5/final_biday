@@ -1,0 +1,3 @@
+interface UserModel {
+    id?: number;
+}

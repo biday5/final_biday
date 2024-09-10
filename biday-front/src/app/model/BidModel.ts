@@ -1,0 +1,3 @@
+interface BidModel {
+    id?: number;
+}
