@@ -29,6 +29,6 @@ public class AccountEntity {
     private int accountNumber; // 암호화, tinyInt https://velog.io/@duridudu/TIL-JPA-%EC%82%BD%EC%A7%88-%EC%A0%95%EB%A6%AC
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createAt;
 }

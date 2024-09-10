@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import shop.biday.model.entity.AuctionEntity;
 
 @Repository
-public interface AuctionRepository extends JpaRepository<AuctionEntity, Integer> {
+public interface AuctionRepository extends JpaRepository<AuctionEntity, Long> {
 }
