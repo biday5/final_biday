@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import shop.biday.model.entity.NotificationEntity;
 
 @Repository
-public interface NotificationRepository extends JpaRepository<NotificationEntity, Integer> {
+public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
 }

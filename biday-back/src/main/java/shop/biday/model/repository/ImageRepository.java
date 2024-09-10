@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import shop.biday.model.entity.ImageEntity;
 
 @Repository
-public interface ImageRepository extends JpaRepository<ImageEntity, Integer> {
+public interface ImageRepository extends JpaRepository<ImageEntity, Long> {
 }

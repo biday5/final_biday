@@ -1,6 +1,7 @@
 package shop.biday.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import shop.biday.model.domain.AccountModel;
 import shop.biday.model.entity.AccountEntity;
@@ -10,6 +11,7 @@ import shop.biday.service.AccountService;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {

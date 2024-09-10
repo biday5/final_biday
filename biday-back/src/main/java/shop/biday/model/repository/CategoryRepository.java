@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import shop.biday.model.entity.CategoryEntity;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<CategoryEntity, Integer> {
+public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
 }
