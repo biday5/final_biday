@@ -38,6 +38,9 @@ out/
 
 ### gpt가 써준 gitignore
 
+# yaml
+*.yaml
+
 # MacOS 관련 파일
 .DS_Store
 
@@ -46,6 +49,3 @@ out/
 
 # 환경 파일
 .env
-
-# Docker 관련 파일 (optional)
-docker-compose.yaml

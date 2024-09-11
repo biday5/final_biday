@@ -16,7 +16,7 @@ import shop.biday.service.UserService;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")

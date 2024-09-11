@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="d48b46b8-1381-47cf-b226-e339d0bf7d46" name="ncloudbiday">
+        <fileTransfer accessType="SFTP" host="211.188.54.157" port="22" sshConfigId="fed4b702-b5a4-4f67-8ad0-ace1673f21b1" sshConfig="root@211.188.54.157:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
