@@ -1,0 +1,3 @@
+interface ProductModel {
+    id?: number;
+}

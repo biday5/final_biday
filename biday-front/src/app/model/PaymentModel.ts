@@ -1,0 +1,3 @@
+interface PaymentModel {
+    id?: number;
+}
