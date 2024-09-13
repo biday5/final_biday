@@ -7,6 +7,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -33,4 +34,7 @@ public class BrandEntity {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = true, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
+
+//    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<ProductEntity> productList;
 }

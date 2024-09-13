@@ -14,9 +14,10 @@ import org.springframework.stereotype.Component;
 public class AddressModel {
     private Long id;
     private Long userId;
-    private String address1;
-    private String address2;
+    private String streetAddress;
+    private String detailAddress;
     private String zipcode;
     private String type;
     private boolean pick;
+
 }

@@ -24,8 +24,9 @@ public class BidEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "auction_id", nullable = false)
-    private Long auctionId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "auction_id", nullable = false)
+    private AuctionEntity auction;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
@@ -43,10 +44,6 @@ public class BidEntity {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = true, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime updatedAt;
 
     @ColumnDefault("b'0'")
     @Column(name = "award", nullable = false)
