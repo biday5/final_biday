@@ -23,21 +23,26 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	applicationVersion = "1.0.0"
+	querydslVersion = "5.0.0"
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
-// queryDSL
-	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+	// queryDSL
+	implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
+	annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-// swagger
+	// swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 
 	compileOnly 'org.projectlombok:lombok'
@@ -49,19 +54,18 @@ dependencies {
 	testImplementation 'org.springframework.batch:spring-batch-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// jwt
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
 
-ext {
-
-	applicationVersion = "1.0.0"
-}
-
-// jar 생성
 bootJar {
-	jar.enabled = false
+	enabled = false
 	archiveFileName.set("biday.${applicationVersion}.jar")
 }
