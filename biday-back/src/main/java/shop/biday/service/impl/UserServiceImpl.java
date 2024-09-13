@@ -60,9 +60,9 @@ public class UserServiceImpl implements UserService {
         if (userModel.getStreetaddress() != null) {
             AddressEntity addressEntity = AddressEntity.builder()
                     .userId(userId)
-                    .streetaddress(userModel.getStreetaddress())
+                    .streetAddress(userModel.getStreetaddress())
                     .zipcode(userModel.getZipcode())
-                    .detailaddress(userModel.getDetailaddress())
+                    .detailAddress(userModel.getDetailaddress())
                     .pick(true)
                     .type(addressType)
                     .build();

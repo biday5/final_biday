@@ -50,7 +50,7 @@ public class OAuth2UserDetailsService extends DefaultOAuth2UserService {
             String birthYearString = oAuth2Response.getBirthyear();
 
             if (birthYearString == null || birthYearString.isEmpty()) {
-                throw new OAuth2AuthenticationException("응답에서 생년이 누락되었습니다.");
+                throw new OAuth2AuthenticationException("응답에서 생년월일이 누락되었습니다.");
             }
 
             int birthYear = Integer.parseInt(birthYearString);
@@ -65,15 +65,17 @@ public class OAuth2UserDetailsService extends DefaultOAuth2UserService {
             UserEntity existData = userRepository.findByEmail(oAuth2Response.getEmail());
 
             if (existData == null) {
-                UserEntity userEntity = new UserEntity();
-                userEntity.setOauthUser(oauthName);
-                userEntity.setName(oAuth2Response.getName());
-                userEntity.setEmail(oAuth2Response.getEmail());
-                userEntity.setPassword(passwordEncoder.encode(oAuth2Response.getEmail())); // 비밀번호 암호화
-                userEntity.setPhone(oAuth2Response.getMobile());
-                userEntity.setRole(UserEntity.Role.valueOf(ROLE_USER));
-                userEntity.setStatus(true);
-                userEntity.setTotalRating(2.0);
+
+                UserEntity userEntity = UserEntity.builder()
+                        .email(oAuth2Response.getEmail())
+                        .oauthUser(oauthName)
+                        .name(oAuth2Response.getName())
+                        .password(passwordEncoder.encode(oAuth2Response.getEmail()))
+                        .phone(oAuth2Response.getMobile())
+                        .role(UserEntity.Role.valueOf(ROLE_USER))
+                        .status(true)
+                        .totalRating(2.0)
+                        .build();
 
                 Long id =userRepository.save(userEntity).getId();
 

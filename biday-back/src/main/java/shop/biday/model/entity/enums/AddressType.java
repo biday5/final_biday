@@ -12,11 +12,7 @@ public enum AddressType {
     OTHER("Other");
 
     private final String type;
-
-    public String getType() {
-        return type;
-    }
-
+    
     public static AddressType fromString(String typeString) {
         for (AddressType type : AddressType.values()) {
             if (type.getType().equals(typeString)) {

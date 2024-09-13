@@ -28,11 +28,11 @@ public class AddressEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "streetaddress", nullable = false)
-    private String streetaddress;
+    @Column(name = "street_address", nullable = false)
+    private String streetAddress;
 
-    @Column(name = "detailaddress", nullable = true)
-    private String detailaddress;
+    @Column(name = "detail_address", nullable = true)
+    private String detailAddress;
 
     @Column(name = "zipcode", nullable = false)
     private String zipcode;
