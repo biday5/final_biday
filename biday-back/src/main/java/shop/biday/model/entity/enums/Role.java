@@ -12,6 +12,10 @@ public enum Role {
 
     private final String role;
 
+    public String getAuthority() {
+        return role;
+    }
+
     // 문자열을 Role 열거형으로 변환하는 유틸리티 메소드
     public static Role fromString(String roleString) {
         for (Role role : Role.values()) {

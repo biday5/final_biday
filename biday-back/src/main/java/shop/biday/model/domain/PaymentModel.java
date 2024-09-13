@@ -27,3 +27,21 @@ public class PaymentModel {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
+/*
+{
+  "id", // 결제 id
+  "orderId", // 주문번호
+  "status", // 결제 처리 상태
+  "approvedAt", // 결제 승인일
+  "card": {
+    "issuerCode", // 카드 발급사
+    "installmentPlanMonths", // 할부 개월 수
+    "cardType", // 카드 종류
+  },
+  "easyPay": {
+    "provider", // 간편결제사
+  },
+  "totalAmount", // 총 결제 금액
+  "method" // 결제 수단
+}
+*/
