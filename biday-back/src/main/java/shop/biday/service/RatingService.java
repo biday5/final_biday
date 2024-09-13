@@ -9,10 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RatingService {
-    List<RatingEntity> findAll();
-    Optional<RatingEntity> findById(Long id);
+    List<RatingEntity> findBySeller(Long userId);
     RatingEntity save(RatingModel ratingModel);
-    boolean existsById(Long id);
-    long count();
-    void deleteById(Long id);
+//    double findRate(Long userId);
 }

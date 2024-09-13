@@ -1,4 +1,4 @@
-package shop.biday.service;
+package shop.biday.model.repository;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -8,12 +8,9 @@ import shop.biday.model.entity.AuctionEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-public interface AuctionService {
+public interface QAuctionRepository {
     AuctionModel findById(Long id);
     Slice<AuctionDto> findByUser(Long userId, String period, LocalDateTime cursor, Pageable pageable);
-    boolean existsById(Long id);
-    AuctionEntity save(AuctionModel auction);
-    AuctionEntity update(AuctionModel auction);
-    void deleteById(Long id);
 }

@@ -35,13 +35,13 @@ public class PaymentEntity {
     @Column(name = "final_bid", nullable = false)
     private Long finalBid;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", nullable = false)
-    private PaymentMethod paymentMethod;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "payment_status", nullable = false)
-    private PaymentStatus paymentStatus;
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "payment_method", nullable = false)
+//    private PaymentMethod paymentMethod;
+//
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "payment_status", nullable = false)
+//    private PaymentStatus paymentStatus;
 
     @Column(name = "payment_date", nullable = false)
     private LocalDateTime paymentDate;

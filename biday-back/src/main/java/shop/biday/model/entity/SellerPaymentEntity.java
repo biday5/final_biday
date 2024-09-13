@@ -6,6 +6,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.UpdateTimestamp;
+import shop.biday.model.entity.eNum.PaymentMethod;
+import shop.biday.model.entity.eNum.PaymentStatus;
 
 import java.time.LocalDateTime;
 

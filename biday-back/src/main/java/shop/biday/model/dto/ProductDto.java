@@ -1,8 +1,8 @@
-package shop.biday.model.domain;
+package shop.biday.model.dto;
 
 import lombok.*;
 import org.springframework.stereotype.Component;
-import shop.biday.model.dto.AuctionDto;
+import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.entity.AuctionEntity;
 
 import java.time.LocalDateTime;
@@ -13,7 +13,7 @@ import java.util.List;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductModel {
+public class ProductDto {
     private Long id;
     private String brand;
     private String category;
@@ -22,10 +22,5 @@ public class ProductModel {
     private String productCode;
     private Long price;
     private String color;
-    private String description;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-//    private List<ImageEntity> images;
-    @Setter
-    private List<AuctionDto> auctions;
+    //    private List<ImageEntity> images;
 }
