@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.BrandModel;
 import shop.biday.model.entity.BrandEntity;
@@ -29,8 +30,8 @@ public class BrandController {
             @ApiResponse(responseCode = "200", description = "브랜드 목록 불러오기 성공"),
             @ApiResponse(responseCode = "404", description = "브랜드 찾을 수 없음")
     })
-    public List<BrandEntity> findAll() {
-        return brandService.findAll();
+    public ResponseEntity<List<BrandEntity>> findAll() {
+        return ResponseEntity.ok(brandService.findAll());
     }
 
     @GetMapping("/findById")
@@ -40,8 +41,8 @@ public class BrandController {
             @ApiResponse(responseCode = "404", description = "브랜드 찾을 수 없음")
     })
     @Parameter(name = "id", description = "상세보기할 브랜드 id", example = "1L")
-    public Optional<BrandEntity> findById(@RequestParam Long id) {
-        return brandService.findById(id);
+    public ResponseEntity<Optional<BrandEntity>> findById(@RequestParam Long id) {
+        return ResponseEntity.ok(brandService.findById(id));
     }
 
     @PostMapping
@@ -53,8 +54,8 @@ public class BrandController {
     @Parameters({
             @Parameter(name = "name", description = "브랜드 이름", example = "나이키(Nike)")
     })
-    public BrandEntity create(@RequestBody BrandModel brand) {
-        return brandService.save(brand);
+    public ResponseEntity<BrandEntity> create(@RequestBody BrandModel brand) {
+        return ResponseEntity.ok(brandService.save(brand));
     }
 
     @PatchMapping
@@ -68,8 +69,8 @@ public class BrandController {
             @Parameter(name = "createdAt", description = "등록 시간", example = "localDateTime 값"),
             @Parameter(name = "updatedAt", description = "수정 시간", example = "localDateTime 값")
     })
-    public BrandEntity update(@RequestBody BrandModel brand) {
-        return brandService.update(brand);
+    public ResponseEntity<BrandEntity> update(@RequestBody BrandModel brand) {
+        return ResponseEntity.ok(brandService.update(brand));
     }
 
     @DeleteMapping

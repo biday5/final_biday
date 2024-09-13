@@ -29,7 +29,6 @@ import java.util.List;
 @RequestMapping("/api/products")
 @Tag(name = "products", description = "Product Controller")
 public class ProductController {
-    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
     private final ProductService productService;
 
     @GetMapping("/findByFilter")
@@ -54,8 +53,6 @@ public class ProductController {
             @RequestParam(value = "order", required = false) String order,
             @RequestParam(value = "lastItemValue", required = false) Long lastItemId, // 커서 값 추가
             Pageable pageable) {
-        log.info("searchByFilter");
-        log.debug("brandId: {} categoryId: {} keyword: {} color: {} order: {} lastItemId: {} page: {}", brandId, categoryId, keyword, color, order, lastItemId, pageable);
         return ResponseEntity.ok(productService.findByFilter(pageable, categoryId, brandId, keyword, color, order, lastItemId));
     }
 
@@ -67,7 +64,6 @@ public class ProductController {
     })
     @Parameter(name = "id", description = "선택된 상품의 id", example = "1L")
     public ResponseEntity<ProductModel> findById(@RequestParam(value = "id", required = true) Long id) {
-        log.debug("Request to get product : {}", id);
         return ResponseEntity.ok(productService.findById(id));
     }
 

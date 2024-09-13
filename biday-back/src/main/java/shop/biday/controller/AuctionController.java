@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.dto.AuctionDto;
@@ -26,8 +27,6 @@ import java.util.List;
 public class AuctionController {
     private final AuctionService auctionService;
 
-    // responseEntity 수정
-
     @GetMapping("/findById")
     @Operation(summary = "경매 상세보기", description = "경매 상세보기, 여기서는 경매와 해당 상품에 관한 정보만 가져옴")
     @ApiResponses(value = {
@@ -35,11 +34,11 @@ public class AuctionController {
             @ApiResponse( responseCode = "404", description = "상품 찾을 수 없음")
     })
     @Parameter(name = "id", description = "상세보기할 경매의 id", example = "1L")
-    public AuctionModel findById(@RequestParam(value = "id", required = true) Long id) {
-        return auctionService.findById(id);
+    public ResponseEntity<AuctionModel> findById(@RequestParam(value = "id", required = true) Long id) {
+        return ResponseEntity.ok(auctionService.findById(id));
     }
 
-    @GetMapping // 강사님한테 api 어떻게 적어야할지 물어보기!!
+    @GetMapping
     @Operation(summary = "경매 목록", description = "마이 페이지에서 불러올 수 있는 상품 목록")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "경매 목록 가져오기 성공"),
@@ -50,11 +49,11 @@ public class AuctionController {
             @Parameter(name = "period", description = "기간별 정렬", example = "3개월"),
             @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1L"),
     })
-    public Slice<AuctionDto> findByUser(@RequestParam(value = "userId", required = true) Long userId,
+    public ResponseEntity<Slice<AuctionDto>> findByUser(@RequestParam(value = "userId", required = true) Long userId,
                                         @RequestParam(value = "period", required = false, defaultValue = "3개월") String period,
                                         @RequestParam(value = "cursor", required = false) LocalDateTime cursor,
                                         Pageable pageable) {
-        return auctionService.findByUser(userId, period, cursor, pageable);
+        return ResponseEntity.ok(auctionService.findByUser(userId, period, cursor, pageable));
     }
 
     @PostMapping
@@ -72,8 +71,8 @@ public class AuctionController {
             @Parameter(name = "startedAt", description = "시작 날짜", example = "localDateTime 값"),
             @Parameter(name = "endedAt", description = "종료 날짜", example = "localDateTime 값")
     })
-    public AuctionEntity save(@RequestBody AuctionModel auctionModel) {
-        return auctionService.save(auctionModel);
+    public ResponseEntity<AuctionEntity> save(@RequestBody AuctionModel auctionModel) {
+        return ResponseEntity.ok(auctionService.save(auctionModel));
     }
 
     @PatchMapping
@@ -91,8 +90,8 @@ public class AuctionController {
             @Parameter(name = "startedAt", description = "만약 이미 시작되었다면 변경 불가, 시작 날짜", example = "localdatetime 값"),
             @Parameter(name = "endedAt", description = "만약 이미 시작되었다면 변경 불가, 종료 날짜", example = "localdatetime 값")
     })
-    public AuctionEntity update(@RequestBody AuctionModel auctionModel) {
-        return auctionService.update(auctionModel);
+    public ResponseEntity<AuctionEntity> update(@RequestBody AuctionModel auctionModel) {
+        return ResponseEntity.ok(auctionService.update(auctionModel));
     }
 
     @DeleteMapping

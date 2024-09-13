@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.RatingModel;
 import shop.biday.model.entity.RatingEntity;
@@ -29,8 +30,8 @@ public class RatingController {
             @ApiResponse( responseCode = "404", description = "리뷰 찾을 수 없음")
     })
     @Parameter(name = "id", description = "리뷰 불러올 판매자 id", example = "1L")
-    public List<RatingEntity> findBySeller(Long sellerId) {
-        return ratingService.findBySeller(sellerId);
+    public ResponseEntity<List<RatingEntity>> findBySeller(Long sellerId) {
+        return ResponseEntity.ok(ratingService.findBySeller(sellerId));
     }
 
     @PostMapping
@@ -43,7 +44,7 @@ public class RatingController {
             @Parameter(name = "userId", description = "판매자 id", example = "1L"),
             @Parameter(name = "rating", description = "판매자에 대한 평가", example = "3"),
     })
-    public RatingEntity save(@RequestBody RatingModel rating) {
-        return ratingService.save(rating);
+    public ResponseEntity<RatingEntity> save(@RequestBody RatingModel rating) {
+        return ResponseEntity.ok(ratingService.save(rating));
     }
 }

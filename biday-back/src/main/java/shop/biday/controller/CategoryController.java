@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.CategoryModel;
 import shop.biday.model.entity.CategoryEntity;
@@ -29,8 +30,8 @@ public class CategoryController {
             @ApiResponse(responseCode = "200", description = "카테고리 목록 불러오기 성공"),
             @ApiResponse(responseCode = "404", description = "카테고리 찾을 수 없음")
     })
-    public List<CategoryEntity> findAll() {
-        return categoryService.findAll();
+    public ResponseEntity<List<CategoryEntity>> findAll() {
+        return ResponseEntity.ok(categoryService.findAll());
     }
 
     @GetMapping("/findById")
@@ -40,8 +41,8 @@ public class CategoryController {
             @ApiResponse(responseCode = "404", description = "카테고리 찾을 수 없음")
     })
     @Parameter(name = "id", description = "상세보기할 카테고리 id", example = "1L")
-    public Optional<CategoryEntity> findById(@RequestParam Long id) {
-        return categoryService.findById(id);
+    public ResponseEntity<Optional<CategoryEntity>> findById(@RequestParam Long id) {
+        return ResponseEntity.ok(categoryService.findById(id));
     }
 
     @PostMapping
@@ -53,8 +54,8 @@ public class CategoryController {
     @Parameters({
             @Parameter(name = "name", description = "카테고리 이름", example = "나이키(Nike)")
     })
-    public CategoryEntity create(@RequestBody CategoryModel category) {
-        return categoryService.save(category);
+    public ResponseEntity<CategoryEntity> create(@RequestBody CategoryModel category) {
+        return ResponseEntity.ok(categoryService.save(category));
     }
 
     @PatchMapping
@@ -68,8 +69,8 @@ public class CategoryController {
             @Parameter(name = "createdAt", description = "등록 시간", example = "localDateTime 값"),
             @Parameter(name = "updatedAt", description = "수정 시간", example = "localDateTime 값")
     })
-    public CategoryEntity update(@RequestBody CategoryModel category) {
-        return categoryService.update(category);
+    public ResponseEntity<CategoryEntity> update(@RequestBody CategoryModel category) {
+        return ResponseEntity.ok(categoryService.update(category));
     }
 
     @DeleteMapping
