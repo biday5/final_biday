@@ -6,6 +6,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.UpdateTimestamp;
+import shop.biday.model.entity.enums.AddressType;
 
 import java.time.LocalDateTime;
 
@@ -27,17 +28,19 @@ public class AddressEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "address1", nullable = false)
-    private String address1;
+    @Column(name = "street_address", nullable = false)
+    private String streetAddress;
 
-    @Column(name = "address2", nullable = true)
-    private String address2;
+    @Column(name = "detail_address", nullable = true)
+    private String detailAddress;
 
     @Column(name = "zipcode", nullable = false)
     private String zipcode;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private String type;
+    @Builder.Default
+    private AddressType type = AddressType.OTHER;
 
     @ColumnDefault("b'1'")
     @Column(name = "pick", nullable = false)

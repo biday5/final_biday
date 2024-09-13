@@ -1,9 +1,6 @@
 package shop.biday.model.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.stereotype.Component;
 import shop.biday.model.entity.enums.Role;
 
@@ -16,13 +13,24 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserModel {
     private Long id;
+    private String oauthName;
     private String name;
     private String email;
     private String password;
-    private String phone;
+    private String phoneNum;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
     private Role role;
     private String status;
     private Long totalRating;
+
+    private String zipcode;
+    private String streetaddress;
+    private String detailaddress;
+    private String type;
+
+
+    public String getRoleAsString() {
+        return role != null ? role.getAuthority() : "";
+    }
 }
