@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.Cookie;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.filter.GenericFilterBean;
+import shop.biday.utils.RedisTemplateUtils;
 
 import java.io.IOException;
 
@@ -18,7 +19,7 @@ import java.io.IOException;
 public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplateUtils<String > redisTemplateUtils;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -27,7 +28,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        // 요청 경로와 메서드 확인
         String requestUri = request.getRequestURI();
         if (!requestUri.equals("/logout")) {
             filterChain.doFilter(request, response);
@@ -39,7 +39,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        //get refresh token
         String refresh = null;
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies) {
@@ -48,9 +47,8 @@ public class CustomLogoutFilter extends GenericFilterBean {
             }
         }
 
-        String username = jwtUtil.getUsername(refresh);
+        String email = jwtUtil.getEmail(refresh);
 
-        // 리프레시 토큰 유효성 검사 및 로그아웃 처리
         if (refresh == null || refresh.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -69,14 +67,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        if (!redisTemplate.hasKey(username)) {
+        if (!redisTemplateUtils.existsKey(email)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        deleteRefreshToken(username);
+        deleteRefreshToken(email);
 
-        // 리프레시 토큰 쿠키 삭제
         Cookie cookie = new Cookie("refresh", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
@@ -85,7 +82,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
     }
 
     private void deleteRefreshToken(String username) {
-        redisTemplate.delete(username);
+        redisTemplateUtils.delete(username);
     }
 }
 

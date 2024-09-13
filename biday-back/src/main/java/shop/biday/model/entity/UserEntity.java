@@ -31,11 +31,11 @@ public class UserEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "username", nullable = false)
-    private String username;
+    @Column(name = "oauthUser ", nullable = true)
+    private String oauthUser ;
 
     @Column(name = "phone_number", nullable = false, unique = true)
-    private String phone; // 일관된 명명 규칙
+    private String phone;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

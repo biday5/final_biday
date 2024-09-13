@@ -6,6 +6,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
@@ -13,66 +14,78 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import shop.biday.model.domain.LoginHistoryModel;
+import shop.biday.model.entity.LoginHistoryEntity;
 import shop.biday.oauth2.OauthDto.CustomOAuth2User;
+import shop.biday.service.impl.LoginHistoryServiceImpl;
+import shop.biday.utils.RedisTemplateUtils;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class Oauth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final JWTUtil jwtUtil;
+    private static final long ACCESS_TOKEN_EXPIRY_MS = 600000L; // 10 minutes
+    private static final long REFRESH_TOKEN_EXPIRY_MS = 86400000L; // 1 day
+    private static final int COOKIE_MAX_AGE_SECONDS = 24 * 60 * 60; // 1 day
+    private static final String ACCESS_TOKEN_TYPE = "access";
+    private static final String REFRESH_TOKEN_TYPE = "refresh";
+    private static final String REDIRECT_URL = "http://localhost:3000/";
+    private static final int HTTP_OK_STATUS = HttpStatus.OK.value();
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final JWTUtil jwtUtil;
+    private final LoginHistoryServiceImpl loginHistoryService;
+    private final RedisTemplateUtils<String > redisTemplateUtils;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
-        //OAuth2User
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
-        String username = customUserDetails.getUsername();
+        String email = customUserDetails.getEmail();
+        String name  = customUserDetails.getName();
+        Long   id    = customUserDetails.getId();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String access = jwtUtil.createJwt("access", username, role, 600000L);
-        String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String access = jwtUtil.createJwt(ACCESS_TOKEN_TYPE, email, role, name,  ACCESS_TOKEN_EXPIRY_MS);
+        String refresh = jwtUtil.createJwt(REFRESH_TOKEN_TYPE, email, role, name,  REFRESH_TOKEN_EXPIRY_MS);
 
-        //Refresh 토큰 저장
-        addRefreshEntity(username, refresh, 86400000L);
+        addRefreshEntity(email, refresh, REFRESH_TOKEN_EXPIRY_MS);
+
+        if(loginHistoryService.findByUserId(id).isEmpty()) {
+            LoginHistoryModel loginHistoryModel = new LoginHistoryModel();
+            loginHistoryModel.setUserId(id);
+            loginHistoryService.save(loginHistoryModel);
+        }
 
         response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));
-        response.setStatus(HttpStatus.OK.value());
-        System.out.println(response);
-        //redirect 3000번으로 전달
-        response.sendRedirect("http://localhost:3000/");
+        response.setStatus(HTTP_OK_STATUS);
+        response.sendRedirect(REDIRECT_URL);
     }
 
     private Cookie createCookie(String key, String value) {
 
         Cookie cookie = new Cookie(key, value);
-        // 쿠키 생명 주기 24시간
-        cookie.setMaxAge(24*60*60);
-        //https 통신 진행시 주석 해제
-        //cookie.setSecure(true);
-        // 쿠키 적용될 범위
+        cookie.setMaxAge(COOKIE_MAX_AGE_SECONDS);
+        // https 통신 진행시 주석 해제
+        // cookie.setSecure(true);
         cookie.setPath("/");
-        // 앞단에서 자바스크립으로 접근 불가 설정
         cookie.setHttpOnly(true);
 
         return cookie;
     }
 
-    private void addRefreshEntity(String username, String refresh, Long expiredMs) {
-        System.out.println("CustomSuccessHandler redis insert : "+ refresh);
-        ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
-        valueOps.set(username, refresh, expiredMs, TimeUnit.MILLISECONDS);
+    private void addRefreshEntity(String email, String refresh, Long expiredMs) {
+        redisTemplateUtils.save(email,refresh,expiredMs);
     }
 }

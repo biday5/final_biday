@@ -8,21 +8,37 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.UserModel;
 import shop.biday.model.entity.UserEntity;
 import shop.biday.service.UserService;
+import shop.biday.service.impl.UserServiceImpl;
 
 import java.util.List;
 import java.util.Optional;
 
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
 @Tag(name = "users", description = "User Controller")
 public class UserController {
-    private final UserService userService;
+    private final UserServiceImpl userService;
+
+
+    @GetMapping("/password")
+    @Operation(summary = "유저 비밀번호 검증", description = "소셜 로그인 후 이메일과 비밀번호 같은 검증 api")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "패스워드 확인", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "409", description = "패스워드 검증이 실패 했습니다.", content = @Content(mediaType = "application/json"))
+    })
+    @Parameter(name = "password", description = "검증할 패스워드 주소", example = "example@domain.com")
+    public ResponseEntity<Boolean> password(@RequestParam String password) {
+        return new ResponseEntity<>(userService.checkPassword(password), HttpStatus.OK);
+    }
 
     @PostMapping("/join")
     @Operation(summary = "유저 회원가입", description = "유저 회원가입할 때 사용하는 api")
@@ -34,13 +50,38 @@ public class UserController {
     })
     @Parameters({
             @Parameter(name = "email", description = "이메일", example = "chrome123@naver.com"),
-            @Parameter(name = "password", description = "8자~12자 이내", example = "abcd1234"),
-            @Parameter(name = "name", description = "이름", example = "코리아 시스템"),
-            @Parameter(name = "phoneNum", description = "번호", example = "112233")
+            @Parameter(name = "password", description = "8자~12자 이내", example = "abcd1234!@"),
+            @Parameter(name = "name", description = "이름", example = "비트춘자"),
+            @Parameter(name = "phoneNum", description = "번호", example = "000-0000-0000"),
+            @Parameter(name = "streetaddress", description = "주소", example = "경기 성남시 중원구 성남동 2325"),
+            @Parameter(name = "detailaddress", description = "상세주소", example = "102호"),
+            @Parameter(name = "zipcode", description = "우편번호", example = "13363"),
+            @Parameter(name = "type", description = "주소유형", example = "HOME")
     })
-    public String join(@RequestBody UserModel model) {
-        userService.save(model);
-        return "success!!";
+    public ResponseEntity<UserEntity> join(@RequestBody UserModel model) {
+        return new ResponseEntity<>(userService.save(model), HttpStatus.OK);
+    }
+
+    @GetMapping("/validate")
+    @Operation(summary = "유저 이메일 검증", description = "회원가입할 때 이메일이 이미 등록되어 있는지 확인합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "이메일이 사용 가능합니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "409", description = "이메일이 이미 등록되어 있습니다.", content = @Content(mediaType = "application/json"))
+    })
+    @Parameter(name = "email", description = "검증할 이메일 주소", example = "example@domain.com")
+    public ResponseEntity<Boolean> validate(@RequestParam String email) {
+        return new ResponseEntity<>(userService.checkEmail(email), HttpStatus.OK);
+    }
+
+    @GetMapping("/phoneNum")
+    @Operation(summary = "유저 핸드폰 검증", description = "회원가입할 때 핸드폰이 이미 등록되어 있는지 확인합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "핸드폰번호가 사용 가능합니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "409", description = "핸드폰번호가 이미 등록되어 있습니다.", content = @Content(mediaType = "application/json"))
+    })
+    @Parameter(name = "phoneNum", description = "번호", example = "000-0000-0000")
+    public ResponseEntity<Boolean> phoneNum(@RequestParam String phoneNum) {
+        return new ResponseEntity<>(userService.checkPhone(phoneNum), HttpStatus.OK);
     }
 
     @GetMapping("/")
