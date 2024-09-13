@@ -1,7 +1,10 @@
-package shop.biday.model.entity;
+package shop.biday.model.entity.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import shop.biday.exception.PaymentException;
+
+import java.util.Arrays;
 
 @Getter
 @RequiredArgsConstructor
@@ -16,4 +19,11 @@ public enum PaymentStatus {
 
     private final String status;
     private final String message;
+
+    public static PaymentStatus fromStatus(String status) {
+        return Arrays.stream(PaymentStatus.values())
+                .filter(p -> p.status.equals(status))
+                .findFirst()
+                .orElseThrow(PaymentException::new);
+    }
 }

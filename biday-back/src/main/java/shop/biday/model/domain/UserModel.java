@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
-import shop.biday.model.entity.Role;
+import shop.biday.model.entity.enums.Role;
 
 import java.time.LocalDateTime;
 
