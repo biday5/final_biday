@@ -73,6 +73,7 @@ public class QProductRepositoryImpl implements QProductRepository {
             query.where(qProduct.color.containsIgnoreCase(color));
         }
 
+        // 람다로 변경
         switch (order) {
             case "가격 낮은 순":
                 query.orderBy(qProduct.price.asc());

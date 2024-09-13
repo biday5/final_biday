@@ -32,7 +32,8 @@ public class QBidRepositoryImpl implements QBidRepository {
 
     @Override
     public BidModel findById(Long id) {
-        // 경매, 상품, 결제, 배송 다 조인해서 보여주기 -> 결제랑 배송은 보류
+        // TODO 경매, 상품, 결제, 배송 다 조인해서 보여주기 -> 결제랑 배송은 보류,
+        // 람다, responseEntity 변경, Exception 처리, image, 결제 합치기
         return queryFactory
                 .select(Projections.constructor(BidModel.class,
                         qBid.id,

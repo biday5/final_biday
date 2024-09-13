@@ -91,6 +91,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
 
     @Override
     public Slice<AuctionDto> findByUser(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
+        // between으로 시도해볼 것!!
         // 현재 날짜와 시간
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDate = null;

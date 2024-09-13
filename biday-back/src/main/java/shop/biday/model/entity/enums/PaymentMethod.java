@@ -1,4 +1,4 @@
-package shop.biday.model.entity.eNum;
+package shop.biday.model.entity.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

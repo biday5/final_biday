@@ -26,6 +26,8 @@ import java.util.List;
 public class AuctionController {
     private final AuctionService auctionService;
 
+    // responseEntity 수정
+
     @GetMapping("/findById")
     @Operation(summary = "경매 상세보기", description = "경매 상세보기, 여기서는 경매와 해당 상품에 관한 정보만 가져옴")
     @ApiResponses(value = {
