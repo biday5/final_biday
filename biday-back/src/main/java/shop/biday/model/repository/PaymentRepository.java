@@ -6,4 +6,5 @@ import shop.biday.model.entity.PaymentEntity;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
+
 }

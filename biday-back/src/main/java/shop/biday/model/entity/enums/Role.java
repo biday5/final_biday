@@ -25,4 +25,3 @@ public enum Role {
         throw new IllegalArgumentException("No enum constant for role: " + roleString);
     }
 }
-

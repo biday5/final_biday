@@ -24,26 +24,30 @@ public class RefundEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "payment_id", nullable = false)
-    private Long paymentId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
+    private PaymentEntity payment;
+
+    @Column(name = "transaction_key", nullable = false)
+    private String transactionKey;
+
+    @Column(name = "reason", nullable = false)
+    private String reason;
 
     @Column(name = "amount", nullable = false)
     private Long amount;
 
-    @Column(name = "refunded_at", nullable = false)
-    private LocalDateTime refundedAt;
+    @Column(name = "canceled_at", nullable = false)
+    private LocalDateTime canceledAt;
 
     @Column(name = "status", nullable = false)
-    private PaymentStatus status;
-
-    @Column(name = "reason", nullable = false)
-    private String reason;
+    private String status;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = true, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "updated_at", insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 }

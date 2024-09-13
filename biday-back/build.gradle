@@ -35,6 +35,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	// queryDSL
 	implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
@@ -44,6 +45,18 @@ dependencies {
 
 	// swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
+	// image-strage
+	// https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
+//	implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.3.1'
+
+	implementation 'org.apache.httpcomponents.client5:httpclient5'
+//	implementation 'org.apache.hc:httpclient5:5.3'
+
+	// mongoDB
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	implementation 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
