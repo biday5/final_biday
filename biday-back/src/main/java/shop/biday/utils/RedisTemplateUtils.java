@@ -19,18 +19,17 @@ public class RedisTemplateUtils<T> {
     public void save(String key, T obj) {
         ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
         valueOps.set(key, obj);
-        log.info("saved getOrderId by Redis: {}", valueOps.get(key));
+        log.info("saved by Redis: {}", valueOps.get(key));
     }
 
     public void save(String key, T obj, Long expireMs) {
         ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
         valueOps.set(key, obj, expireMs, TimeUnit.MILLISECONDS);
-        log.info("saved getOrderId by Redis: {}", valueOps.get(key));
+        log.info("saved by Redis: {}", valueOps.get(key));
     }
 
     public T get(String key, Class<T> clazz) {
-        if (!StringUtils.hasText(key)) {
-            log.warn("올바르지 않는 키입니다. key: {}", key);
+        if (!isValidKey(key) && !existsKey(key)) {
             return null;
         }
 
@@ -45,16 +44,25 @@ public class RedisTemplateUtils<T> {
     }
 
     public void delete(String key) {
-        if (!StringUtils.hasText(key)) {
-            log.warn("올바르지 않는 키입니다. key: {}", key);
+        if (!isValidKey(key)) {
             return;
         }
 
-        redisTemplate.delete(key);
-        log.info("해당 key {}로 삭제하였습니다.", key);
+        if (existsKey(key)) {
+            redisTemplate.delete(key);
+            log.info("해당 key: {}를 삭제하였습니다.", key);
+        }
     }
 
     public boolean existsKey(String key) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+    }
+
+    private boolean isValidKey(String key) {
+        if (!StringUtils.hasText(key)) {
+            log.warn("올바르지 않는 키입니다. key: {}", key);
+            return false;
+        }
+        return true;
     }
 }

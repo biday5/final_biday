@@ -35,7 +35,7 @@ public class BidEntity {
     private LocalDateTime bidedAt;
 
     @Column(name = "current_bid", nullable = false)
-    private int currentBid;
+    private Long currentBid;
 
     @ColumnDefault("1")
     @Column(name = "count", nullable = false)

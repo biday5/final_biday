@@ -23,4 +23,5 @@ public class BidModel {
     private int count;
     private LocalDateTime createdAt;
     private boolean award;
+    private PaymentTempModel paymentTemp;
 }
