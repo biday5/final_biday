@@ -26,9 +26,36 @@ spring:
       show-sql: true
       time-zone: UTC
 
-springdoc:
-  swagger-ui:
-    path: /api-test
-    groups-order: DESC
-    tags-sorter: alpha
-    operations-sorter: method
+  jwt:
+    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb
+    accessTokenExpiration: 7200000 # 2시간 (밀리초 단위)
+    refreshTokenExpiration: 259200000 # 3일 (밀리초 단위)
+
+  springdoc:
+    swagger-ui:
+      path: /api-test
+      groups-order: DESC
+      tags-sorter: alpha
+      operations-sorter: method
+
+  main:
+    allow-bean-definition-overriding: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: biday
+      repositories:
+        enabled: false
+
+    mongodb:
+      uri: mongodb://root:biday@localhost:27017/bidaydb?authSource=admin
+
+payments:
+  toss:
+    secret:
+      key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+logging:
+  level:
+    org.springframework.security: DEBUG
