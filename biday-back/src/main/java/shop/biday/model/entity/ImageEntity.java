@@ -32,7 +32,7 @@ public class ImageEntity {
     private String type; // 브랜드: 01, 상품: 02, 경매: 03, 환불: 04
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
     @Column(name = "rating_value", nullable = false)

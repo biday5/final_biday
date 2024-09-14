@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @ToString
 @DynamicInsert
 @Table(name = "users")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor // 기본 생성자 추가
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity {
     @Id
@@ -31,15 +31,18 @@ public class UserEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "oauthUser ", nullable = true)
+    private String oauthUser ;
+
     @Column(name = "phone_number", nullable = false, unique = true)
-    private String phone; // 일관된 명명 규칙
+    private String phone;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
@@ -61,4 +64,5 @@ public class UserEntity {
         ROLE_SELLER,
         ROLE_USER
     }
+
 }

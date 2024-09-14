@@ -1,15 +1,12 @@
 package shop.biday.model.domain;
 
-import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
 import org.springframework.stereotype.Component;
+import shop.biday.model.dto.AuctionDto;
+import shop.biday.model.entity.AuctionEntity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,8 +15,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ProductModel {
     private Long id;
-    private Long categoryId;
-    private Long brandId;
+    private String brand;
+    private String category;
     private String name;
     private String subName;
     private String productCode;
@@ -28,4 +25,7 @@ public class ProductModel {
     private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+//    private List<ImageEntity> images;
+    @Setter
+    private List<AuctionDto> auctions;
 }

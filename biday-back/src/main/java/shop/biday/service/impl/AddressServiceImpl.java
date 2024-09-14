@@ -2,6 +2,7 @@ package shop.biday.service.impl;
 
 import jakarta.persistence.Id;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import shop.biday.model.domain.AddressModel;
 import shop.biday.model.entity.AddressEntity;
@@ -11,6 +12,7 @@ import shop.biday.service.AddressService;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {

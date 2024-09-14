@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.UpdateTimestamp;
+import shop.biday.model.entity.enums.PaymentMethod;
+import shop.biday.model.entity.enums.PaymentStatus;
 
 import java.time.LocalDateTime;
 
@@ -47,10 +49,10 @@ public class PaymentEntity {
     private LocalDateTime paymentDate;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = true)
+    @Column(name = "created_at", nullable = true, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = true)
+    @Column(name = "updated_at", nullable = true, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 }
