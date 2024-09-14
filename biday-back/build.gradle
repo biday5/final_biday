@@ -39,6 +39,18 @@ dependencies {
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
+	// jsoup
+	implementation group: 'org.jsoup', name: 'jsoup', version: '1.18.1'
+
+	// selenium
+	implementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.24.0'
+
+	// webDriver
+	implementation group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '5.9.2'
+
+
+
+
 // swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 

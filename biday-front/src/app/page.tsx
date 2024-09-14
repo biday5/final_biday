@@ -1,11 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { deleteWish, selectWishList } from "@/app/service/wish/wish.api";
+import { crawlChart} from "@/app/service/crawl/crawl.api";
 
 export default function Home() {
     const [wishList, setWishList] = useState<WishModel[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
 
     const user: UserModel = {
         id: 1
@@ -66,6 +68,11 @@ export default function Home() {
             console.error(error);
             setError("위시 리스트 삭제 중 오류 발생");
         }
+    };
+
+    const moveToCrawl = () => {
+        alert("크롤 페이지로 이동합니다.");
+        window.location.href = "/shull/crawl/main";
     };
 
     useEffect(() => {

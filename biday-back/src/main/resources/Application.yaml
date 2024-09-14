@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: biday
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/bidaydb
+    username: root
+    password: biday
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 600000
+      max-lifetime: 18000000
+      pool-name: HikariCP
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+      show-sql: true
+      time-zone: UTC
+
+springdoc:
+  swagger-ui:
+    path: /api-test
+    groups-order: DESC
+    tags-sorter: alpha
+    operations-sorter: method

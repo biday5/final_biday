@@ -1,7 +1,8 @@
 
-const wish = 'http://localhost:8080/wish'
+const link = 'http://localhost:8080/wish'
 
 export async function toggleWish(amenity: WishModel, user: UserModel, product: ProductModel): Promise<any | { status: number }> {
+
     try {
         const param = new URLSearchParams({
             "userId": (user.id?? '').toString(),
