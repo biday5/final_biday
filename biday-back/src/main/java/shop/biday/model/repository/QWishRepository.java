@@ -8,5 +8,4 @@ public interface QWishRepository {
 
     WishEntity findByUserIdAndProductId(Long userId, Long productId);
 
-
 }

@@ -19,16 +19,18 @@ public class WishServiceImpl implements WishService {
     @Override
     public boolean toggleWIsh(Long userId, Long productId) {
 
-        boolean isWish = isWish(userId, productId);
-        if (isWish) {
-            deleteWish(userId, productId);
+        return isWish(userId, productId) ? deleteWishAndReturnFalse(userId, productId) : insertWishAndReturnTrue(userId, productId);
 
-            return false;
-        } else {
-            insertWish(userId, productId);
+    }
 
-            return true;
-        }
+    private boolean deleteWishAndReturnFalse(Long userId, Long productId) {
+        deleteWish(userId, productId);
+        return false;
+    }
+
+    private boolean insertWishAndReturnTrue(Long userId, Long productId) {
+        insertWish(userId, productId);
+        return true;
     }
 
     @Override
@@ -38,24 +40,20 @@ public class WishServiceImpl implements WishService {
 
     @Override
     public void insertWish(Long userId, Long productId) {
-        UserEntity user = UserEntity.builder().id(userId).build();
-        ProductEntity product = ProductEntity.builder().id(productId).build();
 
-        WishEntity wish = WishEntity.builder()
-                .user(user)
-                .product(product)
-                .build();
+        wishRepository.save(
+                WishEntity.builder()
+                        .user(UserEntity.builder().id(userId).build())
+                        .product(ProductEntity.builder().id(productId).build())
+                        .build()
+        );
 
-        wishRepository.save(wish);
     }
 
     @Override
     public boolean isWish(Long userId, Long productId) {
-        WishEntity result = wishRepository.findByUserIdAndProductId(userId, productId);
 
-        if (result == null) {
-            return false;
-        } else return true;
+        return wishRepository.findByUserIdAndProductId(userId, productId) != null;
 
     }
 }
