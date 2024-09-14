@@ -10,10 +10,12 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.domain.BidModel;
+import shop.biday.model.domain.PaymentTempModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.BidDto;
 import shop.biday.model.entity.QAuctionEntity;
 import shop.biday.model.entity.QBidEntity;
+import shop.biday.model.entity.QPaymentEntity;
 import shop.biday.model.entity.QProductEntity;
 import shop.biday.model.repository.QBidRepository;
 
@@ -29,11 +31,12 @@ public class QBidRepositoryImpl implements QBidRepository {
     private final QBidEntity qBid = QBidEntity.bidEntity;
     private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
     private final QProductEntity qProduct = QProductEntity.productEntity;
+    private final QPaymentEntity qPayment = QPaymentEntity.paymentEntity;
 
     @Override
     public BidModel findById(Long id) {
-        // TODO 경매, 상품, 결제, 배송 다 조인해서 보여주기 -> 결제랑 배송은 보류,
-        // 람다, responseEntity 변경, Exception 처리, image, 결제 합치기
+        /* TODO 경매, 상품, 결제, 배송 다 조인해서 보여주기 -> 결제랑 배송은 보류
+        람다, responseEntity 변경, Exception 처리, image, 결제 합치기 */
         return queryFactory
                 .select(Projections.constructor(BidModel.class,
                         qBid.id,
@@ -53,11 +56,17 @@ public class QBidRepositoryImpl implements QBidRepository {
                         qBid.currentBid,
                         qBid.count,
                         qBid.createdAt,
-                        qBid.award))
+                        qBid.award,
+                        Projections.constructor(PaymentTempModel.class,
+                                qPayment.orderId,
+                                qPayment.userId,
+                                qPayment.bidId,
+                                qPayment.totalAmount)))
                 .from(qBid)
                 .leftJoin(qBid.auction, qAuction)
                 .leftJoin(qAuction.product, qProduct)
-                .where(qBid.id.eq(id))
+                .where(qBid.id.eq(id),
+                        qPayment.bidId.eq(id))
                 .fetchOne();
     }
 
