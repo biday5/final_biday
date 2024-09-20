@@ -87,32 +87,32 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
-    public boolean checkEmail(String email) {
-        return userRepository.existsByEmail(email);
+    public boolean checkEmail(UserModel userModel) {
+        return userRepository.existsByEmail(userModel.getEmail());
     }
 
-    public Boolean checkPhone(String phoneNum) {
-        return userRepository.existsByPhone(phoneNum);
+    public Boolean checkPhone(UserModel userModel) {
+        return userRepository.existsByPhone(userModel.getPhoneNum());
     }
 
-    public Boolean existsByPasswordAndEmail(String email ,String password) {
-        UserEntity user = userRepository.findByEmail(email);
+    public Boolean existsByPasswordAndEmail(UserModel userModel) {
+        UserEntity user = userRepository.findByEmail(userModel.getEmail());
         if (user != null) {
-            return passwordEncoder.matches(password, user.getPassword());
+            return passwordEncoder.matches(userModel.getPassword(), user.getPassword());
         }
         return false;
     }
 
-    public String getEmailByPhone(String phone) {
-        return userRepository.findEmailByPhone(phone)
-                .orElseThrow(() -> new RuntimeException("User not found with phone: " + phone));
+    public String getEmailByPhone(UserModel userModel) {
+        return userRepository.findEmailByPhone(userModel.getPhoneNum())
+                .orElseThrow(() -> new RuntimeException("User not found with phone: " + userModel.getPhoneNum()));
     }
 
-    public String changePassword(String email, String oldPassword, String newPassword) {
-        UserEntity user = userRepository.findByEmail(email);
+    public String changePassword(UserModel userModel) {
+        UserEntity user = userRepository.findByEmail(userModel.getEmail());
         if (user != null) {
-            if (passwordEncoder.matches(oldPassword, user.getPassword())) {
-                String encodedNewPassword = passwordEncoder.encode(newPassword);
+            if (passwordEncoder.matches(userModel.getPassword(), user.getPassword())) {
+                String encodedNewPassword = passwordEncoder.encode(userModel.getNewPassword());
                 user.setPassword(encodedNewPassword);
                 userRepository.save(user);
                 return "비밀번호 변경이 완료 했습니다.";

@@ -23,7 +23,7 @@ public class WishController {
     private final JWTUtil jwtUtil;
 
 
-    @GetMapping("/api/user/wishes")
+    @GetMapping("/user")
     public ResponseEntity<List<?>> findByUser(@RequestHeader("Authrozation") String token) {
 
         String email = jwtUtil.getEmail(token);
