@@ -16,6 +16,7 @@ public class AuctionDto {
     private Long userId;
     private String product;
     private Long startingBid;
+    private Long currentBid;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
     private boolean status;

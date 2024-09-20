@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AwardDto {
     private Long id;
-    private AuctionModel auction;
+    private AuctionDto auction;
     private UserModel user;
     private LocalDateTime bidedAt;
     private Long currentBid;
