@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,6 +27,7 @@ import shop.biday.oauth2.jwt.Oauth2SuccessHandler;
 import shop.biday.service.impl.LoginHistoryServiceImpl;
 import shop.biday.utils.RedisTemplateUtils;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 
@@ -68,8 +68,8 @@ public class SecurityConfig {
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setMaxAge(3600L);
 
-                        configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
-                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                        configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization","Content-Type"));
 
                         return configuration;
                     }
@@ -91,7 +91,8 @@ public class SecurityConfig {
                 );
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/**","/api/users/**", "/reissue","/logout").permitAll()
+                        .requestMatchers("/","/api/addresses/**","/api/users/**", "/reissue","/logout").permitAll()
+                        .requestMatchers("/api/addresses/**").hasRole("USER")
                         .anyRequest().authenticated());
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)

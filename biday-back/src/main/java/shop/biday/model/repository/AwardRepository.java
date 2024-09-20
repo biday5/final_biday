@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import shop.biday.model.entity.AwardEntity;
 
 @Repository
-public interface AwardRepository extends JpaRepository<AwardEntity, Long> {
+public interface AwardRepository extends JpaRepository<AwardEntity, Long>, QAwardRepository {
 
 }

@@ -1,0 +1,15 @@
+package shop.biday.service;
+
+import reactor.core.publisher.Mono;
+import shop.biday.model.document.BidDocument;
+import shop.biday.model.domain.BidModel;
+import shop.biday.model.dto.BidResponse;
+
+public interface BidService {
+
+    Mono<BidResponse> save(BidModel bid);
+
+    Mono<BidDocument> findTopBidByAuctionId(Long auctionId);
+
+    Mono<Boolean> updateAward(Long auctionId);
+}

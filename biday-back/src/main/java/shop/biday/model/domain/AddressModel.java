@@ -19,5 +19,6 @@ public class AddressModel {
     private String zipcode;
     private String type;
     private boolean pick;
+    private String email;
 
 }

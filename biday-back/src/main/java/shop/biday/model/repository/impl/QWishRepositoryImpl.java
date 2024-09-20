@@ -4,37 +4,61 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import shop.biday.model.entity.QWishEntity;
 import shop.biday.model.entity.WishEntity;
 import shop.biday.model.repository.QWishRepository;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
 public class QWishRepositoryImpl implements QWishRepository {
 
     private final JPAQueryFactory queryFactory;
-    private final EntityManager entityManager;
 
     @Override
-    public void deleteWish(Long userId, Long productId) {
-        QWishEntity wishEntity = QWishEntity.wishEntity;
+    public void deleteWish(String email, Long productId) {
 
-
-        queryFactory.delete(wishEntity)
-                .where(wishEntity.user.id.eq(userId)
-                        .and(wishEntity.product.id.eq(productId)))
-                .execute();
     }
 
     @Override
-    public WishEntity findByUserIdAndProductId(Long userId, Long productId) {
-        QWishEntity wishEntity = QWishEntity.wishEntity;
-
-        queryFactory.select(wishEntity)
-                .where(wishEntity.user.id.eq(userId)
-                        .and(wishEntity.product.id.eq(productId)));
-
-
+    public WishEntity findByEmailAndProductId(String email, Long productId) {
         return null;
     }
+
+    @Override
+    public List<?> findByUserEmail(String email) {
+        return List.of();
+    }
+//    private final EntityManager entityManager;
+//
+//    QWishEntity wishEntity = QWishEntity.wishEntity;
+//
+//    @Override
+//    public void deleteWish(String email, Long productId) {
+//
+//        queryFactory.delete(wishEntity)
+//                .where(wishEntity.user.email.eq(email)
+//                        .and(wishEntity.product.id.eq(productId)))
+//                .execute();
+//    }
+//
+//    @Override
+//    public WishEntity findByEmailAndProductId(String email, Long productId) {
+//        queryFactory.select(wishEntity)
+//                .where(wishEntity.user.email.eq(email)
+//                        .and(wishEntity.product.id.eq(productId)));
+//
+//
+//        return null;
+//    }
+//
+//    @Override
+//    public List<?> findByUserEmail(String email) {
+//        QUserEntity userEntity = QUserEntity.userEntity;
+//
+//        return queryFactory.selectFrom(wishEntity)
+//                .join(wishEntity.user, userEntity)
+//                .where(userEntity.email.eq(email))
+//                .fetch();
+//    }
 }

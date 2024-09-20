@@ -2,10 +2,10 @@ package shop.biday;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.data.mongodb.config.EnableReactiveMongoAuditing;
 
 @SpringBootApplication
-@EnableMongoRepositories
+@EnableReactiveMongoAuditing
 public class BidayApplication {
 
 	public static void main(String[] args) {
@@ -13,3 +13,4 @@ public class BidayApplication {
 	}
 
 }
+

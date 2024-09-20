@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
+import shop.biday.model.domain.AuctionModel;
+import shop.biday.model.domain.UserModel;
 
 import java.time.LocalDateTime;
 
@@ -15,9 +17,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AwardDto {
     private Long id;
-    private Long auction;
-    private Long userId;
+    private AuctionModel auction;
+    private UserModel user;
     private LocalDateTime bidedAt;
     private Long currentBid;
-    private boolean award;
+    private int count;
 }

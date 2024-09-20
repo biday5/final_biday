@@ -87,15 +87,41 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
-    public boolean checkEmail(String email) {
-        return userRepository.existsByEmail(email);
+    public boolean checkEmail(UserModel userModel) {
+        return userRepository.existsByEmail(userModel.getEmail());
     }
 
-    public Boolean checkPhone(String phoneNum) {
-        return userRepository.existsByPhone(phoneNum);
+    public Boolean checkPhone(UserModel userModel) {
+        return userRepository.existsByPhone(userModel.getPhoneNum());
     }
 
-    public Boolean checkPassword(String password) {
-        return userRepository.existsByPassword(password);
+    public Boolean existsByPasswordAndEmail(UserModel userModel) {
+        UserEntity user = userRepository.findByEmail(userModel.getEmail());
+        if (user != null) {
+            return passwordEncoder.matches(userModel.getPassword(), user.getPassword());
+        }
+        return false;
     }
+
+    public String getEmailByPhone(UserModel userModel) {
+        return userRepository.findEmailByPhone(userModel.getPhoneNum())
+                .orElseThrow(() -> new RuntimeException("User not found with phone: " + userModel.getPhoneNum()));
+    }
+
+    public String changePassword(UserModel userModel) {
+        UserEntity user = userRepository.findByEmail(userModel.getEmail());
+        if (user != null) {
+            if (passwordEncoder.matches(userModel.getPassword(), user.getPassword())) {
+                String encodedNewPassword = passwordEncoder.encode(userModel.getNewPassword());
+                user.setPassword(encodedNewPassword);
+                userRepository.save(user);
+                return "비밀번호 변경이 완료 했습니다.";
+            } else {
+                return "예전 비밀번호가 틀렸습니다.";
+            }
+        } else {
+            return "이메일 대상이 없습니다.";
+        }
+    }
+
 }

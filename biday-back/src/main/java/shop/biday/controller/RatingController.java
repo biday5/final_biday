@@ -23,6 +23,7 @@ import java.util.List;
 public class RatingController {
     private final RatingService ratingService;
 
+    // 유저의 이메일로 찾아야함
     @GetMapping
     @Operation(summary = "리뷰 목록", description = "판매자에 대한 리뷰 찾기")
     @ApiResponses(value = {

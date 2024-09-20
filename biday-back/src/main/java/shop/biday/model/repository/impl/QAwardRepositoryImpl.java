@@ -12,10 +12,6 @@ import shop.biday.model.domain.AwardModel;
 import shop.biday.model.domain.PaymentTempModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.AwardDto;
-import shop.biday.model.entity.QAuctionEntity;
-import shop.biday.model.entity.QAwardEntity;
-import shop.biday.model.entity.QPaymentEntity;
-import shop.biday.model.entity.QProductEntity;
 import shop.biday.model.repository.QAwardRepository;
 
 import java.time.LocalDateTime;
@@ -27,103 +23,113 @@ import java.util.List;
 public class QAwardRepositoryImpl implements QAwardRepository {
     private final JPAQueryFactory queryFactory;
 
-    private final QAwardEntity qAward = QAwardEntity.awardEntity;
-    private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
-    private final QProductEntity qProduct = QProductEntity.productEntity;
-    private final QPaymentEntity qPayment = QPaymentEntity.paymentEntity;
-
     @Override
-    public AwardModel findById(Long id) {
-        return queryFactory
-                .select(Projections.constructor(AwardModel.class,
-                        qAward.id,
-                        Projections.constructor(AuctionDto.class,
-                                qAuction.id,
-                                qAuction.userId,
-                                qProduct.name.as("product"),
-                                qAuction.startingBid,
-                                qAuction.startedAt,
-                                qAuction.endedAt,
-                                qAuction.status,
-                                qAuction.createdAt,
-                                qAuction.updatedAt
-                        ),
-                        qAward.userId,
-                        qAward.bidedAt,
-                        qAward.currentBid,
-                        qAward.count,
-                        qAward.createdAt,
-                        qAward.award
-//                        ,
-//                        Projections.constructor(PaymentTempModel.class,
-//                                qPayment.orderId,
-//                                qPayment.userId,
-//                                qPayment.bidId,
-//                                qPayment.totalAmount)
-                ))
-                .from(qAward)
-                .leftJoin(qAward.auction, qAuction)
-                .leftJoin(qAuction.product, qProduct)
-                .where(qAward.id.eq(id),
-                        qPayment.bidId.eq(id))
-                .fetchOne();
+    public AwardModel findByUserId(Long id) {
+        return null;
     }
 
     @Override
     public Slice<AwardDto> findByUserId(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
-        // 현재 날짜와 시간
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDate = null;
-
-        // period에 따라 날짜 범위를 설정, 람다로 고치기
-        switch (period) {
-            case "3개월":
-                startDate = now.minus(3, ChronoUnit.MONTHS);
-                break;
-            case "6개월":
-                startDate = now.minus(6, ChronoUnit.MONTHS);
-                break;
-            case "12개월":
-                startDate = now.minus(12, ChronoUnit.MONTHS);
-                break;
-            case "전체보기":
-                startDate = null;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid period specified");
-        }
-
-        // 날짜 범위 조건 설정
-        BooleanExpression datePredicate = startDate != null ? qAward.bidedAt.goe(startDate) : null;
-
-        // 커서 기반 조건 설정
-        BooleanExpression cursorPredicate = cursor != null ? qAward.bidedAt.lt(cursor) : null;
-
-        // QueryDSL 쿼리 빌더
-        List<AwardDto> auctions = queryFactory
-                .select(Projections.constructor(AwardDto.class,
-                        qAward.id,
-                        qAuction.id.as("auction"),
-                        qAward.userId,
-                        qAward.bidedAt,
-                        qAward.currentBid,
-                        qAward.award))
-                .from(qAward)
-                .leftJoin(qAward.auction, qAuction)
-                .leftJoin(qAuction.product, qProduct)
-                .where(qAward.userId.eq(userId)
-                        .and(datePredicate)
-                        .and(cursorPredicate)
-                        .and(qAward.award.eq(true)))
-                .orderBy(qAward.bidedAt.desc())
-                .limit(pageable.getPageSize() + 1)
-                .fetch();
-
-        boolean hasNext = auctions.size() > pageable.getPageSize();
-        if (hasNext) {
-            auctions.remove(auctions.size() - 1);
-        }
-
-        return new SliceImpl<>(auctions, pageable, hasNext);
+        return null;
     }
+
+//    private final QAwardEntity qAward = QAwardEntity.awardEntity;
+//    private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
+//    private final QProductEntity qProduct = QProductEntity.productEntity;
+//    private final QPaymentEntity qPayment = QPaymentEntity.paymentEntity;
+//
+//    @Override
+//    public AwardModel findByUserId(Long id) {
+//        return queryFactory
+//                .select(Projections.constructor(AwardModel.class,
+//                        qAward.id,
+//                        Projections.constructor(AuctionDto.class,
+//                                qAuction.id,
+//                                qAuction.userId,
+//                                qProduct.name.as("product"),
+//                                qAuction.startingBid,
+//                                qAuction.startedAt,
+//                                qAuction.endedAt,
+//                                qAuction.status,
+//                                qAuction.createdAt,
+//                                qAuction.updatedAt
+//                        ),
+//                        qAward.userId,
+//                        qAward.bidedAt,
+//                        qAward.currentBid,
+//                        qAward.count,
+//                        qAward.createdAt,
+//                        qAward.award
+////                        ,
+////                        Projections.constructor(PaymentTempModel.class,
+////                                qPayment.orderId,
+////                                qPayment.userId,
+////                                qPayment.bidId,
+////                                qPayment.totalAmount)
+//                ))
+//                .from(qAward)
+//                .leftJoin(qAward.auction, qAuction)
+//                .leftJoin(qAuction.product, qProduct)
+//                .where(qAward.id.eq(id),
+//                        qPayment.bidId.eq(id))
+//                .fetchOne();
+//    }
+//
+//    @Override
+//    public Slice<AwardDto> findByUserId(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
+//        // 현재 날짜와 시간
+//        LocalDateTime now = LocalDateTime.now();
+//        LocalDateTime startDate = null;
+//
+//        // period에 따라 날짜 범위를 설정, 람다로 고치기
+//        switch (period) {
+//            case "3개월":
+//                startDate = now.minus(3, ChronoUnit.MONTHS);
+//                break;
+//            case "6개월":
+//                startDate = now.minus(6, ChronoUnit.MONTHS);
+//                break;
+//            case "12개월":
+//                startDate = now.minus(12, ChronoUnit.MONTHS);
+//                break;
+//            case "전체보기":
+//                startDate = null;
+//                break;
+//            default:
+//                throw new IllegalArgumentException("Invalid period specified");
+//        }
+//
+//        // 날짜 범위 조건 설정
+//        BooleanExpression datePredicate = startDate != null ? qAward.bidedAt.goe(startDate) : null;
+//
+//        // 커서 기반 조건 설정
+//        BooleanExpression cursorPredicate = cursor != null ? qAward.bidedAt.lt(cursor) : null;
+//
+//        // QueryDSL 쿼리 빌더
+//        List<AwardDto> auctions = queryFactory
+//                .select(Projections.constructor(AwardDto.class,
+//                        qAward.id,
+//                        qAuction.id.as("auction"),
+//                        qAward.userId,
+//                        qAward.bidedAt,
+//                        qAward.currentBid,
+//                        qAward.award))
+//                .from(qAward)
+//                .leftJoin(qAward.auction, qAuction)
+//                .leftJoin(qAuction.product, qProduct)
+//                .where(qAward.userId.eq(userId)
+//                        .and(datePredicate)
+//                        .and(cursorPredicate)
+//                        .and(qAward.award.eq(true)))
+//                .orderBy(qAward.bidedAt.desc())
+//                .limit(pageable.getPageSize() + 1)
+//                .fetch();
+//
+//        boolean hasNext = auctions.size() > pageable.getPageSize();
+//        if (hasNext) {
+//            auctions.remove(auctions.size() - 1);
+//        }
+//
+//        return new SliceImpl<>(auctions, pageable, hasNext);
+//    }
 }
