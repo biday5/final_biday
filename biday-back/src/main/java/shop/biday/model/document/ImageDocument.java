@@ -1,27 +1,28 @@
-package shop.biday.model.domain;
+package shop.biday.model.document;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.stereotype.Component;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
 @Data
 @Builder
-@Component
-@NoArgsConstructor
+@Document(collection = "images")
 @AllArgsConstructor
-public class ImageModel {
+@NoArgsConstructor
+public class ImageDocument {
+    @Id
     private String id;
     private String name;
     private String ext;
     private String url;
     private String type;
-    private Long referenceId;
+    private Long referencedId;
+    @CreatedDate
     private LocalDateTime createdAt;
-//    private int ratingValue;
 }

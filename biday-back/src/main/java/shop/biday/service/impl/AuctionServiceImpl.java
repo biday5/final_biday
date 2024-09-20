@@ -20,12 +20,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuctionServiceImpl implements AuctionService {
     private final AuctionRepository repository;
-    private final QAuctionRepository auctionRepository;
 
     @Override
     public Slice<AuctionDto> findByUser(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
         try{
-            return auctionRepository.findByUser(userId, period, cursor, pageable);
+            return repository.findByUser(userId, period, cursor, pageable);
         } catch (Exception e){
             log.error(e.getMessage());
             return null;
@@ -35,7 +34,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public AuctionModel findById(Long id) {
         try {
-            return auctionRepository.findById(id);
+            return repository.findByAuctionId(id);
         } catch (Exception e) {
             log.error(e.getMessage());
             return null;

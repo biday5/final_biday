@@ -2,11 +2,9 @@ package shop.biday.model.dto;
 
 import lombok.*;
 import org.springframework.stereotype.Component;
-import shop.biday.model.domain.BidModel;
-import shop.biday.model.domain.ProductModel;
+import shop.biday.model.domain.ImageModel;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
@@ -23,5 +21,4 @@ public class AuctionDto {
     private boolean status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    //    private List<ImageModel> images;
 }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AuctionRepository extends JpaRepository<AuctionEntity, Long> {
+public interface AuctionRepository extends JpaRepository<AuctionEntity, Long>, QAuctionRepository {
     boolean existsById(Long id);
     AuctionEntity save(AuctionModel auction);
     void deleteById(Long id);

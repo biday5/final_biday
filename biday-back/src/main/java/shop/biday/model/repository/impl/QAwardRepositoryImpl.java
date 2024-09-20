@@ -8,16 +8,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
-import shop.biday.model.domain.AuctionModel;
-import shop.biday.model.domain.BidModel;
+import shop.biday.model.domain.AwardModel;
 import shop.biday.model.domain.PaymentTempModel;
 import shop.biday.model.dto.AuctionDto;
-import shop.biday.model.dto.BidDto;
+import shop.biday.model.dto.AwardDto;
 import shop.biday.model.entity.QAuctionEntity;
-import shop.biday.model.entity.QBidEntity;
+import shop.biday.model.entity.QAwardEntity;
 import shop.biday.model.entity.QPaymentEntity;
 import shop.biday.model.entity.QProductEntity;
-import shop.biday.model.repository.QBidRepository;
+import shop.biday.model.repository.QAwardRepository;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -25,21 +24,19 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class QBidRepositoryImpl implements QBidRepository {
+public class QAwardRepositoryImpl implements QAwardRepository {
     private final JPAQueryFactory queryFactory;
 
-    private final QBidEntity qBid = QBidEntity.bidEntity;
+    private final QAwardEntity qAward = QAwardEntity.awardEntity;
     private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
     private final QProductEntity qProduct = QProductEntity.productEntity;
     private final QPaymentEntity qPayment = QPaymentEntity.paymentEntity;
 
     @Override
-    public BidModel findById(Long id) {
-        /* TODO 경매, 상품, 결제, 배송 다 조인해서 보여주기 -> 결제랑 배송은 보류
-        람다, responseEntity 변경, Exception 처리, image, 결제 합치기 */
+    public AwardModel findById(Long id) {
         return queryFactory
-                .select(Projections.constructor(BidModel.class,
-                        qBid.id,
+                .select(Projections.constructor(AwardModel.class,
+                        qAward.id,
                         Projections.constructor(AuctionDto.class,
                                 qAuction.id,
                                 qAuction.userId,
@@ -51,32 +48,34 @@ public class QBidRepositoryImpl implements QBidRepository {
                                 qAuction.createdAt,
                                 qAuction.updatedAt
                         ),
-                        qBid.userId,
-                        qBid.bidedAt,
-                        qBid.currentBid,
-                        qBid.count,
-                        qBid.createdAt,
-                        qBid.award,
-                        Projections.constructor(PaymentTempModel.class,
-                                qPayment.orderId,
-                                qPayment.userId,
-                                qPayment.bidId,
-                                qPayment.totalAmount)))
-                .from(qBid)
-                .leftJoin(qBid.auction, qAuction)
+                        qAward.userId,
+                        qAward.bidedAt,
+                        qAward.currentBid,
+                        qAward.count,
+                        qAward.createdAt,
+                        qAward.award
+//                        ,
+//                        Projections.constructor(PaymentTempModel.class,
+//                                qPayment.orderId,
+//                                qPayment.userId,
+//                                qPayment.bidId,
+//                                qPayment.totalAmount)
+                ))
+                .from(qAward)
+                .leftJoin(qAward.auction, qAuction)
                 .leftJoin(qAuction.product, qProduct)
-                .where(qBid.id.eq(id),
+                .where(qAward.id.eq(id),
                         qPayment.bidId.eq(id))
                 .fetchOne();
     }
 
     @Override
-    public Slice<BidDto> findByUserId(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
+    public Slice<AwardDto> findByUserId(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
         // 현재 날짜와 시간
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDate = null;
 
-        // period에 따라 날짜 범위를 설정
+        // period에 따라 날짜 범위를 설정, 람다로 고치기
         switch (period) {
             case "3개월":
                 startDate = now.minus(3, ChronoUnit.MONTHS);
@@ -95,28 +94,28 @@ public class QBidRepositoryImpl implements QBidRepository {
         }
 
         // 날짜 범위 조건 설정
-        BooleanExpression datePredicate = startDate != null ? qBid.bidedAt.goe(startDate) : null;
+        BooleanExpression datePredicate = startDate != null ? qAward.bidedAt.goe(startDate) : null;
 
         // 커서 기반 조건 설정
-        BooleanExpression cursorPredicate = cursor != null ? qBid.bidedAt.lt(cursor) : null;
+        BooleanExpression cursorPredicate = cursor != null ? qAward.bidedAt.lt(cursor) : null;
 
         // QueryDSL 쿼리 빌더
-        List<BidDto> auctions = queryFactory
-                .select(Projections.constructor(BidDto.class,
-                        qBid.id,
+        List<AwardDto> auctions = queryFactory
+                .select(Projections.constructor(AwardDto.class,
+                        qAward.id,
                         qAuction.id.as("auction"),
-                        qBid.userId,
-                        qBid.bidedAt,
-                        qBid.currentBid,
-                        qBid.award))
-                .from(qBid)
-                .leftJoin(qBid.auction, qAuction)
+                        qAward.userId,
+                        qAward.bidedAt,
+                        qAward.currentBid,
+                        qAward.award))
+                .from(qAward)
+                .leftJoin(qAward.auction, qAuction)
                 .leftJoin(qAuction.product, qProduct)
-                .where(qBid.userId.eq(userId)
+                .where(qAward.userId.eq(userId)
                         .and(datePredicate)
                         .and(cursorPredicate)
-                        .and(qBid.award.eq(true)))
-                .orderBy(qBid.bidedAt.desc())
+                        .and(qAward.award.eq(true)))
+                .orderBy(qAward.bidedAt.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 

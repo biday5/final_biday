@@ -5,23 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-import shop.biday.model.domain.BidModel;
-import shop.biday.model.dto.BidDto;
-import shop.biday.model.repository.BidRepository;
-import shop.biday.model.repository.QBidRepository;
-import shop.biday.service.BidService;
+import shop.biday.model.domain.AwardModel;
+import shop.biday.model.dto.AwardDto;
+import shop.biday.model.repository.AwardRepository;
+import shop.biday.model.repository.QAwardRepository;
+import shop.biday.service.AwardService;
 
 import java.time.LocalDateTime;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BidServiceImpl implements BidService {
-    private final BidRepository repository;
-    private final QBidRepository bidRepository;
+public class AwardServiceImpl implements AwardService {
+    private final AwardRepository repository;
+    private final QAwardRepository bidRepository;
 
     @Override
-    public BidModel findById(Long id) {
+    public AwardModel findById(Long id) {
         try {
             return bidRepository.findById(id);
         } catch (Exception e) {
@@ -31,7 +31,7 @@ public class BidServiceImpl implements BidService {
     }
 
     @Override
-    public Slice<BidDto> findByUser(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
+    public Slice<AwardDto> findByUser(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
         try {
             return bidRepository.findByUserId(userId, period, cursor, pageable);
         } catch (Exception e) {

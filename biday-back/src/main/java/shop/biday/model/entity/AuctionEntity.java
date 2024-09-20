@@ -8,7 +8,6 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -59,6 +58,6 @@ public class AuctionEntity {
     @Column(name = "updated_at", nullable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "auction")
-    private List<BidEntity> bids;
+    @OneToOne(mappedBy = "auction")
+    private AwardEntity award;
 }

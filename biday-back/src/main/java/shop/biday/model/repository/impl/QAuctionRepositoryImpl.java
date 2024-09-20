@@ -2,6 +2,7 @@ package shop.biday.model.repository.impl;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -9,10 +10,12 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import shop.biday.model.domain.AuctionModel;
+import shop.biday.model.domain.ImageModel;
 import shop.biday.model.dto.AuctionDto;
-import shop.biday.model.dto.BidDto;
+import shop.biday.model.dto.AwardDto;
 import shop.biday.model.dto.ProductDto;
 import shop.biday.model.entity.*;
+import shop.biday.model.repository.ImageRepository;
 import shop.biday.model.repository.QAuctionRepository;
 
 import java.time.LocalDateTime;
@@ -28,23 +31,24 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
     private final QProductEntity qProduct = QProductEntity.productEntity;
     private final QBrandEntity qBrand = QBrandEntity.brandEntity;
     private final QCategoryEntity qCategory = QCategoryEntity.categoryEntity;
-    private final QBidEntity qBid = QBidEntity.bidEntity;
+    private final QAwardEntity qAward = QAwardEntity.awardEntity;
+    private final ImageRepository imageRepository;
 
     @Override
-    public AuctionModel findById(Long id) {
-        BidDto bid = queryFactory
-                .select(Projections.constructor(BidDto.class,
-                        qBid.id,
-                        qBid.auction.id.as("auction"),
-                        qBid.userId,
-                        qBid.bidedAt,
-                        qBid.currentBid,
-                        qBid.award))
-                .from(qBid)
-                .leftJoin(qBid.auction, qAuction)
-                .where(qBid.auction.id.eq(id))
-                .orderBy(qBid.award.desc())
-                .fetchFirst();
+    public AuctionModel findByAuctionId(Long id) {
+//        AwardDto award = queryFactory
+//                .select(Projections.constructor(AwardDto.class,
+//                        qAward.id,
+//                        qAward.auction.id.as("auction"),
+//                        qAward.userId,
+//                        qAward.bidedAt,
+//                        qAward.currentBid,
+//                        qAward.award))
+//                .from(qAward)
+//                .leftJoin(qAward.auction, qAuction)
+//                .where(qAward.auction.id.eq(id))
+//                .orderBy(qAward.award.desc())
+//                .fetchFirst();
 
         AuctionModel auction = queryFactory
                 .select(Projections.constructor(AuctionModel.class,
@@ -58,8 +62,16 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                                 qProduct.subName,
                                 qProduct.productCode,
                                 qProduct.price,
-                                qProduct.color
-                        ),
+                                qProduct.color,
+                                Projections.constructor(ImageModel.class,
+                                        Expressions.constant("defaultImageId"),        // id
+                                        Expressions.constant("defaultImageName"),      // name
+                                        Expressions.constant("defaultImageExt"),       // ext
+                                        Expressions.constant("defaultImageUrl"),       // url
+                                        Expressions.constant("defaultImageType"),      // type
+                                        Expressions.constant(0L),  // referenceId
+                                        Expressions.constant(LocalDateTime.now())
+                                )),
                         qAuction.description,
                         qAuction.startingBid,
                         qAuction.currentBid,
@@ -68,31 +80,54 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                         qAuction.status,
                         qAuction.createdAt,
                         qAuction.updatedAt,
-                        Projections.constructor(BidDto.class,
-                                qBid.id,
-                                qBid.auction.id.as("auction"),
-                                qBid.userId,
-                                qBid.bidedAt,
-                                qBid.currentBid,
-                                qBid.award)))
+                        // ImageModel 생성자 호출
+                        Projections.list(Projections.constructor(ImageModel.class,
+                                Expressions.constant("defaultImageId"),        // id
+                                Expressions.constant("defaultImageName"),      // name
+                                Expressions.constant("defaultImageExt"),       // ext
+                                Expressions.constant("defaultImageUrl"),       // url
+                                Expressions.constant("defaultImageType"),      // type
+                                Expressions.constant(0L),  // referenceId
+                                Expressions.constant(LocalDateTime.now())      // createdAt
+                        )),
+                        Projections.constructor(AwardDto.class,
+                                qAward.id,
+                                qAward.auction.id.as("auction"),
+                                qAward.userId,
+                                qAward.bidedAt,
+                                qAward.currentBid,
+                                qAward.award)))
                 .from(qAuction)
                 .leftJoin(qAuction.product, qProduct)
                 .leftJoin(qProduct.brand, qBrand)
                 .leftJoin(qProduct.category, qCategory)
-                .leftJoin(qAuction.bids, qBid)
-                .where(qAuction.id.eq(id))
+                .leftJoin(qAuction.award, qAward)
+                .where(qAuction.id.eq(id),
+                        qAward.auction.id.eq(id))
                 .fetchFirst();
 
-        if(auction != null) {
-            auction.setBid(bid);
+        if (auction != null) {
+            List<ImageModel> images = imageRepository.findByTypeAndReferencedId("경매", auction.getId());
+            if (images != null) {
+                auction.setImages(images);
+            }
+            else {
+                auction.setImages((List<ImageModel>) imageRepository.findByType("에러"));
+            }
+
+            ImageModel productImage = imageRepository.findByNameAndType(auction.getProduct().getProductCode(), "상품");
+            if (productImage != null) {
+                auction.getProduct().setImage(productImage);
+            } else {
+                auction.getProduct().setImage(imageRepository.findByType("에러"));
+            }
         }
+
         return auction;
     }
 
     @Override
     public Slice<AuctionDto> findByUser(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
-        // between으로 시도해볼 것!!
-        // 현재 날짜와 시간
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDate = null;
 

@@ -22,7 +22,7 @@ public class QAuctionEntity extends EntityPathBase<AuctionEntity> {
 
     public static final QAuctionEntity auctionEntity = new QAuctionEntity("auctionEntity");
 
-    public final ListPath<BidEntity, QBidEntity> bids = this.<BidEntity, QBidEntity>createList("bids", BidEntity.class, QBidEntity.class, PathInits.DIRECT2);
+    public final QAwardEntity award;
 
     public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
@@ -64,6 +64,7 @@ public class QAuctionEntity extends EntityPathBase<AuctionEntity> {
 
     public QAuctionEntity(Class<? extends AuctionEntity> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.award = inits.isInitialized("award") ? new QAwardEntity(forProperty("award"), inits.get("award")) : null;
         this.product = inits.isInitialized("product") ? new QProductEntity(forProperty("product"), inits.get("product")) : null;
     }
 

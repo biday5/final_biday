@@ -3,6 +3,7 @@ package shop.biday.model.dto;
 import lombok.*;
 import org.springframework.stereotype.Component;
 import shop.biday.model.domain.AuctionModel;
+import shop.biday.model.domain.ImageModel;
 import shop.biday.model.entity.AuctionEntity;
 
 import java.time.LocalDateTime;
@@ -22,5 +23,5 @@ public class ProductDto {
     private String productCode;
     private Long price;
     private String color;
-    //    private List<ImageEntity> images;
+    private ImageModel image;
 }
