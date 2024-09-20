@@ -43,9 +43,9 @@ public class MBidRepositoryImpl implements MBidRepository {
     }
 
     @Override
-    public Mono<Boolean> updateAward(Long auctionId) {
+    public Mono<Boolean> updateAward(String id) {
         return mongoTemplate.updateFirst(
-                query(where("auctionId").is(auctionId)),
+                query(where("id").is(id)),
                 update("award", true),
                 BidDocument.class
         )

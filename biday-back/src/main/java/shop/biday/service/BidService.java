@@ -9,7 +9,7 @@ public interface BidService {
 
     Mono<BidResponse> save(BidModel bid);
 
-    Mono<BidDocument> findByAuctionId(Long auctionId);
+    Mono<BidDocument> findTopBidByAuctionId(Long auctionId);
 
     Mono<Boolean> updateAward(Long auctionId);
 }

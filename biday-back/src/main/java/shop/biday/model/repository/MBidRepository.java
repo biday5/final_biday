@@ -9,5 +9,5 @@ public interface MBidRepository {
 
     Mono<Long> countByAuctionId(Long auctionId);
 
-    Mono<Boolean> updateAward(Long auctionId);
+    Mono<Boolean> updateAward(String id);
 }
