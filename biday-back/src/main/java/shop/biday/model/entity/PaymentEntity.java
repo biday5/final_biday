@@ -25,11 +25,13 @@ public class PaymentEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 
-    @Column(name = "bid_id", nullable = false)
-    private Long bidId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "award_id", nullable = false)
+    private AwardEntity award;
 
     @Column(name = "payment_key", nullable = false)
     private String paymentKey;

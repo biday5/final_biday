@@ -1,54 +1,44 @@
 package shop.biday.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import shop.biday.exception.PaymentException;
-import shop.biday.model.domain.PaymentCardModel;
-import shop.biday.model.domain.PaymentModel;
-import shop.biday.model.domain.PaymentTempModel;
+import shop.biday.model.domain.*;
 import shop.biday.model.dto.PaymentRequest;
 import shop.biday.model.dto.PaymentResponse;
+import shop.biday.model.entity.AwardEntity;
 import shop.biday.model.entity.PaymentEntity;
+import shop.biday.model.entity.UserEntity;
 import shop.biday.model.entity.enums.PaymentCardType;
 import shop.biday.model.entity.enums.PaymentMethod;
 import shop.biday.model.entity.enums.PaymentStatus;
 import shop.biday.model.repository.PaymentRepository;
+import shop.biday.service.AwardService;
 import shop.biday.service.PaymentService;
+import shop.biday.service.UserService;
 import shop.biday.utils.RedisTemplateUtils;
+import shop.biday.utils.TossPaymentTemplate;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.Objects;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     private static final String APPROVE_URI = "confirm";
 
-    @Value("${payments.toss.secret.key}")
-    private String widgetSecretKey;
-
+    private final UserService userService;
+    private final AwardService awardService;
     private final PaymentRepository paymentRepository;
+    private final TossPaymentTemplate tossPaymentTemplate;
     private final RedisTemplateUtils<PaymentTempModel> redisTemplateUtils;
-    private final RestTemplate restTemplate;
-
-    public PaymentServiceImpl(PaymentRepository paymentRepository,
-                              RedisTemplateUtils<PaymentTempModel> redisTemplateUtils,
-                              RestTemplateBuilder restTemplateBuilder) {
-        this.paymentRepository = paymentRepository;
-        this.redisTemplateUtils = redisTemplateUtils;
-        this.restTemplate = restTemplateBuilder.build();
-    }
 
     @Override
     public PaymentEntity findById(Long id) {
@@ -85,21 +75,25 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Boolean save(PaymentRequest paymentRequest) {
+        UserEntity user = userService.findById(paymentRequest.userId())
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 사용자입니다."));
+
+        AwardEntity award = awardService.findById(paymentRequest.awardId());
+
         PaymentTempModel paymentTempModel = getPaymentTempModel(paymentRequest);
         if (!isCheckPaymentData(paymentRequest, paymentTempModel)) {
             return false;
         }
 
-        URI approveUri = getUri(APPROVE_URI);
-        ResponseEntity<PaymentModel> response = exchangePostMethod(approveUri, paymentRequest);
-        PaymentModel paymentModel = getPayment(response);
+        ResponseEntity<PaymentModel> response = tossPaymentTemplate.exchangePostMethod(APPROVE_URI, paymentRequest);
+        PaymentModel paymentModel = tossPaymentTemplate.getPayment(response);
 
         ZonedDateTime requestedAt = ZonedDateTime.parse(paymentModel.getRequestedAt(), DATE_TIME_FORMATTER);
         ZonedDateTime approvedAt = ZonedDateTime.parse(paymentModel.getApprovedAt(), DATE_TIME_FORMATTER);
 
         PaymentEntity payment = PaymentEntity.builder()
-                .userId(paymentRequest.userId())
-                .bidId(paymentRequest.bidId())
+                .user(user)
+                .award(award)
                 .paymentKey(paymentModel.getPaymentKey())
                 .type(paymentModel.getType())
                 .orderId(paymentRequest.orderId())
@@ -115,26 +109,48 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
 
         paymentRepository.save(payment);
+        deletePaymentTempModel(paymentRequest.orderId());
         return true;
     }
 
     @Override
     public PaymentResponse findPaymentByPaymentKey(Long id) {
         PaymentEntity payment = findById(id);
+        log.info("payment: {}", payment);
 
-        URI paymentKeyUri = getUri(payment.getPaymentKey());
-
-        ResponseEntity<PaymentModel> response = exchangeGetMethod(paymentKeyUri);
-        PaymentModel paymentModel = getPayment(response);
+        ResponseEntity<PaymentModel> response = tossPaymentTemplate.exchangeGetMethod(payment.getPaymentKey());
+        PaymentModel paymentModel = tossPaymentTemplate.getPayment(response);
 
         PaymentCardModel card = paymentModel.getCard();
         card.setIssuerName(PaymentCardType.getByCode(card.getIssuerCode()).getName());
 
         ZonedDateTime approvedAt = ZonedDateTime.parse(paymentModel.getApprovedAt(), DATE_TIME_FORMATTER);
+
+        //TODO : Role 변화 시 주석 해제 필요
+        UserModel userModel = UserModel.builder()
+                .id(payment.getUser().getId())
+                .email(payment.getUser().getEmail())
+                .name(payment.getUser().getName())
+                .phoneNum(payment.getUser().getPhone())
+//                .role(payment.getUser().getRole())
+                .build();
+        AuctionModel auctionModel = AuctionModel.builder()
+                .id(payment.getAward().getAuction().getId())
+                .startingBid(payment.getAward().getAuction().getStartingBid())
+                .currentBid(payment.getAward().getAuction().getCurrentBid())
+                .build();
+        AwardModel awardModel = AwardModel.builder()
+                .id(payment.getAward().getId())
+                .auction(auctionModel)
+                .bidedAt(payment.getAward().getBidedAt())
+                .currentBid(payment.getAward().getCurrentBid())
+                .count(payment.getAward().getCount())
+                .build();
+
         return new PaymentResponse(
                 payment.getId(),
-                payment.getUserId(),
-                payment.getBidId(),
+                userModel,
+                awardModel,
                 paymentModel.getTotalAmount(),
                 paymentModel.getMethod(),
                 paymentModel.getOrderId(),
@@ -152,67 +168,18 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentRepository.save(payment);
     }
 
-    private PaymentModel getPayment(ResponseEntity<PaymentModel> response) {
-        PaymentModel paymentModel = response.getBody();
-        if (paymentModel == null) {
-            throw new PaymentException(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "잘못된 요청입니다.");
-        }
-        if (response.getStatusCode().is4xxClientError() || response.getStatusCode().is5xxServerError()) {
-            throw new PaymentException(
-                    HttpStatus.valueOf(response.getStatusCode().value()),
-                    paymentModel.getCode(),
-                    paymentModel.getMessage());
-        }
-
-        return paymentModel;
-    }
-
-    private ResponseEntity<PaymentModel> exchangeGetMethod(URI uri) {
-        return restTemplate.exchange(
-                uri,
-                HttpMethod.GET,
-                new HttpEntity<>(getHttpHeaders()),
-                PaymentModel.class);
-    }
-
-    private <T> ResponseEntity<PaymentModel> exchangePostMethod(URI uri, T request) {
-        return restTemplate.exchange(
-                uri,
-                HttpMethod.POST,
-                new HttpEntity<>(request, getHttpHeaders()),
-                PaymentModel.class);
-    }
-
-    private HttpHeaders getHttpHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(getAuthorizationHeader());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
-    }
-
-    private URI getUri(String path) {
-        return UriComponentsBuilder.newInstance()
-                .scheme("https")
-                .host("api.tosspayments.com")
-                .path("/v1/payments/" + path)
-                .build()
-                .encode()
-                .toUri();
-    }
-
-    private String getAuthorizationHeader() {
-        String authorization = widgetSecretKey + ":";
-        return new String(Base64.getEncoder().encode(authorization.getBytes(StandardCharsets.UTF_8)));
-    }
-
     private boolean isCheckPaymentData(PaymentRequest paymentRequest, PaymentTempModel paymentTempModel) {
         if (paymentTempModel == null) {
             return false;
         }
         return Objects.equals(paymentTempModel.orderId(), paymentRequest.orderId()) &&
                 Objects.equals(paymentTempModel.userId(), paymentRequest.userId()) &&
-                Objects.equals(paymentTempModel.bidId(), paymentRequest.bidId()) &&
+                Objects.equals(paymentTempModel.awardId(), paymentRequest.awardId()) &&
                 Objects.equals(paymentTempModel.amount(), paymentRequest.amount());
+    }
+
+    private void deletePaymentTempModel(String key) {
+        redisTemplateUtils.delete(key);
     }
 
     private PaymentTempModel getPaymentTempModel(PaymentRequest paymentRequest) {
