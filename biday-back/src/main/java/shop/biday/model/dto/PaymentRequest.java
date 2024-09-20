@@ -11,10 +11,10 @@ public record PaymentRequest(
         @NotNull(message = "필수 값입니다.")
         Long userId,
 
-        @Schema(description = "입찰 아이디", example = "2")
+        @Schema(description = "낙찰 아이디", example = "2")
         @Positive
         @NotNull(message = "필수 값입니다.")
-        Long bidId,
+        Long awardId,
 
         @Schema(description = "주문번호", example = "rovneuls-sfg-rtwefh")
         @NotBlank(message = "결제의 키는 반드시 존재하고, 빈 값과 공백일 수 없습니다.")

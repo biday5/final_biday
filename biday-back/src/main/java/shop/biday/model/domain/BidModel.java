@@ -1,26 +1,24 @@
 package shop.biday.model.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
-import shop.biday.model.dto.AuctionDto;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
-import java.time.LocalDateTime;
+import java.math.BigInteger;
 
-@Data
-@Builder
-@Component
-@NoArgsConstructor
-@AllArgsConstructor
-public class BidModel {
-    private Long id;
-    private AuctionDto auction;
-    private Long userId;
-    private LocalDateTime bidedAt;
-    private int currentBid;
-    private int count;
-    private LocalDateTime createdAt;
-    private boolean award;
+public record BidModel(
+    @Schema(description = "경매 ID", example = "1")
+    @Positive
+    @NotNull(message = "필수 값입니다.")
+    Long auctionId,
+
+    @Schema(description = "사용자 아이디", example = "1")
+    @Positive
+    @NotNull(message = "필수 값입니다.")
+    Long userId,
+
+    @Schema(description = "입찰 가격", example = "1000")
+    @Positive
+    @NotNull(message = "필수 값입니다.")
+    BigInteger currentBid) {
 }
