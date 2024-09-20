@@ -2,10 +2,14 @@ package shop.biday.model.repository;
 
 import shop.biday.model.entity.WishEntity;
 
+import java.util.List;
+
 public interface QWishRepository {
 
-    void deleteWish(Long userId, Long productId);
+    void deleteWish(String email, Long productId);
 
-    WishEntity findByUserIdAndProductId(Long userId, Long productId);
+    WishEntity findByEmailAndProductId(String email, Long productId);
+
+    List<?> findByUserEmail(String email);
 
 }

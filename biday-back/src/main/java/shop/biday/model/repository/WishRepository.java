@@ -9,6 +9,5 @@ import java.util.List;
 @Repository
 public interface WishRepository extends JpaRepository<WishEntity, Long>, QWishRepository {
 
-    List<?> findByUserId(Long id);
 
 }

@@ -28,6 +28,7 @@ public class UserModel {
     private String streetaddress;
     private String detailaddress;
     private String type;
+    private String newPassword;
 
 
     public String getRoleAsString() {

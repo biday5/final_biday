@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import shop.biday.model.entity.ProductEntity;
 import shop.biday.model.entity.UserEntity;
 import shop.biday.model.entity.WishEntity;
+import shop.biday.model.repository.UserRepository;
 import shop.biday.model.repository.WishRepository;
+import shop.biday.oauth2.jwt.JWTUtil;
 import shop.biday.service.WishService;
 
 @Slf4j
@@ -15,35 +17,39 @@ import shop.biday.service.WishService;
 public class WishServiceImpl implements WishService {
 
     private final WishRepository wishRepository;
+    private final UserRepository userRepository;
+    private final JWTUtil jwtUtil;
 
     @Override
-    public boolean toggleWIsh(Long userId, Long productId) {
+    public boolean toggleWIsh(String email, Long productId) {
 
-        return isWish(userId, productId) ? deleteWishAndReturnFalse(userId, productId) : insertWishAndReturnTrue(userId, productId);
+        return isWish(email, productId) ? deleteWishAndReturnFalse(email, productId) : insertWishAndReturnTrue(email, productId);
 
     }
 
-    private boolean deleteWishAndReturnFalse(Long userId, Long productId) {
-        deleteWish(userId, productId);
+    private boolean deleteWishAndReturnFalse(String email, Long productId) {
+        deleteWish(email, productId);
         return false;
     }
 
-    private boolean insertWishAndReturnTrue(Long userId, Long productId) {
-        insertWish(userId, productId);
+    private boolean insertWishAndReturnTrue(String email, Long productId) {
+        insertWish(email, productId);
         return true;
     }
 
     @Override
-    public void deleteWish(Long userId, Long productId) {
-        wishRepository.deleteWish(userId, productId);
+    public void deleteWish(String email, Long productId) {
+        wishRepository.deleteWish(email, productId);
     }
 
     @Override
-    public void insertWish(Long userId, Long productId) {
+    public void insertWish(String email, Long productId) {
+
+        UserEntity user = userRepository.findByEmail(email);
 
         wishRepository.save(
                 WishEntity.builder()
-                        .user(UserEntity.builder().id(userId).build())
+                        .user(UserEntity.builder().id(user.getId()).build())
                         .product(ProductEntity.builder().id(productId).build())
                         .build()
         );
@@ -51,9 +57,9 @@ public class WishServiceImpl implements WishService {
     }
 
     @Override
-    public boolean isWish(Long userId, Long productId) {
+    public boolean isWish(String email, Long productId) {
 
-        return wishRepository.findByUserIdAndProductId(userId, productId) != null;
+        return wishRepository.findByEmailAndProductId(email, productId) != null;
 
     }
 }

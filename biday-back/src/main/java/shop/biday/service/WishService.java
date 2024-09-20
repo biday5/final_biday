@@ -1,9 +1,9 @@
 package shop.biday.service;
 
 public interface WishService {
-    boolean toggleWIsh(Long userId, Long productId);
-    void deleteWish(Long userId, Long productId);
-    void insertWish(Long userId, Long productId);
-    boolean isWish(Long userId, Long productId);
+    boolean toggleWIsh(String email, Long productId);
+    void deleteWish(String email, Long productId);
+    void insertWish(String email, Long productId);
+    boolean isWish(String email, Long productId);
 
 }
