@@ -1,6 +1,8 @@
 package shop.biday.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,6 +48,9 @@ public class PaymentController {
     }
 
     @Operation(summary = "결제 조회", description = "paymentKey로 결제 조회합니다.")
+    @Parameters({
+            @Parameter(name = "id", description = "결제 ID", example = "1"),
+    })
     @ApiResponse(responseCode = "200", description = "성공")
     @GetMapping
     public ResponseEntity<PaymentResponse> findPaymentByPaymentKey(@RequestParam("id") Long id) {

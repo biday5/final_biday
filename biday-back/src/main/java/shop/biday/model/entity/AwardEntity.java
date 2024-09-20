@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -13,12 +12,13 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-@ToString
+@ToString(exclude = "auction")
 @DynamicInsert
-@Table(name = "bids")
+@Table(name = "awards")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class BidEntity {
+public class AwardEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -28,8 +28,9 @@ public class BidEntity {
     @JoinColumn(name = "auction_id", nullable = false)
     private AuctionEntity auction;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 
     @Column(name = "bided_at", nullable = false)
     private LocalDateTime bidedAt;
@@ -40,12 +41,4 @@ public class BidEntity {
     @ColumnDefault("1")
     @Column(name = "count", nullable = false)
     private int count;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt;
-
-    @ColumnDefault("b'0'")
-    @Column(name = "award", nullable = false)
-    private boolean award;
 }

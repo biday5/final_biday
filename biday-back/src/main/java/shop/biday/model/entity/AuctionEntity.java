@@ -60,5 +60,5 @@ public class AuctionEntity {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "auction")
-    private List<BidEntity> bids;
+    private List<AwardEntity> bids;
 }

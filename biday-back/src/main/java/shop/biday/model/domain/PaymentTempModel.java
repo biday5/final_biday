@@ -15,10 +15,10 @@ public record PaymentTempModel(
         @NotNull(message = "필수 값입니다.")
         Long userId,
 
-        @Schema(description = "입찰 아이디", example = "2")
+        @Schema(description = "낙찰 아이디", example = "2")
         @Positive
         @NotNull(message = "필수 값입니다.")
-        Long bidId,
+        Long awardId,
 
         @Schema(description = "결제 가격", example = "100000")
         @Positive

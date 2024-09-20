@@ -1,13 +1,15 @@
 package shop.biday.service;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import reactor.core.publisher.Mono;
+import shop.biday.model.document.BidDocument;
 import shop.biday.model.domain.BidModel;
-import shop.biday.model.dto.BidDto;
-
-import java.time.LocalDateTime;
+import shop.biday.model.dto.BidResponse;
 
 public interface BidService {
-    BidModel findById(Long id);
-    Slice<BidDto> findByUser(Long userId, String period, LocalDateTime cursor, Pageable pageable);
+
+    Mono<BidResponse> save(BidModel bid);
+
+    Mono<BidDocument> findTopBidByAuctionId(Long auctionId);
+
+    Mono<Boolean> updateAward(Long auctionId);
 }

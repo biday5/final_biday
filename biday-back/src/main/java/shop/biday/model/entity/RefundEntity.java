@@ -25,7 +25,7 @@ public class RefundEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id")
+    @JoinColumn(name = "payment_id", nullable = false)
     private PaymentEntity payment;
 
     @Column(name = "transaction_key", nullable = false)

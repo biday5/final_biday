@@ -4,20 +4,23 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
-@Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class BidDto {
-    private Long id;
-    private Long auction;
-    private Long userId;
-    private LocalDateTime bidedAt;
-    private int currentBid;
+public class BidResponse {
+
+    private Long auctionId;
+
+    private BigInteger currentBid;
+
     private boolean award;
+
+    private Long count;
+
+    private LocalDateTime bidedAt;
 }

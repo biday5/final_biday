@@ -32,6 +32,7 @@ public class WishEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
 
+    @Builder.Default
     @Column(name = "status", nullable = false)
     private boolean status = true;
 

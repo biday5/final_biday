@@ -37,6 +37,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // reactive programming
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+
     // queryDSL
     implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
     annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
@@ -55,8 +59,6 @@ dependencies {
 
     // mongoDB
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    implementation 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -79,6 +81,9 @@ tasks.named('test') {
 }
 
 bootJar {
-    enabled = false
     archiveFileName.set("biday.${applicationVersion}.jar")
+}
+
+tasks.jar {
+    enabled = false
 }
