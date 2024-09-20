@@ -28,6 +28,32 @@ import java.util.Optional;
 public class UserController {
     private final UserServiceImpl userService;
 
+    @PutMapping("/passupdate")
+    @Operation(summary = "비밀번호 변경", description = "사용자의 비밀번호를 변경합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "비밀번호가 성공적으로 변경되었습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청. 올바르지 않은 비밀번호 형식이거나 기존 비밀번호가 맞지 않습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json"))
+    })
+    @Parameter(description = "비밀번호 변경 요청", required = true)
+    public ResponseEntity<String> changePassword(@RequestParam String email, @RequestParam String oldPassword, @RequestParam String newPassword) {
+            return ResponseEntity.ok(userService.changePassword(email, oldPassword, newPassword));
+    }
+
+    @GetMapping("/email")
+    @Operation(summary = "전화번호로 이메일 조회", description = "제공된 전화번호에 연결된 이메일 주소를 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "이메일이 성공적으로 조회되었습니다.", content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(responseCode = "404", description = "제공된 전화번호로 사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")
+            )
+    })
+    @Parameter(name = "phone", description = "이메일을 조회할 전화번호", example = "123-456-7890"
+    )
+    public ResponseEntity<String> getEmailByPhone(@RequestParam String phone) {
+            return ResponseEntity.ok(userService.getEmailByPhone(phone));
+    }
 
     @GetMapping("/password")
     @Operation(summary = "유저 비밀번호 검증", description = "소셜 로그인 후 이메일과 비밀번호 같은 검증 api")
@@ -36,8 +62,8 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "패스워드 검증이 실패 했습니다.", content = @Content(mediaType = "application/json"))
     })
     @Parameter(name = "password", description = "검증할 패스워드 주소", example = "example@domain.com")
-    public ResponseEntity<Boolean> password(@RequestParam String password) {
-        return new ResponseEntity<>(userService.checkPassword(password), HttpStatus.OK);
+    public ResponseEntity<Boolean> checkPassword(@RequestParam String email, @RequestParam String password) {
+        return new ResponseEntity<>(userService.existsByPasswordAndEmail(email, password), HttpStatus.OK);
     }
 
     @PostMapping("/join")

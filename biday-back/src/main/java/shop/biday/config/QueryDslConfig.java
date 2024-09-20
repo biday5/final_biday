@@ -11,8 +11,7 @@ public class QueryDslConfig {
     @PersistenceContext
     private EntityManager entityManager;
 
-// test commit
-//    sdfsdfsdfsdfsdfsdfsdfsdfsdfsdfsdf
+
     @Bean
     public JPAQueryFactory jpaQueryFactory() {
         return new JPAQueryFactory(entityManager);
