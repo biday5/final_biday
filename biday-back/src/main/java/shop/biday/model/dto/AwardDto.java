@@ -1,11 +1,12 @@
-package shop.biday.model.domain;
+package shop.biday.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
-import shop.biday.model.dto.AuctionDto;
+import shop.biday.model.domain.AuctionModel;
+import shop.biday.model.domain.UserModel;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
-public class AwardModel {
+public class AwardDto {
     private Long id;
     private AuctionDto auction;
     private UserModel user;

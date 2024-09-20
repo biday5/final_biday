@@ -48,9 +48,9 @@ public class ProductController {
     public ResponseEntity<Slice<ProductDto>> searchByFilter(
             @RequestParam(value = "brandId", required = false) Long brandId,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
-            @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestParam(value = "color", required = false) String color,
-            @RequestParam(value = "order", required = false) String order,
+            @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
+            @RequestParam(value = "color", required = false, defaultValue = "") String color,
+            @RequestParam(value = "order", required = false, defaultValue = "") String order,
             @RequestParam(value = "lastItemValue", required = false) Long lastItemId, // 커서 값 추가
             Pageable pageable) {
         return ResponseEntity.ok(productService.findByFilter(pageable, categoryId, brandId, keyword, color, order, lastItemId));

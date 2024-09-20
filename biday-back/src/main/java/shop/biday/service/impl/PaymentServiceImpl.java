@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import shop.biday.exception.PaymentException;
 import shop.biday.model.domain.*;
+import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.PaymentRequest;
 import shop.biday.model.dto.PaymentResponse;
 import shop.biday.model.entity.AwardEntity;
@@ -134,14 +135,20 @@ public class PaymentServiceImpl implements PaymentService {
                 .phoneNum(payment.getUser().getPhone())
 //                .role(payment.getUser().getRole())
                 .build();
-        AuctionModel auctionModel = AuctionModel.builder()
+//        AuctionModel auctionModel = AuctionModel.builder()
+//                .id(payment.getAward().getAuction().getId())
+//                .startingBid(payment.getAward().getAuction().getStartingBid())
+//                .currentBid(payment.getAward().getAuction().getCurrentBid())
+//                .build();
+        AuctionDto auctionDto = AuctionDto.builder()
                 .id(payment.getAward().getAuction().getId())
                 .startingBid(payment.getAward().getAuction().getStartingBid())
                 .currentBid(payment.getAward().getAuction().getCurrentBid())
                 .build();
         AwardModel awardModel = AwardModel.builder()
                 .id(payment.getAward().getId())
-                .auction(auctionModel)
+//                .auction(auctionModel)
+                .auction(auctionDto)
                 .bidedAt(payment.getAward().getBidedAt())
                 .currentBid(payment.getAward().getCurrentBid())
                 .count(payment.getAward().getCount())

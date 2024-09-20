@@ -3,7 +3,6 @@ package shop.biday.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
@@ -24,7 +23,7 @@ public class AwardEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "auction_id", nullable = false)
     private AuctionEntity auction;
 

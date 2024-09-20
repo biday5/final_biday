@@ -2,12 +2,16 @@ package shop.biday.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import shop.biday.model.dto.AwardDto;
 import shop.biday.model.domain.AwardModel;
 import shop.biday.model.entity.AwardEntity;
 import shop.biday.model.repository.AwardRepository;
 import shop.biday.service.AwardService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -31,5 +35,26 @@ public class AwardServiceImpl implements AwardService {
     @Override
     public AwardEntity save(AwardEntity award) {
         return awardRepository.save(award);
+    }
+
+    @Override
+    public AwardModel findByAwardId(Long id) {
+        return null;
+//        try {
+//            return awardRepository.findByAwardId(id);
+//        } catch (Exception e) {
+//            log.error(e.getMessage());
+//            return null;
+//        }
+    }
+
+    @Override
+    public Slice<AwardDto> findByUser(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
+        try {
+            return awardRepository.findByUserId(userId, period, cursor, pageable);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
     }
 }

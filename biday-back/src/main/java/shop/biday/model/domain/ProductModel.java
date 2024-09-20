@@ -25,7 +25,7 @@ public class ProductModel {
     private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-//    private List<ImageEntity> images;
+    private ImageModel image;
     @Setter
     private List<AuctionDto> auctions;
 }

@@ -1,4 +1,17 @@
 package shop.biday.service;
 
+import org.springframework.web.multipart.MultipartFile;
+import shop.biday.model.document.ImageDocument;
+import shop.biday.model.domain.ImageModel;
+
+import java.util.List;
+
 public interface ImageService {
+    String save(MultipartFile[] files, String type, Long referencedId);
+    String update(MultipartFile file, String id);
+    String deleteById(String id);
+    ImageModel findByType(String type);
+    ImageModel findByNameAndType(String name, String type);
+    List<ImageModel> findAllByNameAndType(List<String> names, String type);
+    List<ImageModel> findByTypeAndReferencedId(String type, Long referencedId);
 }

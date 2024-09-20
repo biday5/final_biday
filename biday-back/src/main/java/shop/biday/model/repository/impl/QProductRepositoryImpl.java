@@ -1,6 +1,7 @@
 package shop.biday.model.repository.impl;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -10,15 +11,19 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.stereotype.Repository;
 import shop.biday.model.domain.AuctionModel;
+import shop.biday.model.domain.ImageModel;
 import shop.biday.model.domain.ProductModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.ProductDto;
 import shop.biday.model.entity.*;
+import shop.biday.model.repository.ImageRepository;
 import shop.biday.model.repository.QProductRepository;
 import shop.biday.service.impl.CategoryServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -32,9 +37,10 @@ public class QProductRepositoryImpl implements QProductRepository {
     private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
     private final ProductModel productModel;
     private final CategoryServiceImpl categoryServiceImpl;
+    private final ImageRepository imageRepository;
 
     private JPQLQuery<ProductDto> createBaseQuery(JPAQueryFactory queryFactory, Pageable pageable, Long categoryId, Long brandId, String keyword,
-                                                    String color, String order, Long lastItemId) {
+                                                  String color, String order, Long lastItemId) {
         JPQLQuery<ProductDto> query = queryFactory
                 .select(Projections.constructor(ProductDto.class,
                         qProduct.id,
@@ -44,7 +50,16 @@ public class QProductRepositoryImpl implements QProductRepository {
                         qProduct.subName,
                         qProduct.productCode,
                         qProduct.price,
-                        qProduct.color
+                        qProduct.color,
+                        Projections.constructor(ImageModel.class,
+                                Expressions.constant("defaultImageId"),        // id
+                                Expressions.constant("defaultImageName"),      // name
+                                Expressions.constant("defaultImageExt"),       // ext
+                                Expressions.constant("defaultImageUrl"),       // url
+                                Expressions.constant("defaultImageType"),      // type
+                                Expressions.constant(0L),  // referenceId
+                                Expressions.constant(LocalDateTime.now())      // createdAt
+                        )
                 ))
                 .from(qProduct)
                 .leftJoin(qProduct.category, qCategory)
@@ -58,7 +73,7 @@ public class QProductRepositoryImpl implements QProductRepository {
             query.where(qProduct.brand.id.eq(brandId));
         }
 
-        if (keyword != null && !keyword.isEmpty()) {
+        if (!keyword.isEmpty()) {
             query.where(
                     qProduct.name.containsIgnoreCase(keyword)
                             .or(qProduct.subName.containsIgnoreCase(keyword))
@@ -69,34 +84,52 @@ public class QProductRepositoryImpl implements QProductRepository {
             );
         }
 
-        if (color != null && !color.isEmpty()) {
+        if (!color.isEmpty()) {
             query.where(qProduct.color.containsIgnoreCase(color));
         }
 
-        // 람다로 변경
+        // 입찰 수, 위시, endedAt
         switch (order) {
             case "가격 낮은 순":
-                query.orderBy(qProduct.price.asc());
                 if (lastItemId != null) {
                     query.where(qProduct.price.gt(fetchPriceById(lastItemId)));
+                } else {
+                    query.orderBy(qProduct.price.asc());
                 }
                 break;
             case "가격 높은 순":
-                query.orderBy(qProduct.price.desc());
                 if (lastItemId != null) {
                     query.where(qProduct.price.lt(fetchPriceById(lastItemId)));
+                } else {
+                    query.orderBy(qProduct.price.desc());
                 }
                 break;
             case "오래된 순":
-                query.orderBy(qProduct.createdAt.asc());
                 if (lastItemId != null) {
                     query.where(qProduct.createdAt.gt(fetchCreatedAtById(lastItemId)));
+                } else {
+                    query.orderBy(qProduct.createdAt.asc());
                 }
                 break;
             case "최신순":
-                query.orderBy(qProduct.createdAt.desc());
                 if (lastItemId != null) {
                     query.where(qProduct.createdAt.lt(fetchCreatedAtById(lastItemId)));
+                } else {
+                    query.orderBy(qProduct.createdAt.desc());
+                }
+                break;
+            case "경매 적은 순":
+                if (lastItemId != null) {
+                    query.where(qProduct.auctions.any().count().gt(fetchAuctionById(lastItemId)));
+                } else {
+                    query.orderBy(qProduct.auctions.any().count().asc());
+                }
+                break;
+            case "경매 많은 순":
+                if (lastItemId != null) {
+                    query.where(qProduct.auctions.any().count().lt(fetchAuctionById(lastItemId)));
+                } else {
+                    query.orderBy(qProduct.auctions.any().count().desc());
                 }
                 break;
 //            case "위시 많은 순":
@@ -106,9 +139,10 @@ public class QProductRepositoryImpl implements QProductRepository {
 //                }
 //                break;
             default:
-                query.orderBy(qProduct.id.asc());
                 if (lastItemId != null) {
                     query.where(qProduct.id.gt(lastItemId));
+                } else {
+                    query.orderBy(qProduct.id.asc());
                 }
                 break;
         }
@@ -132,15 +166,33 @@ public class QProductRepositoryImpl implements QProductRepository {
                 .fetchOne();
     }
 
+    private Long fetchAuctionById(Long id) {
+        return queryFactory
+                .select(qProduct.auctions.any().count())
+                .from(qProduct)
+                .where(qProduct.id.eq(id))
+                .fetchOne();
+    }
+
     @Override
     public Slice<ProductDto> findByFilter(Pageable pageable, Long categoryId, Long brandId, String keyword, String color, String order, Long lastItemValue) {
-        System.out.println("Pageable: " + pageable + "categoryId: " + categoryId + " brandId: " + brandId + " keyword: " + keyword + " color: " + color + " order: " + order + " lastItemValue: " + lastItemValue);
+        System.out.println("Pageable: " + pageable + " categoryId: " + categoryId + " brandId: " + brandId + " keyword: " + keyword + " color: " + color + " order: " + order + " lastItemValue: " + lastItemValue);
+
         List<ProductDto> list = createBaseQuery(queryFactory, pageable, categoryId, brandId, keyword, color, order, lastItemValue)
                 .fetch();
 
         boolean hasNext = list.size() > pageable.getPageSize(); // 페이지 사이즈보다 많으면 다음 페이지가 있음
         if (hasNext) {
             list = list.subList(0, pageable.getPageSize()); // 페이지 사이즈까지만 유지
+        }
+
+        if (!list.isEmpty()) {
+            for(ProductDto productDto: list) {
+                ImageModel imageModel = imageRepository.findByNameAndType(productDto.getProductCode(), "상품");
+                if (imageModel != null) {
+                    productDto.setImage(imageModel);
+                }
+            }
         }
 
         return new SliceImpl<>(list, pageable, hasNext);
@@ -182,20 +234,25 @@ public class QProductRepositoryImpl implements QProductRepository {
                         qProduct.description,
                         qProduct.createdAt,
                         qProduct.updatedAt,
-                        // 경매 리스트를 직접 전달합니다.
-                        Projections.list(
-                                Projections.constructor(AuctionDto.class,
-                                        qAuction.id,
-                                        qAuction.userId,
-                                        qProduct.name.as("product"),
-                                        qAuction.startingBid,
-                                        qAuction.startedAt,
-                                        qAuction.endedAt,
-                                        qAuction.status,
-                                        qAuction.createdAt,
-                                        qAuction.updatedAt
-                                )
-                        )
+                        Projections.constructor(ImageModel.class,
+                                Expressions.constant("defaultImageId"),        // id
+                                Expressions.constant("defaultImageName"),      // name
+                                Expressions.constant("defaultImageExt"),       // ext
+                                Expressions.constant("defaultImageUrl"),       // url
+                                Expressions.constant("defaultImageType"),      // type
+                                Expressions.constant(0L),  // referenceId
+                                Expressions.constant(LocalDateTime.now())      // createdAt
+                        ),
+                        Projections.list(Projections.constructor(AuctionDto.class,
+                                qAuction.id,
+                                qAuction.userId,
+                                qProduct.name.as("product"),
+                                qAuction.startingBid,
+                                qAuction.startedAt,
+                                qAuction.endedAt,
+                                qAuction.status,
+                                qAuction.createdAt,
+                                qAuction.updatedAt))
                 ))
                 .from(qProduct)
                 .leftJoin(qProduct.category, qCategory)
@@ -207,6 +264,13 @@ public class QProductRepositoryImpl implements QProductRepository {
         // 필요에 따라 가져온 경매를 productDto에 설정합니다.
         if (product != null) {
             product.setAuctions(auctions); // 경매 리스트를 설정
+
+            ImageModel imageModel = imageRepository.findByNameAndType(product.getProductCode(), "상품");
+            if(imageModel != null) {
+                product.setImage(imageModel);
+            } else {
+                product.setImage(imageRepository.findByType("에러"));
+            }
         }
 
         return product;
