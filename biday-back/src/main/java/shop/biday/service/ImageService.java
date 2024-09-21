@@ -16,6 +16,7 @@ public interface ImageService {
     Optional<ImageDocument> findById(String id);
     ImageModel findByType(String type);
     ImageModel findByNameAndType(String name, String type);
+    ImageModel findByNameAndTypeAndReferencedId(String type, String name, Long referencedId);
     List<ImageModel> findAllByNameAndType(List<String> names, String type);
     List<ImageModel> findByTypeAndReferencedId(String type, Long referencedId);
 }

@@ -12,6 +12,7 @@ public interface ImageRepository extends MongoRepository<ImageDocument, String> 
     ImageDocument save(ImageModel imageModel);
     ImageModel findByType(String type);
     ImageModel findByNameAndType(String name, String type);
+    ImageModel findByNameAndTypeAndReferencedId(String name, String type, Long referencedId);
     List<ImageModel> findAllByNameAndType(List<String> names, String type);
     List<ImageModel> findByTypeAndReferencedId(String type, Long referencedId);
 }

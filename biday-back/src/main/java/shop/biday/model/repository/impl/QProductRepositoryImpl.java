@@ -6,6 +6,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -24,6 +25,7 @@ import shop.biday.service.ImageService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class QProductRepositoryImpl implements QProductRepository {
@@ -33,6 +35,7 @@ public class QProductRepositoryImpl implements QProductRepository {
     private final QBrandEntity qBrand = QBrandEntity.brandEntity;
     private final QCategoryEntity qCategory = QCategoryEntity.categoryEntity;
     private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
+
     private final ImageService imageRepository;
 
     private JPQLQuery<ProductDto> createBaseQuery(JPAQueryFactory queryFactory, Pageable pageable, Long categoryId, Long brandId, String keyword,
@@ -114,20 +117,22 @@ public class QProductRepositoryImpl implements QProductRepository {
                     query.orderBy(qProduct.createdAt.desc());
                 }
                 break;
-            case "경매 적은 순":
-                if (lastItemId != null) {
-                    query.where(qProduct.auctions.any().count().gt(fetchAuctionById(lastItemId)));
-                } else {
-                    query.orderBy(qProduct.auctions.any().count().asc());
-                }
-                break;
-            case "경매 많은 순":
-                if (lastItemId != null) {
-                    query.where(qProduct.auctions.any().count().lt(fetchAuctionById(lastItemId)));
-                } else {
-                    query.orderBy(qProduct.auctions.any().count().desc());
-                }
-                break;
+            // 이거 할라면 ProductDto 사용 x
+//            case "경매 적은 순":
+//                if (lastItemId != null) {
+//                    query.where(qProduct.auctions.any().count().gt(fetchAuctionById(lastItemId)));
+//                } else {
+//                    query.orderBy(qProduct.auctions.any().count().asc());
+//                }
+//                break;
+//            case "경매 많은 순":
+//                if (lastItemId != null) {
+//                    query.where(qProduct.auctions.any().count().lt(fetchAuctionById(lastItemId)));
+//                } else {
+//                    query.orderBy(qProduct.auctions.any().count().desc());
+//                }
+//                break;
+            // wish 조인해야함
 //            case "위시 많은 순":
 //                query.orderBy(qProduct.createdAt.desc());
 //                if (lastItemId != null) {
@@ -162,16 +167,16 @@ public class QProductRepositoryImpl implements QProductRepository {
                 .fetchOne();
     }
 
-    private Long fetchAuctionById(Long id) {
-        return queryFactory
-                .select(qProduct.auctions.any().count())
-                .from(qProduct)
-                .where(qProduct.id.eq(id))
-                .fetchOne();
-    }
+//    private Long fetchAuctionById(Long id) {
+//        return queryFactory
+//                .select(qProduct.auctions.any().count())
+//                .from(qProduct)
+//                .where(qProduct.id.eq(id))
+//                .fetchOne();
+//    }
 
     @Override
-    public Slice<ProductDto> findByFilter(Pageable pageable, Long categoryId, Long brandId, String keyword, String color, String order, Long lastItemValue) {
+    public Slice<ProductDto> findProducts(Pageable pageable, Long categoryId, Long brandId, String keyword, String color, String order, Long lastItemValue) {
         List<ProductDto> list = createBaseQuery(queryFactory, pageable, categoryId, brandId, keyword, color, order, lastItemValue)
                 .fetch();
 
@@ -181,10 +186,14 @@ public class QProductRepositoryImpl implements QProductRepository {
         }
 
         if (!list.isEmpty()) {
-            for(ProductDto productDto: list) {
-                ImageModel imageModel = imageRepository.findByNameAndType(productDto.getProductCode(), "상품");
+            for (ProductDto productDto : list) {
+                ImageModel imageModel = imageRepository.findByNameAndTypeAndReferencedId(productDto.getProductCode(), "상품", productDto.getId());
                 if (imageModel != null) {
                     productDto.setImage(imageModel);
+                    log.debug("Product Image Found : {}", imageModel.getName());
+                } else {
+                    productDto.setImage(imageRepository.findByType("에러"));
+                    log.debug("Product Image Not Found : {}", imageRepository.findByType("에러").getName());
                 }
             }
         }
@@ -209,6 +218,7 @@ public class QProductRepositoryImpl implements QProductRepository {
                         qAuction.updatedAt
                 ))
                 .from(qAuction)
+//                .leftJoin(qProduct.auctions, qAuction)
                 .leftJoin(qAuction.product, qProduct)
                 .where(qAuction.product.id.eq(id))
                 .fetch();
@@ -251,7 +261,8 @@ public class QProductRepositoryImpl implements QProductRepository {
                 .from(qProduct)
                 .leftJoin(qProduct.category, qCategory)
                 .leftJoin(qProduct.brand, qBrand)
-                .leftJoin(qAuction.product, qProduct)
+                .leftJoin(qProduct.auctions, qAuction)
+//                .leftJoin(qAuction.product, qProduct)
                 .where(qProduct.id.eq(id))
                 .fetchFirst();
 
@@ -260,10 +271,12 @@ public class QProductRepositoryImpl implements QProductRepository {
             product.setAuctions(auctions); // 경매 리스트를 설정
 
             ImageModel imageModel = imageRepository.findByNameAndType(product.getProductCode(), "상품");
-            if(imageModel != null) {
+            if (imageModel != null) {
                 product.setImage(imageModel);
+                log.debug("Product Image Found : {}", imageModel.getName());
             } else {
                 product.setImage(imageRepository.findByType("에러"));
+                log.debug("Product Image Not Found : {}", imageRepository.findByType("에러").getName());
             }
         }
 

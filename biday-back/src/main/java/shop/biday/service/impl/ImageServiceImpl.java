@@ -155,6 +155,12 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
+    public ImageModel findByNameAndTypeAndReferencedId(String name, String type, Long referencedId) {
+        log.info("Find Image by Name: {} Type: {} ReferencedId: {}", name, type, referencedId);
+        return imageRepository.findByNameAndTypeAndReferencedId(name, type, referencedId);
+    }
+
+    @Override
     public List<ImageModel> findAllByNameAndType(List<String> names, String type) {
         log.info("Find Image List by Name: {}, Type: {}", names, type);
         return imageRepository.findAllByNameAndType(names, type);

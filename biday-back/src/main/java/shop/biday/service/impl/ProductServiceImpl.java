@@ -81,8 +81,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Slice<ProductDto> findByFilter(Pageable pageable, Long categoryId, Long brandId, String keyword, String color, String order, Long lastItemId) {
         log.info("Find Product by Filter started");
-        log.info("Pageable: {} categoryId: {} brandId: {} keyword: {} color: {} order: {] lastItemId: {}", pageable, categoryId, brandId, keyword, color, order, lastItemId);
-        return repository.findByFilter(pageable, categoryId, brandId, keyword, color, order, lastItemId);
+        log.info("Pageable: {} categoryId: {} brandId: {} keyword: {} color: {} order: {} lastItemId: {}", pageable, categoryId, brandId, keyword, color, order, lastItemId);
+        return repository.findProducts(pageable, categoryId, brandId, keyword, color, order, lastItemId);
     }
 
     private Optional<String> validateUser(String token) {

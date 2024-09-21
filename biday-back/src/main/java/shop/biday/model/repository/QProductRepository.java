@@ -7,5 +7,5 @@ import shop.biday.model.dto.ProductDto;
 
 public interface QProductRepository {
     ProductModel findByProductId(Long id);
-    Slice<ProductDto> findByFilter(Pageable pageable, Long categoryId, Long brandId, String keyword, String color, String order, Long lastItemId);
+    Slice<ProductDto> findProducts(Pageable pageable, Long categoryId, Long brandId, String keyword, String color, String order, Long lastItemId);
 }
