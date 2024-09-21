@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
     List<CategoryEntity> findAll();
     Optional<CategoryEntity> findById(Long id);
+    boolean existsById(Long id);
     CategoryEntity save(CategoryModel category);
     void deleteById(Long id);
 }

@@ -8,7 +8,7 @@ import shop.biday.model.domain.ProductModel;
 import shop.biday.model.entity.ProductEntity;
 
 @Repository
-public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
+public interface ProductRepository extends JpaRepository<ProductEntity, Long>, QProductRepository {
     boolean existsById(Long id);
     ProductEntity save(ProductModel product);
     void deleteById(Long id);

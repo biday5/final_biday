@@ -54,8 +54,8 @@ public class BrandController {
     @Parameters({
             @Parameter(name = "name", description = "브랜드 이름", example = "나이키(Nike)")
     })
-    public ResponseEntity<BrandEntity> create(@RequestBody BrandModel brand) {
-        return ResponseEntity.ok(brandService.save(brand));
+    public ResponseEntity<BrandEntity> create(@RequestHeader("access") String token, @RequestBody BrandModel brand) {
+        return ResponseEntity.ok(brandService.save(token, brand));
     }
 
     @PatchMapping
@@ -69,8 +69,8 @@ public class BrandController {
             @Parameter(name = "createdAt", description = "등록 시간", example = "localDateTime 값"),
             @Parameter(name = "updatedAt", description = "수정 시간", example = "localDateTime 값")
     })
-    public ResponseEntity<BrandEntity> update(@RequestBody BrandModel brand) {
-        return ResponseEntity.ok(brandService.update(brand));
+    public ResponseEntity<BrandEntity> update(@RequestHeader("access") String token, @RequestBody BrandModel brand) {
+        return ResponseEntity.ok(brandService.update(token, brand));
     }
 
     @DeleteMapping
@@ -82,7 +82,7 @@ public class BrandController {
     @Parameters({
             @Parameter(name = "id", description = "브랜드 id", example = "1L")
     })
-    public void delete(@RequestParam Long id) {
-        brandService.deleteById(id);
+    public void delete(@RequestHeader("access") String token, @RequestParam Long id) {
+        brandService.deleteById(token, id);
     }
 }

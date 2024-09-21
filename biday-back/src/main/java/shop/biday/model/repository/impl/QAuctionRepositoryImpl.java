@@ -17,6 +17,7 @@ import shop.biday.model.dto.ProductDto;
 import shop.biday.model.entity.*;
 import shop.biday.model.repository.ImageRepository;
 import shop.biday.model.repository.QAuctionRepository;
+import shop.biday.service.ImageService;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -33,24 +34,10 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
     private final QCategoryEntity qCategory = QCategoryEntity.categoryEntity;
     private final QAwardEntity qAward = QAwardEntity.awardEntity;
     private final QUserEntity qUser = QUserEntity.userEntity;
-    private final ImageRepository imageRepository;
+    private final ImageService imageRepository;
 
     @Override
     public AuctionModel findByAuctionId(Long id) {
-//        AwardDto award = queryFactory
-//                .select(Projections.constructor(AwardDto.class,
-//                        qAward.id,
-//                        qAward.auction.id.as("auction"),
-//                        qAward.userId,
-//                        qAward.bidedAt,
-//                        qAward.currentBid,
-//                        qAward.award))
-//                .from(qAward)
-//                .leftJoin(qAward.auction, qAuction)
-//                .where(qAward.auction.id.eq(id))
-//                .orderBy(qAward.award.desc())
-//                .fetchFirst();
-
         AuctionModel auction = queryFactory
                 .select(Projections.constructor(AuctionModel.class,
                         qAuction.id,
@@ -93,8 +80,8 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                         )),
                         Projections.constructor(AwardDto.class,
                                 qAward.id,
-                                qAward.auction.id.as("auction"), //auction model로 변경 예정
-                                qUser,
+                                qAward.auction.id.as("auction"),
+                                qAward.user.email.as("user"),
                                 qAward.bidedAt,
                                 qAward.currentBid,
                                 qAward.count)))
@@ -103,6 +90,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                 .leftJoin(qProduct.brand, qBrand)
                 .leftJoin(qProduct.category, qCategory)
                 .leftJoin(qAuction.award, qAward)
+                .leftJoin(qAward.user, qUser)
                 .where(qAuction.id.eq(id),
                         qAward.auction.id.eq(id))
                 .fetchFirst();

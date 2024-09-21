@@ -6,21 +6,17 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.ProductModel;
 import shop.biday.model.dto.ProductDto;
 import shop.biday.model.entity.ProductEntity;
 import shop.biday.service.ProductService;
 
-import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -83,8 +79,8 @@ public class ProductController {
             @Parameter(name = "color", description = "색깔", example = "black"),
             @Parameter(name = "description", description = "상품 설명", example = "대비되는 컬러로 포인트를 줌과 동시에 나염+자수 기법 혼합하여 디자인하였습니다. 원단 및 시보리의 각 색상에 따라 염색 과정이 상이하여 색상 별로 중량, 텐션에 차이가 있을 수 있습니다.")
     })
-    public ResponseEntity<ProductEntity> saveProduct(@RequestBody ProductModel product) {
-        return ResponseEntity.ok(productService.save(product));
+    public ResponseEntity<ProductEntity> saveProduct(@RequestHeader("access") String token, @RequestBody ProductModel product) {
+        return ResponseEntity.ok(productService.save(token, product));
     }
 
     @PatchMapping
@@ -103,8 +99,8 @@ public class ProductController {
             @Parameter(name = "color", description = "색깔", example = "black"),
             @Parameter(name = "description", description = "상품 설명", example = "대비되는 컬러로 포인트를 줌과 동시에 나염+자수 기법 혼합하여 디자인하였습니다. 원단 및 시보리의 각 색상에 따라 염색 과정이 상이하여 색상 별로 중량, 텐션에 차이가 있을 수 있습니다.")
     })
-    public ResponseEntity<ProductEntity> updateProduct(@RequestBody ProductModel product) {
-        return ResponseEntity.ok(productService.update(product));
+    public ResponseEntity<ProductEntity> updateProduct(@RequestHeader("access") String token, @RequestBody ProductModel product) {
+        return ResponseEntity.ok(productService.update(token, product));
     }
 
     @DeleteMapping
@@ -114,7 +110,7 @@ public class ProductController {
             @ApiResponse( responseCode = "404", description = "상품 찾을 수 없음")
     })
     @Parameter(name = "id", description = "삭제할 상품의 id", example = "1L")
-    public void deleteProduct(@RequestParam(value = "id", required = true) Long id) {
-        productService.deleteById(id);
+    public void deleteProduct(@RequestHeader("access") String token, @RequestParam(value = "id", required = true) Long id) {
+        productService.deleteById(token, id);
     }
 }

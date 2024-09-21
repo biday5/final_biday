@@ -1,5 +1,6 @@
 package shop.biday.model.repository.impl;
 
+
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -8,22 +9,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.stereotype.Repository;
-import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.domain.ImageModel;
 import shop.biday.model.domain.ProductModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.ProductDto;
-import shop.biday.model.entity.*;
-import shop.biday.model.repository.ImageRepository;
+import shop.biday.model.entity.QAuctionEntity;
+import shop.biday.model.entity.QBrandEntity;
+import shop.biday.model.entity.QCategoryEntity;
+import shop.biday.model.entity.QProductEntity;
 import shop.biday.model.repository.QProductRepository;
-import shop.biday.service.impl.CategoryServiceImpl;
+import shop.biday.service.ImageService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -33,11 +32,8 @@ public class QProductRepositoryImpl implements QProductRepository {
     private final QProductEntity qProduct = QProductEntity.productEntity;
     private final QBrandEntity qBrand = QBrandEntity.brandEntity;
     private final QCategoryEntity qCategory = QCategoryEntity.categoryEntity;
-    private final QImageEntity qImage = QImageEntity.imageEntity;
     private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
-    private final ProductModel productModel;
-    private final CategoryServiceImpl categoryServiceImpl;
-    private final ImageRepository imageRepository;
+    private final ImageService imageRepository;
 
     private JPQLQuery<ProductDto> createBaseQuery(JPAQueryFactory queryFactory, Pageable pageable, Long categoryId, Long brandId, String keyword,
                                                   String color, String order, Long lastItemId) {
@@ -176,8 +172,6 @@ public class QProductRepositoryImpl implements QProductRepository {
 
     @Override
     public Slice<ProductDto> findByFilter(Pageable pageable, Long categoryId, Long brandId, String keyword, String color, String order, Long lastItemValue) {
-        System.out.println("Pageable: " + pageable + " categoryId: " + categoryId + " brandId: " + brandId + " keyword: " + keyword + " color: " + color + " order: " + order + " lastItemValue: " + lastItemValue);
-
         List<ProductDto> list = createBaseQuery(queryFactory, pageable, categoryId, brandId, keyword, color, order, lastItemValue)
                 .fetch();
 
@@ -200,14 +194,14 @@ public class QProductRepositoryImpl implements QProductRepository {
 
     // 하기!!!
     @Override
-    public ProductModel findById(Long id) {
-        // 주어진 제품 ID에 대한 경매 목록을 먼저 가져옵니다.
+    public ProductModel findByProductId(Long id) {
         List<AuctionDto> auctions = queryFactory
                 .select(Projections.constructor(AuctionDto.class,
                         qAuction.id,
                         qAuction.userId,
                         qProduct.name.as("product"),
                         qAuction.startingBid,
+                        qAuction.currentBid,
                         qAuction.startedAt,
                         qAuction.endedAt,
                         qAuction.status,
@@ -217,10 +211,8 @@ public class QProductRepositoryImpl implements QProductRepository {
                 .from(qAuction)
                 .leftJoin(qAuction.product, qProduct)
                 .where(qAuction.product.id.eq(id))
-                .orderBy(qAuction.endedAt.asc())
                 .fetch();
 
-        // 제품 세부 사항과 해당 제품의 경매 목록을 가져옵니다.
         ProductModel product = queryFactory
                 .select(Projections.constructor(ProductModel.class,
                         qProduct.id,
@@ -248,16 +240,18 @@ public class QProductRepositoryImpl implements QProductRepository {
                                 qAuction.userId,
                                 qProduct.name.as("product"),
                                 qAuction.startingBid,
+                                qAuction.currentBid,
                                 qAuction.startedAt,
                                 qAuction.endedAt,
                                 qAuction.status,
                                 qAuction.createdAt,
-                                qAuction.updatedAt))
+                                qAuction.updatedAt
+                        ))
                 ))
                 .from(qProduct)
                 .leftJoin(qProduct.category, qCategory)
                 .leftJoin(qProduct.brand, qBrand)
-                .leftJoin(qProduct.auctions, qAuction)
+                .leftJoin(qAuction.product, qProduct)
                 .where(qProduct.id.eq(id))
                 .fetchFirst();
 

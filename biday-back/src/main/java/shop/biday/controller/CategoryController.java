@@ -54,8 +54,8 @@ public class CategoryController {
     @Parameters({
             @Parameter(name = "name", description = "카테고리 이름", example = "나이키(Nike)")
     })
-    public ResponseEntity<CategoryEntity> create(@RequestBody CategoryModel category) {
-        return ResponseEntity.ok(categoryService.save(category));
+    public ResponseEntity<CategoryEntity> create(@RequestHeader("access") String token, @RequestBody CategoryModel category) {
+        return ResponseEntity.ok(categoryService.save(token, category));
     }
 
     @PatchMapping
@@ -69,8 +69,8 @@ public class CategoryController {
             @Parameter(name = "createdAt", description = "등록 시간", example = "localDateTime 값"),
             @Parameter(name = "updatedAt", description = "수정 시간", example = "localDateTime 값")
     })
-    public ResponseEntity<CategoryEntity> update(@RequestBody CategoryModel category) {
-        return ResponseEntity.ok(categoryService.update(category));
+    public ResponseEntity<CategoryEntity> update(@RequestHeader("access") String token, @RequestBody CategoryModel category) {
+        return ResponseEntity.ok(categoryService.update(token, category));
     }
 
     @DeleteMapping
@@ -82,7 +82,7 @@ public class CategoryController {
     @Parameters({
             @Parameter(name = "id", description = "카테고리 id", example = "1L")
     })
-    public void delete(@RequestParam Long id) {
-        categoryService.deleteById(id);
+    public void delete(@RequestHeader("access") String token, @RequestParam Long id) {
+        categoryService.deleteById(token, id);
     }
 }

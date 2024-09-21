@@ -31,7 +31,7 @@ public class QAwardRepositoryImpl implements QAwardRepository {
     private final QUserEntity qUser = QUserEntity.userEntity;
 
     @Override
-    public AwardModel findByUserId(Long id) {
+    public AwardModel findByAwardId(Long id) {
         return queryFactory
                 .select(Projections.constructor(AwardModel.class,
                         qAward.id,

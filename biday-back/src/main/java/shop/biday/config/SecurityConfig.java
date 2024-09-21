@@ -91,8 +91,9 @@ public class SecurityConfig {
                 );
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/","/api/addresses/**","/api/users/**", "/reissue","/logout").permitAll()
-                        .requestMatchers("/api/addresses/**").hasRole("USER")
+                        .requestMatchers("/**").permitAll()
+//                        .requestMatchers("/","/api/addresses/**","/api/users/**", "/reissue","/logout").permitAll()
+//                        .requestMatchers("/api/addresses/**").hasRole("USER")
                         .anyRequest().authenticated());
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)

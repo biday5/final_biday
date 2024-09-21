@@ -17,7 +17,7 @@ import shop.biday.model.entity.AuctionEntity;
 import shop.biday.service.AuctionService;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -34,7 +34,7 @@ public class AuctionController {
             @ApiResponse( responseCode = "404", description = "상품 찾을 수 없음")
     })
     @Parameter(name = "id", description = "상세보기할 경매의 id", example = "1L")
-    public ResponseEntity<AuctionModel> findById(@RequestParam(value = "id", required = true) Long id) {
+    public ResponseEntity<Optional<AuctionEntity>> findById(@RequestParam(value = "id", required = true) Long id) {
         return ResponseEntity.ok(auctionService.findById(id));
     }
 
@@ -49,11 +49,11 @@ public class AuctionController {
             @Parameter(name = "period", description = "기간별 정렬", example = "3개월"),
             @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1L"),
     })
-    public ResponseEntity<Slice<AuctionDto>> findByUser(@RequestParam(value = "userId", required = true) Long userId,
+    public ResponseEntity<Slice<AuctionDto>> findByUser(@RequestHeader("access") String token, @RequestParam(value = "userId", required = true) Long userId,
                                         @RequestParam(value = "period", required = false, defaultValue = "3개월") String period,
                                         @RequestParam(value = "cursor", required = false) LocalDateTime cursor,
                                         Pageable pageable) {
-        return ResponseEntity.ok(auctionService.findByUser(userId, period, cursor, pageable));
+        return ResponseEntity.ok(auctionService.findByUser(token, userId, period, cursor, pageable));
     }
 
     @PostMapping
@@ -71,8 +71,8 @@ public class AuctionController {
             @Parameter(name = "startedAt", description = "시작 날짜", example = "localDateTime 값"),
             @Parameter(name = "endedAt", description = "종료 날짜", example = "localDateTime 값")
     })
-    public ResponseEntity<AuctionEntity> save(@RequestBody AuctionModel auctionModel) {
-        return ResponseEntity.ok(auctionService.save(auctionModel));
+    public ResponseEntity<AuctionEntity> save(@RequestHeader("access") String token, @RequestBody AuctionModel auctionModel) {
+        return ResponseEntity.ok(auctionService.save(token, auctionModel));
     }
 
     @PatchMapping
@@ -90,8 +90,8 @@ public class AuctionController {
             @Parameter(name = "startedAt", description = "만약 이미 시작되었다면 변경 불가, 시작 날짜", example = "localdatetime 값"),
             @Parameter(name = "endedAt", description = "만약 이미 시작되었다면 변경 불가, 종료 날짜", example = "localdatetime 값")
     })
-    public ResponseEntity<AuctionEntity> update(@RequestBody AuctionModel auctionModel) {
-        return ResponseEntity.ok(auctionService.update(auctionModel));
+    public ResponseEntity<AuctionEntity> update(@RequestHeader("access") String token, @RequestBody AuctionModel auctionModel) {
+        return ResponseEntity.ok(auctionService.update(token, auctionModel));
     }
 
     @DeleteMapping
@@ -101,7 +101,7 @@ public class AuctionController {
             @ApiResponse( responseCode = "404", description = "상품 찾을 수 없음")
     })
     @Parameter(name = "id", description = "삭제할 상품의 id", example = "1L")
-    public void delete(@RequestParam Long id) {
-        auctionService.deleteById(id);
+    public void delete(@RequestHeader("access") String token, @RequestParam Long id) {
+        auctionService.deleteById(token, id);
     }
 }

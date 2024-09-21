@@ -8,6 +8,6 @@ import shop.biday.model.dto.AwardDto;
 import java.time.LocalDateTime;
 
 public interface QAwardRepository {
-    AwardModel findByUserId(Long id);
+    AwardModel findByAwardId(Long id);
     Slice<AwardDto> findByUserId(Long userId, String period, LocalDateTime cursor, Pageable pageable);
 }

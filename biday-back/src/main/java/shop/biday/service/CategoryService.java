@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface CategoryService {
     List<CategoryEntity> findAll();
     Optional<CategoryEntity> findById(Long id);
-    CategoryEntity save(CategoryModel category);
-    CategoryEntity update(CategoryModel category);
-    void deleteById(Long id);
+    CategoryEntity save(String token, CategoryModel category);
+    CategoryEntity update(String token, CategoryModel category);
+    void deleteById(String token, Long id);
 }
