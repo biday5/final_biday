@@ -10,6 +10,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import shop.biday.model.domain.AwardModel;
 import shop.biday.model.domain.PaymentTempModel;
+import shop.biday.model.domain.UserModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.AwardDto;
 import shop.biday.model.entity.*;
@@ -40,13 +41,14 @@ public class QAwardRepositoryImpl implements QAwardRepository {
                                 qAuction.userId,
                                 qProduct.name.as("product"),
                                 qAuction.startingBid,
+                                qAuction.currentBid,
                                 qAuction.startedAt,
                                 qAuction.endedAt,
                                 qAuction.status,
                                 qAuction.createdAt,
                                 qAuction.updatedAt
                         ),
-                        qUser,
+                        qUser.name.as("user"),
                         qAward.bidedAt,
                         qAward.currentBid,
                         qAward.count
@@ -60,6 +62,7 @@ public class QAwardRepositoryImpl implements QAwardRepository {
                 .from(qAward)
                 .leftJoin(qAward.auction, qAuction)
                 .leftJoin(qAuction.product, qProduct)
+                .leftJoin(qAward.user, qUser)
                 .where(qAward.id.eq(id)
 //                        ,
 //                        qPayment.bidId.eq(id)
@@ -102,13 +105,14 @@ public class QAwardRepositoryImpl implements QAwardRepository {
                 .select(Projections.constructor(AwardDto.class,
                         qAward.id,
                         qAuction.id.as("auction"),
-                        qUser,
+                        qUser.name.as("user"),
                         qAward.bidedAt,
                         qAward.currentBid,
                         qAward.count))
                 .from(qAward)
                 .leftJoin(qAward.auction, qAuction)
                 .leftJoin(qAuction.product, qProduct)
+                .leftJoin(qAward.user, qUser)
                 .where(qAward.user.id.eq(userId)
                         .and(datePredicate)
                         .and(cursorPredicate))

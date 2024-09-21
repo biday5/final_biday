@@ -31,7 +31,7 @@ public class AuctionController {
     @Operation(summary = "경매 상세보기", description = "경매 상세보기, 여기서는 경매와 해당 상품에 관한 정보만 가져옴")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "상품 불러오기 성공"),
-            @ApiResponse( responseCode = "404", description = "상품 찾을 수 없음")
+            @ApiResponse(responseCode = "404", description = "상품 찾을 수 없음")
     })
     @Parameter(name = "id", description = "상세보기할 경매의 id", example = "1L")
     public ResponseEntity<Optional<AuctionEntity>> findById(@RequestParam(value = "id", required = true) Long id) {
@@ -42,17 +42,19 @@ public class AuctionController {
     @Operation(summary = "경매 목록", description = "마이 페이지에서 불러올 수 있는 상품 목록")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "경매 목록 가져오기 성공"),
-            @ApiResponse( responseCode = "404", description = "경매 목록 찾을 수 없음")
+            @ApiResponse(responseCode = "404", description = "경매 목록 찾을 수 없음")
     })
     @Parameters({
             @Parameter(name = "userId", description = "판매자 id", example = "1L"),
             @Parameter(name = "period", description = "기간별 정렬", example = "3개월"),
             @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1L"),
     })
-    public ResponseEntity<Slice<AuctionDto>> findByUser(@RequestHeader("access") String token, @RequestParam(value = "userId", required = true) Long userId,
-                                        @RequestParam(value = "period", required = false, defaultValue = "3개월") String period,
-                                        @RequestParam(value = "cursor", required = false) LocalDateTime cursor,
-                                        Pageable pageable) {
+    public ResponseEntity<Slice<AuctionDto>> findByUser(
+            @RequestHeader("access") String token,
+            @RequestParam(value = "userId", required = true) Long userId,
+            @RequestParam(value = "period", required = false, defaultValue = "3개월") String period,
+            @RequestParam(value = "cursor", required = false) LocalDateTime cursor,
+            Pageable pageable) {
         return ResponseEntity.ok(auctionService.findByUser(token, userId, period, cursor, pageable));
     }
 
@@ -60,7 +62,7 @@ public class AuctionController {
     @Operation(summary = "경매 등록", description = "새로운 경매 등록")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "경매 등록 성공"),
-            @ApiResponse( responseCode = "404", description = "경매 등록 할 수 없음")
+            @ApiResponse(responseCode = "404", description = "경매 등록 할 수 없음")
     })
     @Parameters({
             @Parameter(name = "userId", description = "판매자 id", example = "1L"),
@@ -79,7 +81,7 @@ public class AuctionController {
     @Operation(summary = "경매 수정", description = "진행 예정 경매 수정, 기존 시작 날짜 전에만 시작 날짜+끝나는 날짜만 변경 가능")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "경매 수정 성공"),
-            @ApiResponse( responseCode = "404", description = "경매 수정 할 수 없음")
+            @ApiResponse(responseCode = "404", description = "경매 수정 할 수 없음")
     })
     @Parameters({
             @Parameter(name = "userId", description = "변경 불가, 판매자 id", example = "1L"),
@@ -98,7 +100,7 @@ public class AuctionController {
     @Operation(summary = "상품 삭제", description = "상품 삭제")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "상품 삭제 성공"),
-            @ApiResponse( responseCode = "404", description = "상품 찾을 수 없음")
+            @ApiResponse(responseCode = "404", description = "상품 찾을 수 없음")
     })
     @Parameter(name = "id", description = "삭제할 상품의 id", example = "1L")
     public void delete(@RequestHeader("access") String token, @RequestParam Long id) {

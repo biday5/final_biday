@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class AwardModel {
     private Long id;
     private AuctionDto auction;
-    private UserModel user;
+    private String user;
     private LocalDateTime bidedAt;
     private Long currentBid;
     private int count;
