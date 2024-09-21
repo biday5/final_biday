@@ -33,7 +33,7 @@ public class AuctionController {
             @ApiResponse(responseCode = "200", description = "상품 불러오기 성공"),
             @ApiResponse(responseCode = "404", description = "상품 찾을 수 없음")
     })
-    @Parameter(name = "id", description = "상세보기할 경매의 id", example = "1L")
+    @Parameter(name = "id", description = "상세보기할 경매의 id", example = "1")
     public ResponseEntity<Optional<AuctionEntity>> findById(@RequestParam(value = "id", required = true) Long id) {
         return ResponseEntity.ok(auctionService.findById(id));
     }
@@ -45,7 +45,6 @@ public class AuctionController {
             @ApiResponse(responseCode = "404", description = "경매 목록 찾을 수 없음")
     })
     @Parameters({
-            @Parameter(name = "userId", description = "판매자 id", example = "1L"),
             @Parameter(name = "period", description = "기간별 정렬", example = "3개월"),
             @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1L"),
     })

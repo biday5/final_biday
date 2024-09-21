@@ -53,14 +53,13 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                                 qProduct.productCode,
                                 qProduct.price,
                                 qProduct.color,
-                                // Default Image
                                 Projections.constructor(ImageModel.class,
-                                        Expressions.constant("defaultImageId"),
-                                        Expressions.constant("defaultImageName"),
-                                        Expressions.constant("defaultImageExt"),
-                                        Expressions.constant("defaultImageUrl"),
-                                        Expressions.constant("defaultImageType"),
-                                        Expressions.constant(0L),
+                                        Expressions.constant("defaultImageId"),        // id
+                                        Expressions.constant("defaultImageName"),      // name
+                                        Expressions.constant("defaultImageExt"),       // ext
+                                        Expressions.constant("defaultImageUrl"),       // url
+                                        Expressions.constant("defaultImageType"),      // type
+                                        Expressions.constant(0L),  // referenceId
                                         Expressions.constant(LocalDateTime.now())
                                 )),
                         qAuction.description,
@@ -73,13 +72,13 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                         qAuction.updatedAt,
                         // ImageModel 생성자 호출
                         Projections.list(Projections.constructor(ImageModel.class,
-                                Expressions.constant("defaultImageId"),
-                                Expressions.constant("defaultImageName"),
-                                Expressions.constant("defaultImageExt"),
-                                Expressions.constant("defaultImageUrl"),
-                                Expressions.constant("defaultImageType"),
-                                Expressions.constant(0L),
-                                Expressions.constant(LocalDateTime.now())
+                                Expressions.constant("defaultImageId"),        // id
+                                Expressions.constant("defaultImageName"),      // name
+                                Expressions.constant("defaultImageExt"),       // ext
+                                Expressions.constant("defaultImageUrl"),       // url
+                                Expressions.constant("defaultImageType"),      // type
+                                Expressions.constant(0L),  // referenceId
+                                Expressions.constant(LocalDateTime.now())      // createdAt
                         )),
                         Projections.constructor(AwardDto.class,
                                 qAward.id,
@@ -88,13 +87,14 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                                 qAward.bidedAt,
                                 qAward.currentBid,
                                 qAward.count)))
-                .from(qAuction)
+                .from(qAuction).where(qAuction.id.eq(id),
+                        qAward.auction.id.eq(id))
                 .leftJoin(qAuction.product, qProduct)
                 .leftJoin(qProduct.brand, qBrand)
                 .leftJoin(qProduct.category, qCategory)
                 .leftJoin(qAuction.award, qAward)
                 .leftJoin(qAward.user, qUser)
-                .where(qAuction.id.eq(id))
+
                 .fetchFirst();
 
         if (auction != null) {
@@ -102,7 +102,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
             if (images != null) {
                 auction.setImages(images);
             } else {
-                auction.setImages(new ArrayList<>()); // 기본 값 설정
+                auction.setImages(new ArrayList<>());
             }
 
             ImageModel productImage = imageRepository.findByNameAndType(auction.getProduct().getProductCode(), "상품");
@@ -116,105 +116,15 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
         return auction;
     }
 
-//    public AuctionModel findByAuctionId(Long id) {
-//        AuctionModel auction = queryFactory
-//                .select(Projections.constructor(AuctionModel.class,
-//                        qAuction.id,
-//                        qAuction.userId,
-//                        Projections.constructor(ProductDto.class,
-//                                qProduct.id,
-//                                qBrand.name.as("brand"),
-//                                qCategory.name.as("category"),
-//                                qProduct.name,
-//                                qProduct.subName,
-//                                qProduct.productCode,
-//                                qProduct.price,
-//                                qProduct.color,
-//                                Projections.constructor(ImageModel.class,
-//                                        Expressions.constant("defaultImageId"),        // id
-//                                        Expressions.constant("defaultImageName"),      // name
-//                                        Expressions.constant("defaultImageExt"),       // ext
-//                                        Expressions.constant("defaultImageUrl"),       // url
-//                                        Expressions.constant("defaultImageType"),      // type
-//                                        Expressions.constant(0L),  // referenceId
-//                                        Expressions.constant(LocalDateTime.now())
-//                                )),
-//                        qAuction.description,
-//                        qAuction.startingBid,
-//                        qAuction.currentBid,
-//                        qAuction.startedAt,
-//                        qAuction.endedAt,
-//                        qAuction.status,
-//                        qAuction.createdAt,
-//                        qAuction.updatedAt,
-//                        // ImageModel 생성자 호출
-//                        Projections.list(Projections.constructor(ImageModel.class,
-//                                Expressions.constant("defaultImageId"),        // id
-//                                Expressions.constant("defaultImageName"),      // name
-//                                Expressions.constant("defaultImageExt"),       // ext
-//                                Expressions.constant("defaultImageUrl"),       // url
-//                                Expressions.constant("defaultImageType"),      // type
-//                                Expressions.constant(0L),  // referenceId
-//                                Expressions.constant(LocalDateTime.now())      // createdAt
-//                        )),
-//                        Projections.constructor(AwardDto.class,
-//                                qAward.id,
-//                                qAward.auction.id.as("auction"),
-//                                qAward.user.email.as("user"),
-//                                qAward.bidedAt,
-//                                qAward.currentBid,
-//                                qAward.count)))
-//                .from(qAuction)
-//                .leftJoin(qAuction.product, qProduct)
-//                .leftJoin(qProduct.brand, qBrand)
-//                .leftJoin(qProduct.category, qCategory)
-//                .leftJoin(qAuction.award, qAward)
-//                .leftJoin(qAward.user, qUser)
-//                .where(qAuction.id.eq(id),
-//                        qAward.auction.id.eq(id))
-//                .fetchFirst();
-//
-//        if (auction != null) {
-//            List<ImageModel> images = imageRepository.findByTypeAndReferencedId("경매", auction.getId());
-//            if (images != null) {
-//                auction.setImages(images);
-//            } else {
-//                auction.setImages(new ArrayList<>());
-//            }
-//
-//            ImageModel productImage = imageRepository.findByNameAndType(auction.getProduct().getProductCode(), "상품");
-//            if (productImage != null) {
-//                auction.getProduct().setImage(productImage);
-//            } else {
-//                auction.getProduct().setImage(imageRepository.findByType("에러"));
-//            }
-//        }
-//
-//        return auction;
-//    }
-
     @Override
     public Slice<AuctionDto> findByUser(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDate = null;
-
-        // period에 따라 날짜 범위를 설정
-        switch (period) {
-            case "3개월":
-                startDate = now.minus(3, ChronoUnit.MONTHS);
-                break;
-            case "6개월":
-                startDate = now.minus(6, ChronoUnit.MONTHS);
-                break;
-            case "12개월":
-                startDate = now.minus(12, ChronoUnit.MONTHS);
-                break;
-            case "전체보기":
-                startDate = null;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid period specified");
-        }
+        LocalDateTime startDate = switch (period) {
+            case "3개월" -> LocalDateTime.now().minus(3, ChronoUnit.MONTHS);
+            case "6개월" -> LocalDateTime.now().minus(6, ChronoUnit.MONTHS);
+            case "12개월" -> LocalDateTime.now().minus(12, ChronoUnit.MONTHS);
+            case "전체보기" -> null;
+            default -> throw new IllegalArgumentException("Invalid period specified");
+        };
 
         // 날짜 범위 조건 설정
         BooleanExpression datePredicate = startDate != null ? qAuction.startedAt.goe(startDate) : null;
@@ -237,8 +147,8 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                         qAuction.updatedAt))
                 .from(qAuction)
                 .where(qAuction.userId.eq(userId)
-                .and(datePredicate)
-                .and(cursorPredicate))
+                        .and(datePredicate)
+                        .and(cursorPredicate))
                 .orderBy(qAuction.endedAt.desc())
                 .limit(pageable.getPageSize() + 1)
                 .leftJoin(qAuction.product, qProduct).fetch();

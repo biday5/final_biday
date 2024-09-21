@@ -35,6 +35,6 @@ public class BrandEntity {
     @Column(name = "updated_at", nullable = true, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 
-//    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<ProductEntity> productList;
+    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductEntity> productList;
 }
