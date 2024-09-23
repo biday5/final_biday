@@ -8,7 +8,7 @@ import shop.biday.model.entity.RatingEntity;
 import java.util.List;
 
 @Repository
-public interface RatingRepository extends JpaRepository<RatingEntity, Long> {
+public interface RatingRepository extends JpaRepository<RatingEntity, Long>, QRatingRepository {
     boolean existsById(Long id);
     RatingEntity save(RatingModel rating);
 }

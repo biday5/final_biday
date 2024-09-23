@@ -2,11 +2,8 @@ package shop.biday.model.dto;
 
 import lombok.*;
 import org.springframework.stereotype.Component;
-import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.domain.ImageModel;
-import shop.biday.model.entity.AuctionEntity;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -24,4 +21,6 @@ public class ProductDto {
     private Long price;
     private String color;
     private ImageModel image;
+    private Long auctions;
+    private Long wishes;
 }

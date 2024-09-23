@@ -10,6 +10,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import shop.biday.model.domain.AwardModel;
 import shop.biday.model.domain.PaymentTempModel;
+import shop.biday.model.domain.UserModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.AwardDto;
 import shop.biday.model.entity.*;
@@ -27,11 +28,10 @@ public class QAwardRepositoryImpl implements QAwardRepository {
     private final QAwardEntity qAward = QAwardEntity.awardEntity;
     private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
     private final QProductEntity qProduct = QProductEntity.productEntity;
-    private final QPaymentEntity qPayment = QPaymentEntity.paymentEntity;
     private final QUserEntity qUser = QUserEntity.userEntity;
 
     @Override
-    public AwardModel findByUserId(Long id) {
+    public AwardModel findByAwardId(Long id) {
         return queryFactory
                 .select(Projections.constructor(AwardModel.class,
                         qAward.id,
@@ -40,56 +40,35 @@ public class QAwardRepositoryImpl implements QAwardRepository {
                                 qAuction.userId,
                                 qProduct.name.as("product"),
                                 qAuction.startingBid,
+                                qAuction.currentBid,
                                 qAuction.startedAt,
                                 qAuction.endedAt,
                                 qAuction.status,
                                 qAuction.createdAt,
                                 qAuction.updatedAt
                         ),
-                        qUser,
+                        qUser.name.as("user"),
                         qAward.bidedAt,
                         qAward.currentBid,
                         qAward.count
-//                        ,
-//                        Projections.constructor(PaymentTempModel.class,
-//                                qPayment.orderId,
-//                                qPayment.userId,
-//                                qPayment.bidId,
-//                                qPayment.totalAmount)
                 ))
                 .from(qAward)
                 .leftJoin(qAward.auction, qAuction)
                 .leftJoin(qAuction.product, qProduct)
-                .where(qAward.id.eq(id)
-//                        ,
-//                        qPayment.bidId.eq(id)
-                        )
+                .leftJoin(qAward.user, qUser)
+                .where(qAward.id.eq(id))
                 .fetchOne();
     }
 
     @Override
     public Slice<AwardDto> findByUserId(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
-        // 현재 날짜와 시간
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDate = null;
-
-        // period에 따라 날짜 범위를 설정, 람다로 고치기
-        switch (period) {
-            case "3개월":
-                startDate = now.minus(3, ChronoUnit.MONTHS);
-                break;
-            case "6개월":
-                startDate = now.minus(6, ChronoUnit.MONTHS);
-                break;
-            case "12개월":
-                startDate = now.minus(12, ChronoUnit.MONTHS);
-                break;
-            case "전체보기":
-                startDate = null;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid period specified");
-        }
+        LocalDateTime startDate = switch (period) {
+            case "3개월" -> LocalDateTime.now().minus(3, ChronoUnit.MONTHS);
+            case "6개월" -> LocalDateTime.now().minus(6, ChronoUnit.MONTHS);
+            case "12개월" -> LocalDateTime.now().minus(12, ChronoUnit.MONTHS);
+            case "전체보기" -> null;
+            default -> throw new IllegalArgumentException("Invalid period specified");
+        };
 
         // 날짜 범위 조건 설정
         BooleanExpression datePredicate = startDate != null ? qAward.bidedAt.goe(startDate) : null;
@@ -102,13 +81,14 @@ public class QAwardRepositoryImpl implements QAwardRepository {
                 .select(Projections.constructor(AwardDto.class,
                         qAward.id,
                         qAuction.id.as("auction"),
-                        qUser,
+                        qUser.name.as("user"),
                         qAward.bidedAt,
                         qAward.currentBid,
                         qAward.count))
                 .from(qAward)
                 .leftJoin(qAward.auction, qAuction)
                 .leftJoin(qAuction.product, qProduct)
+                .leftJoin(qAward.user, qUser)
                 .where(qAward.user.id.eq(userId)
                         .and(datePredicate)
                         .and(cursorPredicate))

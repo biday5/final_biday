@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface AuctionRepository extends JpaRepository<AuctionEntity, Long>, QAuctionRepository {
     boolean existsById(Long id);
-    AuctionEntity save(AuctionModel auction);
+    AuctionEntity save(AuctionEntity auction);
     void deleteById(Long id);
 }

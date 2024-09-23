@@ -60,4 +60,7 @@ public class ProductEntity {
 
     @OneToMany(mappedBy = "product")
     private List<AuctionEntity> auctions;
+
+    @OneToMany(mappedBy = "product")
+    private List<WishEntity> wishes;
 }

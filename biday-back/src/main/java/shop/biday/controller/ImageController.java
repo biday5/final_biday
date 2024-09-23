@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import shop.biday.model.document.ImageDocument;
@@ -16,6 +18,7 @@ import shop.biday.service.ImageService;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j
 @CrossOrigin
@@ -74,4 +77,11 @@ public class ImageController {
         log.info("이미지 삭제 중");
         return imageService.deleteById(id);
     }
+
+    @GetMapping("/findImage")
+    public ResponseEntity<byte[]> getImageById(@RequestParam("id")String id) {
+        log.info("이미지 불러오는 중");
+        return imageService.getImage(id);
+    }
+
 }

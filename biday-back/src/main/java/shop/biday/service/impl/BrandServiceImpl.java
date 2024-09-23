@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import shop.biday.model.domain.BrandModel;
 import shop.biday.model.entity.BrandEntity;
 import shop.biday.model.repository.BrandRepository;
+import shop.biday.model.repository.UserRepository;
+import shop.biday.oauth2.jwt.JWTUtil;
 import shop.biday.service.BrandService;
 
 import java.util.List;
@@ -16,53 +18,78 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BrandServiceImpl implements BrandService {
     private final BrandRepository brandRepository;
+    private final JWTUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @Override
     public List<BrandEntity> findAll() {
-        try {
-            return brandRepository.findAll();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return null;
-        }
+        log.info("Find all brands");
+        return brandRepository.findAll();
     }
 
     @Override
     public Optional<BrandEntity> findById(Long id) {
-        try {
-            return brandRepository.findById(id);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return Optional.empty();
-        }
+        log.info("Find brand by id: {}", id);
+        return Optional.of(id)
+                .filter(t -> {
+                    boolean exists = brandRepository.existsById(id);
+                    if (!exists) {
+                        log.error("Not found brand: {}", id);
+                    }
+                    return exists;
+                })
+                .flatMap(brandRepository::findById);
     }
 
     @Override
-    public BrandEntity save(BrandModel brand) {
-        try {
-            return brandRepository.save(brand);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return null;
-        }
+    public BrandEntity save(String token, BrandModel brand) {
+        log.info("Save Brand started");
+        return validateUser(token)
+                .map(t -> brandRepository.save(brand))
+                .orElse(null);
     }
 
     @Override
-    public BrandEntity update(BrandModel brand) {
-        try {
-            return brandRepository.save(brand);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return null;
-        }
+    public BrandEntity update(String token, BrandModel brand) {
+        log.info("Update Brand started");
+        return validateUser(token)
+                .filter(t -> {
+                    boolean exists = brandRepository.existsById(brand.getId());
+                    if (!exists) {
+                        log.error("Not found brand: {}", brand.getId());
+                    }
+                    return exists;
+                })
+                .map(t -> brandRepository.save(brand))
+                .orElse(null);
     }
 
     @Override
-    public void deleteById(Long id) {
-        try {
-            brandRepository.deleteById(id);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
+    public void deleteById(String token, Long id) {
+        log.info("Delete Brand started for id: {}", id);
+        validateUser(token)
+                .filter(t -> {
+                    boolean exists = brandRepository.existsById(id);
+                    if (!exists) {
+                        log.error("Not found brand: {}", id);
+                    }
+                    return exists;
+                })
+                .ifPresentOrElse(t -> {
+                    brandRepository.deleteById(id);
+                    log.info("Brand deleted: {}", id);
+                }, () -> log.error("User does not have role SELLER or does not exist"));
     }
+
+    private Optional<String> validateUser(String token) {
+        log.info("Validate User started");
+        return Optional.of(token)
+                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_SELLER"))
+                .filter(t -> userRepository.existsByEmail(jwtUtil.getEmail(t)))
+                .or(() -> {
+                    log.error("User does not have role SELLER or does not exist");
+                    return Optional.empty();
+                });
+    }
+
 }
