@@ -32,9 +32,9 @@ public class AwardController {
             @ApiResponse(responseCode = "404", description = "낙찰 목록 찾을 수 없음")
     })
     @Parameters({
-            @Parameter(name = "userId", description = "구매자 id", example = "1L"),
+            @Parameter(name = "userId", description = "구매자 id", example = "1"),
             @Parameter(name = "period", description = "기간별 정렬", example = "3개월"),
-            @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 낙찰의 id", example = "1L"),
+            @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 낙찰의 id", example = "1"),
     })
     public ResponseEntity<Slice<AwardDto>> findByUser(
             @RequestHeader("access") String token,
@@ -51,7 +51,7 @@ public class AwardController {
             @ApiResponse(responseCode = "200", description = "낙찰 불러오기 성공"),
             @ApiResponse(responseCode = "404", description = "낙찰 찾을 수 없음")
     })
-    @Parameter(name = "id", description = "상세보기할 낙찰의 id", example = "1L")
+    @Parameter(name = "id", description = "상세보기할 낙찰의 id", example = "1")
     public ResponseEntity<AwardModel> findById(
             @RequestHeader("access") String token,
             @RequestParam(value = "id", required = true) Long id) {

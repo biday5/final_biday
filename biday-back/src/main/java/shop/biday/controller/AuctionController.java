@@ -34,25 +34,42 @@ public class AuctionController {
             @ApiResponse(responseCode = "404", description = "상품 찾을 수 없음")
     })
     @Parameter(name = "id", description = "상세보기할 경매의 id", example = "1")
-    public ResponseEntity<Optional<AuctionEntity>> findById(@RequestParam(value = "id", required = true) Long id) {
+    public ResponseEntity<AuctionModel> findById(@RequestParam(value = "id", required = true) Long id) {
         return ResponseEntity.ok(auctionService.findById(id));
     }
 
+    @GetMapping("/findByTime")
+    @Operation(summary = "헤더 경매 목록", description = "종료 날짜에 따른 경매 목록")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "경매 목록 가져오기 성공"),
+            @ApiResponse(responseCode = "404", description = "경매 목록 찾을 수 없음")
+    })
+    @Parameters({
+            @Parameter(name = "order", description = "정렬할 시간 기준", example = "종료 임박 순"),
+            @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1"),
+    })
+    public ResponseEntity<Slice<AuctionDto>> findByTime(
+            @RequestParam(value = "order", required = false, defaultValue = "") String order,
+            @RequestParam(value = "cursor", required = false) Long cursor,
+            Pageable pageable) {
+        return ResponseEntity.ok(auctionService.findByTime(order, cursor, pageable));
+    }
+
     @GetMapping
-    @Operation(summary = "경매 목록", description = "마이 페이지에서 불러올 수 있는 상품 목록")
+    @Operation(summary = "마이페이지 경매 목록", description = "마이 페이지에서 불러올 수 있는 경매 목록")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "경매 목록 가져오기 성공"),
             @ApiResponse(responseCode = "404", description = "경매 목록 찾을 수 없음")
     })
     @Parameters({
             @Parameter(name = "period", description = "기간별 정렬", example = "3개월"),
-            @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1L"),
+            @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1"),
     })
     public ResponseEntity<Slice<AuctionDto>> findByUser(
             @RequestHeader("access") String token,
             @RequestParam(value = "userId", required = true) Long userId,
             @RequestParam(value = "period", required = false, defaultValue = "3개월") String period,
-            @RequestParam(value = "cursor", required = false) LocalDateTime cursor,
+            @RequestParam(value = "cursor", required = false) Long cursor,
             Pageable pageable) {
         return ResponseEntity.ok(auctionService.findByUser(token, userId, period, cursor, pageable));
     }
@@ -65,7 +82,7 @@ public class AuctionController {
     })
     @Parameters({
             @Parameter(name = "userId", description = "판매자 id", example = "1L"),
-            @Parameter(name = "product", description = "경매로 등록할 상품, product의 findById 사용해서 선택!", example = "1L"),
+            @Parameter(name = "product", description = "경매로 등록할 상품, product의 findById 사용해서 선택!", example = "1"),
             @Parameter(name = "description", description = "경매로 등록할 판매자 상품의 사진", example = "경매로 등록할 판매자 상품의 사진"),
             @Parameter(name = "startingBid", description = "경매 시작가, 상품 가격의 반값or40%로 시작", example = "50000"),
             @Parameter(name = "currentBid", description = "현재 경매가", example = "U23-TOP38-BR"),
@@ -84,7 +101,7 @@ public class AuctionController {
     })
     @Parameters({
             @Parameter(name = "userId", description = "변경 불가, 판매자 id", example = "1L"),
-            @Parameter(name = "product", description = "변경 불가, 경매로 등록할 상품, product의 findById 사용해서 선택!", example = "1L"),
+            @Parameter(name = "product", description = "변경 불가, 경매로 등록할 상품, product의 findById 사용해서 선택!", example = "1"),
             @Parameter(name = "description", description = "변경 불가, 경매로 등록할 판매자 상품의 사진", example = "경매로 등록할 판매자 상품의 사진"),
             @Parameter(name = "startingBid", description = "변경 불가, 경매 시작가, 상품 가격의 반값or40%로 시작", example = "50000"),
             @Parameter(name = "currentBid", description = "변경 불가, 현재 경매가", example = "U23-TOP38-BR"),
@@ -101,7 +118,7 @@ public class AuctionController {
             @ApiResponse(responseCode = "200", description = "상품 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "상품 찾을 수 없음")
     })
-    @Parameter(name = "id", description = "삭제할 상품의 id", example = "1L")
+    @Parameter(name = "id", description = "삭제할 상품의 id", example = "1")
     public void delete(@RequestHeader("access") String token, @RequestParam Long id) {
         auctionService.deleteById(token, id);
     }

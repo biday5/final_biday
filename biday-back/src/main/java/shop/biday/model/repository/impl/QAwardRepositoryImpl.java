@@ -28,7 +28,6 @@ public class QAwardRepositoryImpl implements QAwardRepository {
     private final QAwardEntity qAward = QAwardEntity.awardEntity;
     private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
     private final QProductEntity qProduct = QProductEntity.productEntity;
-    private final QPaymentEntity qPayment = QPaymentEntity.paymentEntity;
     private final QUserEntity qUser = QUserEntity.userEntity;
 
     @Override
@@ -52,21 +51,12 @@ public class QAwardRepositoryImpl implements QAwardRepository {
                         qAward.bidedAt,
                         qAward.currentBid,
                         qAward.count
-//                        ,
-//                        Projections.constructor(PaymentTempModel.class,
-//                                qPayment.orderId,
-//                                qPayment.userId,
-//                                qPayment.bidId,
-//                                qPayment.totalAmount)
                 ))
                 .from(qAward)
                 .leftJoin(qAward.auction, qAuction)
                 .leftJoin(qAuction.product, qProduct)
                 .leftJoin(qAward.user, qUser)
-                .where(qAward.id.eq(id)
-//                        ,
-//                        qPayment.bidId.eq(id)
-                        )
+                .where(qAward.id.eq(id))
                 .fetchOne();
     }
 

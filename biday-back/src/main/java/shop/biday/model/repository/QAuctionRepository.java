@@ -12,5 +12,6 @@ import java.util.Optional;
 
 public interface QAuctionRepository {
     AuctionModel findByAuctionId(Long id);
-    Slice<AuctionDto> findByUser(Long userId, String period, LocalDateTime cursor, Pageable pageable);
+    Slice<AuctionDto> findByUser(Long userId, String period, Long cursor, Pageable pageable);
+    Slice<AuctionDto> findByTime(String order, Long cursor, Pageable pageable);
 }

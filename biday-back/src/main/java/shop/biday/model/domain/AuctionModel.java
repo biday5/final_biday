@@ -1,16 +1,9 @@
 package shop.biday.model.domain;
 
-import jakarta.persistence.Column;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.stereotype.Component;
-//import shop.biday.model.dto.AwardDto;
 import shop.biday.model.dto.AwardDto;
 import shop.biday.model.dto.ProductDto;
-//import shop.biday.model.entity.AwardEntity;
-import shop.biday.model.entity.ProductEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;

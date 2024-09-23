@@ -7,11 +7,11 @@ import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.entity.AuctionEntity;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 public interface AuctionService {
-    Optional<AuctionEntity> findById(Long id);
-    Slice<AuctionDto> findByUser(String token, Long userId, String period, LocalDateTime cursor, Pageable pageable);
+    AuctionModel findById(Long id);
+    Slice<AuctionDto> findByTime(String order, Long cursor, Pageable pageable);
+    Slice<AuctionDto> findByUser(String token, Long userId, String period, Long cursor, Pageable pageable);
     boolean existsById(Long id);
     AuctionEntity save(String token, AuctionModel auction);
     AuctionEntity update(String token, AuctionModel auction);

@@ -26,6 +26,6 @@ public class ProductModel {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private ImageModel image;
-    @Setter
     private List<AuctionDto> auctions;
+    private Long wishes;
 }

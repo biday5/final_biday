@@ -20,33 +20,37 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AuctionServiceImpl implements AuctionService {
+    private static final String ROLE_SELLER = "ROLE_SELLER";
+
     private final AuctionRepository repository;
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
 
     @Override
-    public Optional<AuctionEntity> findById(Long id) {
-        return repository.findById(id);
+    public AuctionModel findById(Long id) {
+        log.info("Find Auction by id: {}", id);
+        return repository.findByAuctionId(id);
     }
 
     @Override
     public boolean existsById(Long id) {
+        log.info("Exists Auction by id: {}", id);
         return repository.existsById(id);
     }
 
     @Override
-    public Slice<AuctionDto> findByUser(String token, Long userId, String period, LocalDateTime cursor, Pageable pageable) {
+    public Slice<AuctionDto> findByTime(String order, Long cursor, Pageable pageable) {
+        log.info("Find All Auctions By Time: {}", order);
+        return repository.findByTime(order, cursor, pageable);
+    }
+
+    @Override
+    public Slice<AuctionDto> findByUser(String token, Long userId, String period, Long cursor, Pageable pageable) {
         log.info("Find All Auctions By User: {}", userId);
         return validateUser(token)
-                .filter(t -> {
-                    if (!userRepository.existsById(userId)) {
-                        log.error("User does not exist for userId: {}", userId);
-                        return false;
-                    }
-                    return true;
-                })
+                .filter(t -> userRepository.existsById(userId))
                 .map(t -> repository.findByUser(userId, period, cursor, pageable))
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("User does not exist or invalid token"));
     }
 
     @Override
@@ -54,12 +58,10 @@ public class AuctionServiceImpl implements AuctionService {
         log.info("Save Auction started");
         return validateUser(token)
                 .map(t -> {
-                    if (auction.getProduct().getPrice() / 2 != auction.getStartingBid()) {
-                        auction.setStartingBid(auction.getProduct().getPrice() / 2);
-                    }
+                    setStartingBid(auction);
                     return repository.save(auction);
                 })
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token or not a seller"));
     }
 
     @Override
@@ -71,37 +73,31 @@ public class AuctionServiceImpl implements AuctionService {
                         log.error("Auction does not exist for id: {}", auction.getId());
                         return null;
                     }
-                    if (auction.getProduct().getPrice() / 2 != auction.getStartingBid()) {
-                        auction.setStartingBid(auction.getProduct().getPrice() / 2);
-                    }
+                    setStartingBid(auction);
                     return repository.save(auction);
                 })
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token or not a seller"));
     }
 
     @Override
     public void deleteById(String token, Long id) {
         log.info("Delete Auction started for id: {}", id);
         validateUser(token).ifPresentOrElse(t -> {
-            try {
-                if (!repository.existsById(id)) {
-                    log.error("Auction does not exist for id: {}", id);
-                    return;
-                }
+            if (!repository.existsById(id)) {
+                log.error("Auction does not exist for id: {}", id);
+                return;
+            }
 
-                Long auctionUserId = repository.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Auction not found"))
-                        .getUserId();
-                Long requestingUserId = userRepository.findByEmail(jwtUtil.getEmail(token)).getId();
+            Long auctionUserId = repository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Auction not found"))
+                    .getUserId();
+            Long requestingUserId = userRepository.findByEmail(jwtUtil.getEmail(token)).getId();
 
-                if (!auctionUserId.equals(requestingUserId)) {
-                    log.error("User does not have Delete Authority for auction id: {}", id);
-                } else {
-                    repository.deleteById(id);
-                    log.info("Delete Auction By User for id: {}", id);
-                }
-            } catch (Exception e) {
-                log.error("Error during delete operation: {}", e.getMessage());
+            if (!auctionUserId.equals(requestingUserId)) {
+                log.error("User does not have Delete Authority for auction id: {}", id);
+            } else {
+                repository.deleteById(id);
+                log.info("Delete Auction By User for id: {}", id);
             }
         }, () -> log.error("User does not have role SELLER or does not exist"));
     }
@@ -109,7 +105,7 @@ public class AuctionServiceImpl implements AuctionService {
     private Optional<String> validateUser(String token) {
         log.info("Validate User started for token: {}", token);
         return Optional.of(token)
-                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_SELLER"))
+                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase(ROLE_SELLER))
                 .filter(t -> userRepository.existsByEmail(jwtUtil.getEmail(t)))
                 .or(() -> {
                     log.error("User does not have role SELLER or does not exist for token: {}", token);
@@ -117,4 +113,9 @@ public class AuctionServiceImpl implements AuctionService {
                 });
     }
 
+    private void setStartingBid(AuctionModel auction) {
+        if (auction.getProduct().getPrice() / 2 != auction.getStartingBid()) {
+            auction.setStartingBid(auction.getProduct().getPrice() / 2);
+        }
+    }
 }
