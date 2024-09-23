@@ -4,6 +4,8 @@ import lombok.*;
 import org.springframework.stereotype.Component;
 import shop.biday.model.dto.AwardDto;
 import shop.biday.model.dto.ProductDto;
+import shop.biday.model.entity.AuctionEntity;
+import shop.biday.model.repository.ProductRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -6,9 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import shop.biday.model.domain.AuctionModel;
+import shop.biday.model.domain.ProductModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.entity.AuctionEntity;
+import shop.biday.model.entity.ProductEntity;
 import shop.biday.model.repository.AuctionRepository;
+import shop.biday.model.repository.ProductRepository;
 import shop.biday.model.repository.UserRepository;
 import shop.biday.oauth2.jwt.JWTUtil;
 import shop.biday.service.AuctionService;
@@ -25,6 +28,8 @@ public class AuctionServiceImpl implements AuctionService {
     private final AuctionRepository repository;
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
+    private final ProductRepository productRepository;
+    private final ProductModel productModel;
 
     @Override
     public AuctionModel findById(Long id) {
@@ -59,7 +64,16 @@ public class AuctionServiceImpl implements AuctionService {
         return validateUser(token)
                 .map(t -> {
                     setStartingBid(auction);
-                    return repository.save(auction);
+                    return repository.save(AuctionEntity.builder()
+                            .userId(auction.getUserId())
+                            .product(productRepository.findByName(auction.getProduct().getName()))
+                            .description(auction.getDescription())
+                            .startingBid(auction.getStartingBid())
+                            .currentBid(auction.getCurrentBid())
+                            .startedAt(auction.getStartedAt())
+                            .endedAt(auction.getEndedAt())
+                            .createdAt(LocalDateTime.now())
+                            .build());
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token or not a seller"));
     }
@@ -74,7 +88,16 @@ public class AuctionServiceImpl implements AuctionService {
                         return null;
                     }
                     setStartingBid(auction);
-                    return repository.save(auction);
+                    return repository.save(AuctionEntity.builder()
+                            .userId(auction.getUserId())
+                            .product(productRepository.findByName(auction.getProduct().getName()))
+                            .description(auction.getDescription())
+                            .startingBid(auction.getStartingBid())
+                            .currentBid(auction.getCurrentBid())
+                            .startedAt(auction.getStartedAt())
+                            .endedAt(auction.getEndedAt())
+                            .updatedAt(LocalDateTime.now())
+                            .build());
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token or not a seller"));
     }
