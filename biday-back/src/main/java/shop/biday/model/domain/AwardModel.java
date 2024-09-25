@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 import shop.biday.model.dto.AuctionDto;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Data
@@ -19,6 +20,6 @@ public class AwardModel {
     private AuctionDto auction;
     private String user;
     private LocalDateTime bidedAt;
-    private Long currentBid;
+    private BigInteger currentBid;
     private int count;
 }

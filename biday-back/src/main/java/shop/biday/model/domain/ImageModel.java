@@ -17,11 +17,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ImageModel {
     private String id;
-    private String name;
-    private String ext;
-    private String url;
+    private String originalName;
+    private String uploadName;
+    private String uploadPath;
+    private String uploadUrl;
     private String type;
-    private Long referenceId;
+    private Long referencedId;
     private LocalDateTime createdAt;
-//    private int ratingValue;
 }

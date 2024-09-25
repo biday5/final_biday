@@ -59,7 +59,7 @@ public class ProductEntity {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "product")
-    private List<AuctionEntity> auctions;
+    private List<SizeEntity> sizes;
 
     @OneToMany(mappedBy = "product")
     private List<WishEntity> wishes;

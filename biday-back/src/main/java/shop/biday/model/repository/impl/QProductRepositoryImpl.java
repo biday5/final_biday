@@ -1,10 +1,7 @@
 package shop.biday.model.repository.impl;
 
-
-import com.querydsl.core.types.ConstructorExpression;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.Coalesce;
+import com.querydsl.core.types.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -15,17 +12,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import shop.biday.model.AuctionTest;
+import shop.biday.model.ProductTest;
+import shop.biday.model.SizeTest;
 import shop.biday.model.domain.ImageModel;
 import shop.biday.model.domain.ProductModel;
+import shop.biday.model.domain.SizeModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.ProductDto;
 import shop.biday.model.entity.*;
 import shop.biday.model.repository.QProductRepository;
 import shop.biday.service.ImageService;
-import shop.biday.service.impl.CategoryServiceImpl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.querydsl.core.group.GroupBy.*;
 
 @Slf4j
 @Repository
@@ -36,11 +41,13 @@ public class QProductRepositoryImpl implements QProductRepository {
     private final QProductEntity qProduct = QProductEntity.productEntity;
     private final QBrandEntity qBrand = QBrandEntity.brandEntity;
     private final QCategoryEntity qCategory = QCategoryEntity.categoryEntity;
+    private final QSizeEntity qSize = QSizeEntity.sizeEntity;
     private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
     private final QWishEntity qWish = QWishEntity.wishEntity;
 
     private final ImageService imageService;
 
+    // auction 수 이상하게 나옴
     @Override
     public Slice<ProductDto> findProducts(Pageable pageable, Long categoryId, Long brandId, String keyword, String color, String order, Long lastItemValue) {
         List<ProductDto> list = createBaseQuery(queryFactory, pageable, categoryId, brandId, keyword, color, order, lastItemValue)
@@ -53,13 +60,13 @@ public class QProductRepositoryImpl implements QProductRepository {
 
         if (!list.isEmpty()) {
             for (ProductDto productDto : list) {
-                ImageModel imageModel = imageService.findByNameAndTypeAndReferencedId(productDto.getProductCode(), "상품", productDto.getId());
+                ImageModel imageModel = imageService.findByOriginalNameAndTypeAndReferencedId(productDto.getProductCode(), "상품", productDto.getId());
                 if (imageModel != null) {
                     productDto.setImage(imageModel);
-                    log.debug("Product Image Found : {}", imageModel.getName());
+                    log.debug("Product Image Found : {}", imageModel.getOriginalName());
                 } else {
-                    productDto.setImage(imageService.findByType("에러"));
-                    log.debug("Product Image Not Found : {}", imageService.findByType("에러").getName());
+                    productDto.setImage(imageService.findByTypeAndUploadPath("에러", "error"));
+                    log.debug("Product Image Not Found : {}", imageService.findByTypeAndUploadPath("에러", "error").getOriginalName());
                 }
             }
         }
@@ -67,19 +74,36 @@ public class QProductRepositoryImpl implements QProductRepository {
         return new SliceImpl<>(list, pageable, hasNext);
     }
 
-    @Override
-    public ProductModel findByProductId(Long id) {
-        List<AuctionDto> auctions = queryFactory
-                .select(createAuctionDtoProjection())
-                .from(qAuction)
-                .leftJoin(qAuction.product, qProduct)
-                .where(qAuction.product.id.eq(id))
-                .orderBy(qAuction.status.asc(),
-                        qAuction.startedAt.asc())
+    // java.lang.IllegalArgumentException: argument type mismatch 오류 발생
+    public List<ProductTest> findByProductTest(Long id) {
+        List<ProductTest> products = queryFactory
+                .select(Projections.constructor(ProductTest.class,
+                        qProduct.id,
+                        qProduct.name,
+                        Projections.constructor(SizeTest.class,
+                                qSize.size.stringValue(),
+                                Projections.constructor(AuctionTest.class,
+                                        qAuction.id))
+                ))
+                .from(qProduct)
+                .join(qSize).on(qSize.product.id.eq(qProduct.id))
+                .join(qAuction).on(qAuction.size.id.eq(qSize.id))
+                .where(qProduct.id.eq(id))
                 .fetch();
+        return products;
+    }
 
-        ProductModel product = queryFactory
-                .select(Projections.constructor(ProductModel.class,
+    @Override
+    public Map<Long, ProductModel> findByProductId(Long id, String name) {
+        return queryFactory
+                .selectFrom(qProduct)
+                .leftJoin(qProduct.category, qCategory)
+                .leftJoin(qProduct.brand, qBrand)
+                .leftJoin(qWish).on(qProduct.id.eq(qWish.product.id))
+                .leftJoin(qSize).on(qSize.product.id.eq(qProduct.id))
+                .where(qProduct.id.eq(id).or(qProduct.name.containsIgnoreCase(name)))
+                .orderBy(qSize.id.asc())
+                .transform(groupBy(qProduct.id).as(Projections.constructor(ProductModel.class,
                         qProduct.id,
                         qBrand.name.as("brand"),
                         qCategory.name.as("category"),
@@ -91,32 +115,10 @@ public class QProductRepositoryImpl implements QProductRepository {
                         qProduct.description,
                         qProduct.createdAt,
                         qProduct.updatedAt,
+                        wishCount(),
                         createDefaultImageProjection(),
-                        Projections.list(createAuctionDtoProjection()),
-                        wishCount()
-                ))
-                .from(qProduct)
-                .leftJoin(qProduct.category, qCategory)
-                .leftJoin(qProduct.brand, qBrand)
-                .leftJoin(qProduct.auctions, qAuction)
-                .leftJoin(qWish).on(qProduct.id.eq(qWish.product.id))
-                .where(qProduct.id.eq(id))
-                .fetchFirst();
-
-        if (product != null) {
-            product.setAuctions(auctions); // 경매 리스트를 설정
-
-            ImageModel imageModel = imageService.findByNameAndType(product.getProductCode(), "상품");
-            if (imageModel != null) {
-                product.setImage(imageModel);
-                log.debug("Product Image Found : {}", imageModel.getName());
-            } else {
-                product.setImage(imageService.findByType("에러"));
-                log.debug("Product Image Not Found : {}", imageService.findByType("에러").getName());
-            }
-        }
-
-        return product;
+                        set(createDefaultSizeProjection())
+                        )));
     }
 
     private ConstructorExpression<ProductDto> createProductDtoProjection() {
@@ -130,15 +132,18 @@ public class QProductRepositoryImpl implements QProductRepository {
                 qProduct.price,
                 qProduct.color,
                 createDefaultImageProjection(),
-                auctionCount(),
-                wishCount()
+                wishCount(),
+                auctionCount()
         );
     }
 
     private JPQLQuery<Long> auctionCount() {
         return JPAExpressions.select(qAuction.count().coalesce(0L))
                 .from(qAuction)
-                .where(qAuction.status.eq(false), qAuction.product.id.eq(qProduct.id));
+                .where(
+                        qAuction.status.eq(false),
+                        qAuction.size.product.id.eq(qSize.product.id)
+                );
     }
 
     private JPQLQuery<Long> wishCount() {
@@ -150,28 +155,40 @@ public class QProductRepositoryImpl implements QProductRepository {
     private ConstructorExpression<ImageModel> createDefaultImageProjection() {
         return Projections.constructor(ImageModel.class,
                 Expressions.constant("defaultImageId"),
-                Expressions.constant("defaultImageName"),
-                Expressions.constant("defaultImageExt"),
-                Expressions.constant("defaultImageUrl"),
+                Expressions.constant("defaultImageOriginalName"),
+                Expressions.constant("defaultImageUploadName"),
+                Expressions.constant("defaultImageUploadName"),
+                Expressions.constant("defaultImageUploadUrl"),
                 Expressions.constant("defaultImageType"),
                 Expressions.constant(0L),
                 Expressions.constant(LocalDateTime.now())
         );
     }
 
-    private ConstructorExpression<AuctionDto> createAuctionDtoProjection() {
-        return Projections.constructor(AuctionDto.class,
-                qAuction.id,
-                qAuction.userId,
-                qProduct.name.as("product"),
-                qAuction.startingBid,
-                qAuction.currentBid,
-                qAuction.startedAt,
-                qAuction.endedAt,
-                qAuction.status,
-                qAuction.createdAt,
-                qAuction.updatedAt);
+    private ConstructorExpression<SizeModel> createDefaultSizeProjection() {
+        return Projections.constructor(SizeModel.class,
+                qSize.id,
+                qProduct.name.as("sizeProduct"),
+                qSize.size.stringValue(),
+                qSize.createdAt,
+                qSize.updatedAt
+        );
     }
+
+//    private ConstructorExpression<AuctionDto> createAuctionDtoProjection() {
+//        return Projections.constructor(AuctionDto.class,
+//                qAuction.id,
+//                qAuction.user,
+//                qProduct.name,
+//                qSize.size.stringValue(),
+//                qAuction.startingBid,
+//                qAuction.currentBid,
+//                qAuction.startedAt,
+//                qAuction.endedAt,
+//                qAuction.status,
+//                qAuction.createdAt,
+//                qAuction.updatedAt);
+//    }
 
     private JPQLQuery<ProductDto> createBaseQuery(JPAQueryFactory queryFactory, Pageable pageable, Long categoryId, Long brandId, String keyword,
                                                   String color, String order, Long lastItemId) {
@@ -180,10 +197,16 @@ public class QProductRepositoryImpl implements QProductRepository {
                 .from(qProduct)
                 .leftJoin(qProduct.category, qCategory)
                 .leftJoin(qProduct.brand, qBrand)
-                .leftJoin(qProduct.auctions, qAuction)
-                .leftJoin(qWish).on(qProduct.id.eq(qWish.product.id));
+                .leftJoin(qWish).on(qProduct.id.eq(qWish.product.id))
+                .leftJoin(qProduct.sizes, qSize)
+                .leftJoin(qSize.auctions, qAuction)
+                .where(
+                        findByBrand(brandId),
+                        findByCategory(categoryId),
+                        findByColor(color),
+                        findByKeyword(keyword)
+                );
 
-        findByFilter(query, categoryId, brandId, keyword, color);
         findByOrdering(query, order, lastItemId);
 
         return query
@@ -191,88 +214,78 @@ public class QProductRepositoryImpl implements QProductRepository {
                 .limit(pageable.getPageSize() + 1); // 페이지 사이즈 + 1을 반환하여 더 많은 데이터가 있는지 확인
     }
 
-    private void findByFilter(JPQLQuery<ProductDto> query, Long categoryId, Long brandId, String keyword, String color) {
-        if (categoryId != null) {
-            query.where(qCategory.id.eq(categoryId));
-        }
+    private BooleanExpression findByCategory(Long categoryId) {
+        return categoryId != null ? qCategory.id.eq(categoryId) : null;
+    }
 
-        if (brandId != null) {
-            query.where(qProduct.brand.id.eq(brandId));
-        }
+    private BooleanExpression findByBrand(Long brandId) {
+        return brandId != null ? qBrand.id.eq(brandId) : null;
+    }
 
-        if (!keyword.isEmpty()) {
-            query.where(
-                    qProduct.name.containsIgnoreCase(keyword)
-                            .or(qProduct.subName.containsIgnoreCase(keyword))
-                            .or(qProduct.productCode.containsIgnoreCase(keyword))
-                            .or(qProduct.color.containsIgnoreCase(keyword))
-                            .or(qCategory.name.containsIgnoreCase(keyword))
-                            .or(qBrand.name.containsIgnoreCase(keyword))
-            );
-        }
+    private BooleanExpression findByColor(String color) {
+        return color != null ? qProduct.color.containsIgnoreCase(color) : null;
+    }
 
-        if (!color.isEmpty()) {
-            query.where(qProduct.color.containsIgnoreCase(color));
-        }
+    private BooleanExpression findByKeyword(String keyword) {
+        return keyword != null ? qProduct.name.containsIgnoreCase(keyword)
+                .or(qProduct.subName.containsIgnoreCase(keyword))
+                .or(qProduct.productCode.containsIgnoreCase(keyword))
+                .or(qProduct.color.containsIgnoreCase(keyword))
+                .or(qCategory.name.containsIgnoreCase(keyword))
+                .or(qBrand.name.containsIgnoreCase(keyword)) : null;
     }
 
     private void findByOrdering(JPQLQuery<ProductDto> query, String order, Long lastItemId) {
         switch (order) {
+            // TODO orderBy 제대로 안 먹음
+            case "경매 적은 순":
+                if (lastItemId != null) {
+                    query.where(auctionCount().gt(fetchAuctionByCount(lastItemId)));
+                }
+                query.orderBy(qAuction.count().isNotNull().asc());
+                break;
+            case "경매 많은 순":
+                if (lastItemId != null) {
+                    query.where(auctionCount().lt(fetchAuctionByCount(lastItemId)));
+                }
+                query.orderBy(qAuction.count().desc());
+                break;
             case "가격 낮은 순":
                 if (lastItemId != null) {
                     query.where(qProduct.price.gt(fetchProductByPrice(lastItemId)));
-                } else {
-                    query.orderBy(qProduct.price.asc());
                 }
+                query.orderBy(qProduct.price.asc());
                 break;
             case "가격 높은 순":
                 if (lastItemId != null) {
                     query.where(qProduct.price.lt(fetchProductByPrice(lastItemId)));
-                } else {
-                    query.orderBy(qProduct.price.desc());
                 }
-                break;
-            case "경매 적은 순":
-                if (lastItemId != null) {
-                    query.where(qAuction.count().gt(fetchAuctionByCount(lastItemId)));
-                } else {
-                    query.orderBy(qAuction.count().asc());
-                }
-                break;
-            case "경매 많은 순":
-                if (lastItemId != null) {
-                    query.where(qAuction.count().lt(fetchAuctionByCount(lastItemId)));
-                } else {
-                    query.orderBy(qAuction.count().desc());
-                }
+                query.orderBy(qProduct.price.desc());
                 break;
             case "위시 적은 순":
                 if (lastItemId != null) {
                     query.where(qWish.count().gt(fetchWishByCount(lastItemId)));
-                } else {
-                    query.orderBy(qWish.count().asc());
                 }
+                query.orderBy(qWish.count().asc());
                 break;
             case "위시 많은 순":
                 if (lastItemId != null) {
                     query.where(qWish.count().lt(fetchWishByCount(lastItemId)));
-                } else {
-                    query.orderBy(qWish.count().desc());
                 }
+                query.orderBy(qWish.count().desc());
                 break;
             default:
                 if (lastItemId != null) {
                     query.where(qProduct.id.gt(lastItemId));
-                } else {
-                    query.orderBy(qProduct.id.asc());
                 }
+                query.orderBy(qProduct.id.asc());
                 break;
         }
     }
 
     private Long fetchProductByPrice(Long id) {
         return queryFactory
-                .select(qProduct.price)
+                .select(qProduct.price.coalesce(0L))
                 .from(qProduct)
                 .where(qProduct.id.eq(id))
                 .fetchOne();
@@ -280,15 +293,18 @@ public class QProductRepositoryImpl implements QProductRepository {
 
     private Long fetchAuctionByCount(Long id) {
         return queryFactory
-                .select(qAuction.count())
-                .from(qProduct)
-                .where(qAuction.product.id.eq(id))
+                .select(qAuction.count().coalesce(0L))
+                .from(qAuction)
+                .leftJoin(qAuction.size, qSize)
+                .where(qAuction.status.eq(false),
+                        qAuction.size.product.id.eq(id))
                 .fetchOne();
     }
 
+
     private Long fetchWishByCount(Long id) {
         return queryFactory
-                .select(qWish.count())
+                .select(qWish.count().coalesce(0L))
                 .from(qProduct)
                 .where(qWish.product.id.eq(id))
                 .fetchOne();

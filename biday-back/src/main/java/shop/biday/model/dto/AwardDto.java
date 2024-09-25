@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.domain.UserModel;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
-@Component
 @NoArgsConstructor
 @AllArgsConstructor
 public class AwardDto {
@@ -20,6 +20,6 @@ public class AwardDto {
     private Long auction;
     private String user;
     private LocalDateTime bidedAt;
-    private Long currentBid;
+    private BigInteger currentBid;
     private int count;
 }

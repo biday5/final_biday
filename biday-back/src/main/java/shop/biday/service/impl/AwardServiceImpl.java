@@ -58,17 +58,17 @@ public class AwardServiceImpl implements AwardService {
     }
 
     @Override
-    public Slice<AwardDto> findByUser(String token, Long userId, String period, LocalDateTime cursor, Pageable pageable) {
-        log.info("Find awards by UserId: {}", userId);
+    public Slice<AwardModel> findByUserEmail(String token, String user, String period, LocalDateTime cursor, Pageable pageable) {
+        log.info("Find awards by User: {}", user);
         return validateUser(token)
                 .filter(t -> {
-                    boolean exists = userRepository.existsById(userId);
+                    boolean exists = userRepository.existsByEmail(user);
                     if (!exists) {
-                        log.error("User does not exist for userId: {}", userId);
+                        log.error("User does not exist for user: {}", user);
                     }
                     return exists;
                 })
-                .map(t -> awardRepository.findByUserId(userId, period, cursor, pageable))
+                .map(t -> awardRepository.findByUserEmail(user, period, cursor, pageable))
                 .orElse(null);
     }
 

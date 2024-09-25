@@ -36,13 +36,13 @@ public class AwardController {
             @Parameter(name = "period", description = "기간별 정렬", example = "3개월"),
             @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 낙찰의 id", example = "1"),
     })
-    public ResponseEntity<Slice<AwardDto>> findByUser(
+    public ResponseEntity<Slice<AwardModel>> findByUser(
             @RequestHeader("access") String token,
-            @RequestParam(value = "userId", required = true) Long userId,
+            @RequestParam(value = "email", required = true) String user,
             @RequestParam(value = "period", required = false, defaultValue = "3개월") String period,
             @RequestParam(value = "cursor", required = false) LocalDateTime cursor,
             Pageable pageable) {
-        return ResponseEntity.ok(awardService.findByUser(token, userId, period, cursor, pageable));
+        return ResponseEntity.ok(awardService.findByUserEmail(token, user, period, cursor, pageable));
     }
 
     @GetMapping("/findById")

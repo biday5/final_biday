@@ -2,12 +2,13 @@ package shop.biday.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.UpdateTimestamp;
+import shop.biday.model.entity.enums.Size;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -15,40 +16,22 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 @DynamicInsert
-@Table(name = "auctions")
+@Table(name = "sizes")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class AuctionEntity {
+public class SizeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "user", nullable = false)
-    private String user;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "size_id", nullable = false)
-    private SizeEntity size;
+    @JoinColumn(name = "product_id", nullable = false)
+    private ProductEntity product;
 
-    @Column(name = "description", nullable = false)
-    private String description;
-
-    @Column(name = "starting_bid", nullable = false)
-    private Long startingBid;
-
-    @Column(name = "current_bid", nullable = false)
-    private Long currentBid;
-
-    @Column(name = "started_at", nullable = false)
-    private LocalDateTime startedAt;
-
-    @Column(name = "ended_at", nullable = false)
-    private LocalDateTime endedAt;
-
-    @ColumnDefault("b'0'")
-    @Column(name = "status", nullable = false)
-    private boolean status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "size", nullable = false)
+    private Size size;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -58,6 +41,6 @@ public class AuctionEntity {
     @Column(name = "updated_at", nullable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 
-    @OneToOne(mappedBy = "auction")
-    private AwardEntity award;
+    @OneToMany(mappedBy = "size")
+    private List<AuctionEntity> auctions;
 }

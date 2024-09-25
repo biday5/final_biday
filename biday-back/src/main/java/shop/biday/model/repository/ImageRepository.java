@@ -11,8 +11,8 @@ import java.util.List;
 public interface ImageRepository extends MongoRepository<ImageDocument, String> {
     ImageDocument save(ImageModel imageModel);
     ImageModel findByType(String type);
-    ImageModel findByNameAndType(String name, String type);
-    ImageModel findByNameAndTypeAndReferencedId(String name, String type, Long referencedId);
-    List<ImageModel> findAllByNameAndType(List<String> names, String type);
+    ImageModel findByOriginalNameAndType(String name, String type);
+    ImageModel findByTypeAndUploadPath(String type, String uploadPath);
+    ImageModel findByOriginalNameAndTypeAndReferencedId(String name, String type, Long referencedId);
     List<ImageModel> findByTypeAndReferencedId(String type, Long referencedId);
 }

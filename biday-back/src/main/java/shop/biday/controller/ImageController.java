@@ -8,17 +8,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import shop.biday.model.document.ImageDocument;
-import shop.biday.model.domain.ImageModel;
 import shop.biday.service.ImageService;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
 
 @Slf4j
 @CrossOrigin
@@ -28,6 +23,20 @@ import java.util.Optional;
 @Tag(name = "images", description = "Image Controller")
 public class ImageController {
     private final ImageService imageService;
+
+    @GetMapping("/findImage")
+    @Operation(summary = "이미지 불러오기", description = "이미지 불러오기.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "사진 불러오기 성공"),
+            @ApiResponse( responseCode = "404", description = "사진 불러오기 실패")
+    })
+    @Parameters(value = {
+            @Parameter(description = "이미지의 ID")
+    })
+    public ResponseEntity<byte[]> getImageById(@RequestParam("id") String id) {
+        log.info("이미지 불러오는 중");
+        return imageService.getImage(id);
+    }
 
     @PostMapping("/upload")
     @Operation(summary = "이미지 업로드", description = "여러 이미지를 업로드합니다.")
@@ -41,11 +50,13 @@ public class ImageController {
             @Parameter(description = "이미지의 참조 ID")
     })
     public String uploadImages(
-            @RequestPart("files") MultipartFile[] files,
+            @RequestPart("files") List<MultipartFile> files,
+            @RequestParam("filePath") String filePath,
             @RequestParam("type") String type,
-            @RequestParam("referenceId") Long referenceId) {
+            @RequestParam("referenceId") Long referenceId
+    ) {
         log.info("이미지 업로드 중");
-        return imageService.save(files, type, referenceId);
+        return imageService.uploadFiles(files, filePath, type, referenceId).toString();
     }
 
     @PatchMapping
@@ -76,12 +87,6 @@ public class ImageController {
             @RequestParam("id") String id) {
         log.info("이미지 삭제 중");
         return imageService.deleteById(id);
-    }
-
-    @GetMapping("/findImage")
-    public ResponseEntity<byte[]> getImageById(@RequestParam("id")String id) {
-        log.info("이미지 불러오는 중");
-        return imageService.getImage(id);
     }
 
 }

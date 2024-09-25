@@ -6,8 +6,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import shop.biday.model.domain.AuctionModel;
+import shop.biday.model.domain.ImageModel;
 import shop.biday.model.domain.ProductModel;
 import shop.biday.model.dto.AuctionDto;
+import shop.biday.model.dto.ProductDto;
 import shop.biday.model.entity.AuctionEntity;
 import shop.biday.model.entity.ProductEntity;
 import shop.biday.model.repository.AuctionRepository;
@@ -15,8 +17,11 @@ import shop.biday.model.repository.ProductRepository;
 import shop.biday.model.repository.UserRepository;
 import shop.biday.oauth2.jwt.JWTUtil;
 import shop.biday.service.AuctionService;
+import shop.biday.service.ImageService;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Slf4j
@@ -28,13 +33,25 @@ public class AuctionServiceImpl implements AuctionService {
     private final AuctionRepository repository;
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
-    private final ProductRepository productRepository;
-    private final ProductModel productModel;
+    private final ImageService imageService;
 
     @Override
     public AuctionModel findById(Long id) {
         log.info("Find Auction by id: {}", id);
-        return repository.findByAuctionId(id);
+        AuctionModel auction = repository.findByAuctionId(id);
+        if (auction != null) {
+            List<ImageModel> images = imageService.findByTypeAndReferencedId("경매", auction.getId());
+            System.out.println("images: " + images);
+            log.debug("Found Images: {}", images);
+            auction.setImages(images != null ? images : (List<ImageModel>) imageService.findByTypeAndUploadPath("에러", "error"));
+
+            ProductDto product = auction.getSize().getProduct();
+            ImageModel productImage = imageService.findByOriginalNameAndType(product.getProductCode(), "상품");
+            System.out.println("image: " + productImage);
+            log.debug("Found ProductImage: {}", productImage);
+            product.setImage(productImage != null ? productImage : imageService.findByTypeAndUploadPath("에러", "error"));
+        }
+        return auction;
     }
 
     @Override
@@ -44,18 +61,27 @@ public class AuctionServiceImpl implements AuctionService {
     }
 
     @Override
-    public Slice<AuctionDto> findByTime(String order, Long cursor, Pageable pageable) {
-        log.info("Find All Auctions By Time: {}", order);
-        return repository.findByTime(order, cursor, pageable);
+    public Slice<AuctionDto> findByProduct(Long sizeId, String order, Long cursor, Pageable pageable) {
+        log.info("Find All Auctions By Time: {} SizeId: {}", order, sizeId);
+        return repository.findByProduct(sizeId, order, cursor, pageable);
     }
 
     @Override
-    public Slice<AuctionDto> findByUser(String token, Long userId, String period, Long cursor, Pageable pageable) {
-        log.info("Find All Auctions By User: {}", userId);
+    public Slice<AuctionDto> findByUser(String token, String user, String period, Long cursor, Pageable pageable) {
+        log.info("Find All Auctions By User: {}", user);
         return validateUser(token)
-                .filter(t -> userRepository.existsById(userId))
-                .map(t -> repository.findByUser(userId, period, cursor, pageable))
+                .filter(t -> userRepository.existsByEmail(user))
+                .map(t -> repository.findByUser(user, period, cursor, pageable))
                 .orElseThrow(() -> new IllegalArgumentException("User does not exist or invalid token"));
+    }
+
+    @Override
+    public AuctionEntity updateState(Long id) {
+        log.info("Update Auction Status by id: {}", id);
+        return repository.findById(id).map(auction -> {
+            auction.setStatus(true);
+            return repository.save(auction);
+        }).orElseThrow(() -> new NoSuchElementException("Auction not found with id: " + id));
     }
 
     @Override
@@ -65,8 +91,8 @@ public class AuctionServiceImpl implements AuctionService {
                 .map(t -> {
                     setStartingBid(auction);
                     return repository.save(AuctionEntity.builder()
-                            .userId(auction.getUserId())
-                            .product(productRepository.findByName(auction.getProduct().getName()))
+                            .user(auction.getUser())
+//                            .product(productRepository.findByName(auction.getProduct().getName()))
                             .description(auction.getDescription())
                             .startingBid(auction.getStartingBid())
                             .currentBid(auction.getCurrentBid())
@@ -89,8 +115,8 @@ public class AuctionServiceImpl implements AuctionService {
                     }
                     setStartingBid(auction);
                     return repository.save(AuctionEntity.builder()
-                            .userId(auction.getUserId())
-                            .product(productRepository.findByName(auction.getProduct().getName()))
+                            .user(auction.getUser())
+//                            .product(productRepository.findByName(auction.getProduct().getName()))
                             .description(auction.getDescription())
                             .startingBid(auction.getStartingBid())
                             .currentBid(auction.getCurrentBid())
@@ -111,12 +137,12 @@ public class AuctionServiceImpl implements AuctionService {
                 return;
             }
 
-            Long auctionUserId = repository.findById(id)
+            String auctionUser = repository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Auction not found"))
-                    .getUserId();
-            Long requestingUserId = userRepository.findByEmail(jwtUtil.getEmail(token)).getId();
+                    .getUser();
+            String requestingUser = jwtUtil.getEmail(token);
 
-            if (!auctionUserId.equals(requestingUserId)) {
+            if (!auctionUser.equals(requestingUser)) {
                 log.error("User does not have Delete Authority for auction id: {}", id);
             } else {
                 repository.deleteById(id);
@@ -137,8 +163,8 @@ public class AuctionServiceImpl implements AuctionService {
     }
 
     private void setStartingBid(AuctionModel auction) {
-        if (auction.getProduct().getPrice() / 2 != auction.getStartingBid()) {
-            auction.setStartingBid(auction.getProduct().getPrice() / 2);
+        if (auction.getSize().getProduct().getPrice() / 2 != auction.getStartingBid()) {
+            auction.setStartingBid(auction.getSize().getProduct().getPrice() / 2);
         }
     }
 }

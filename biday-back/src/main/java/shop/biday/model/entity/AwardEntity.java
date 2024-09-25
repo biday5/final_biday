@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,15 +28,14 @@ public class AwardEntity {
     @JoinColumn(name = "auction_id", nullable = false)
     private AuctionEntity auction;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    @Column(name = "user", nullable = false)
+    private String user;
 
     @Column(name = "bided_at", nullable = false)
     private LocalDateTime bidedAt;
 
     @Column(name = "current_bid", nullable = false)
-    private Long currentBid;
+    private BigInteger currentBid;
 
     @ColumnDefault("1")
     @Column(name = "count", nullable = false)

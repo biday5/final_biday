@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import shop.biday.model.domain.ImageModel;
 import shop.biday.model.domain.ProductModel;
 import shop.biday.model.dto.ProductDto;
 import shop.biday.model.entity.ProductEntity;
@@ -13,10 +14,10 @@ import shop.biday.model.repository.CategoryRepository;
 import shop.biday.model.repository.ProductRepository;
 import shop.biday.model.repository.UserRepository;
 import shop.biday.oauth2.jwt.JWTUtil;
+import shop.biday.service.ImageService;
 import shop.biday.service.ProductService;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -27,6 +28,35 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
+    private final ImageService imageService;
+
+    @Override
+    public List<Map.Entry<Long, ProductModel>> findByProductId(Long id) {
+        Map<Long, ProductModel> map = repository.findByProductId(id, removeParentheses(repository.findById(id).get().getName()));
+
+        if (map != null) {
+            for (Map.Entry<Long, ProductModel> entry : map.entrySet()) {
+                ImageModel imageModel = imageService.findByOriginalNameAndType(entry.getValue().getProductCode(), "상품");
+                if (imageModel != null) {
+                    entry.getValue().setImage(imageModel);
+                    log.debug("Product Image Found : {}", imageModel.getOriginalName());
+                } else {
+                    entry.getValue().setImage(imageService.findByTypeAndUploadPath("에러", "error"));
+                    log.debug("Product Image Not Found : {}", imageService.findByTypeAndUploadPath("에러", "error").getOriginalName());
+                }
+            }
+        }
+
+        return map.entrySet().stream().toList();
+    }
+
+    public static String removeParentheses(String productName) {
+        int index = productName.indexOf(" (");
+        if (index != -1) {
+            return productName.substring(0, index);
+        }
+        return productName;
+    }
 
     @Override
     public ProductEntity save(String token, ProductModel product) {
@@ -57,6 +87,7 @@ public class ProductServiceImpl implements ProductService {
                     return exists;
                 })
                 .map(t -> repository.save(ProductEntity.builder()
+                        .id(product.getId())
                         .brand(brandRepository.findByName(product.getBrand()))
                         .category(categoryRepository.findByName(product.getCategory()))
                         .name(product.getName())
@@ -86,19 +117,76 @@ public class ProductServiceImpl implements ProductService {
                 }, () -> log.error("User does not have role SELLER or does not exist"));
     }
 
-    @Override
-    public ProductModel findById(Long id) {
+    // 강사님이 말씀하신대로 한 것
+    /*public Map<Long, GroupedProduct> findByProductTest(Long id) {
+        List<ProductTest> products = repository.findByProductTest(id);
+
+        if (!products.isEmpty()) {
+            Map<Long, GroupedProduct> groupedProducts = products.stream()
+                    .collect(Collectors.groupingBy(
+                            ProductTest::getId,
+                            Collectors.mapping(product -> {
+                                String size = product.getSizes().getSize();
+                                Long auctionId = product.getSizes().getAuctions().getId();
+                                return new AbstractMap.SimpleEntry<>(size, auctionId);
+                            }, Collectors.toList())
+                    ))
+                    .entrySet().stream()
+                    .map(entry -> {
+                        Long productId = entry.getKey();
+                        List<AbstractMap.SimpleEntry<String, Long>> sizeAuctionPairs = entry.getValue();
+
+                        Map<String, List<Long>> sizeToAuctionIds = sizeAuctionPairs.stream()
+                                .collect(Collectors.groupingBy(
+                                        AbstractMap.SimpleEntry::getKey,
+                                        Collectors.mapping(AbstractMap.SimpleEntry::getValue, Collectors.toList())
+                                ));
+
+                        List<GroupedSize> sizes = sizeToAuctionIds.entrySet().stream()
+                                .map(sizeEntry -> {
+                                    String size = sizeEntry.getKey();
+                                    List<GroupedAuction> auctions = sizeEntry.getValue().stream()
+                                            .map(GroupedAuction::new)
+                                            .collect(Collectors.toList());
+                                    return new GroupedSize(size, auctions);
+                                })
+                                .collect(Collectors.toList());
+
+                        ProductTest sampleProduct = products.stream()
+                                .filter(p -> p.getId().equals(productId))
+                                .findFirst()
+                                .orElse(null);
+
+                        return new GroupedProduct(productId, sampleProduct.getName(), sizes);
+                    })
+                    .collect(Collectors.toMap(GroupedProduct::getId, groupedProduct -> groupedProduct));
+
+            // 결과 확인
+            groupedProducts.forEach((key, value) -> {
+                System.out.println("Product ID: " + value.getId() + ", Name: " + value.getName());
+                value.getSizesWithAuctions().forEach(size -> {
+                    System.out.println("  Size: " + size.getSize() + ", Auction IDs: " + size.getAuctionIds().stream()
+                            .map(GroupedAuction::getId)
+                            .collect(Collectors.toList()));
+                });
+            });
+            return groupedProducts;
+        } else return null;
+    }*/
+
+    public List<ProductModel> findById(Long id) {
         log.info("Find Product by id: {}", id);
-        return Optional.of(id)
-                .filter(t -> {
-                    boolean exists = repository.existsById(t);
-                    if (!exists) {
-                        log.error("Not found product: {}", id);
-                    }
-                    return exists;
-                })
-                .map(t -> repository.findByProductId(id))
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        return null;
+//        return Optional.of(id)
+//                .filter(t -> {
+//                    boolean exists = repository.existsById(t);
+//                    if (!exists) {
+//                        log.error("Not found product: {}", id);
+//                    }
+//                    return exists;
+//                })
+//                .map(t -> repository.findByProductId(id))
+//                .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
     @Override
