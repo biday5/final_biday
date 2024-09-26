@@ -17,6 +17,7 @@ import shop.biday.model.entity.enums.PaymentCardType;
 import shop.biday.model.entity.enums.PaymentMethod;
 import shop.biday.model.entity.enums.PaymentStatus;
 import shop.biday.model.repository.PaymentRepository;
+import shop.biday.oauth2.jwt.JWTUtil;
 import shop.biday.service.AwardService;
 import shop.biday.service.PaymentService;
 import shop.biday.service.UserService;
@@ -25,6 +26,7 @@ import shop.biday.utils.TossPaymentTemplate;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -40,6 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final TossPaymentTemplate tossPaymentTemplate;
     private final RedisTemplateUtils<PaymentTempModel> redisTemplateUtils;
+    private final JWTUtil jWTUtil;
 
     @Override
     public PaymentEntity findById(Long id) {
@@ -173,6 +176,19 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentEntity payment = findById(id);
         payment.setPaymentStatus(paymentStatus);
         return paymentRepository.save(payment);
+    }
+
+    // TODO user mongo로 올리면 변경 해야 함
+    @Override
+    public List<PaymentRequest> findByUser(String token) {
+        String user = jWTUtil.getEmail(token);
+        log.info("Find Payment By User: {}", user);
+        if (!userService.existsById(Long.valueOf(user))) {
+            log.error("User not found");
+            return null;
+        } else {
+            return paymentRepository.findByUser(user);
+        }
     }
 
     private boolean isCheckPaymentData(PaymentRequest paymentRequest, PaymentTempModel paymentTempModel) {

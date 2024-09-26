@@ -89,17 +89,17 @@ public class BrandServiceImpl implements BrandService {
                 .ifPresentOrElse(t -> {
                     brandRepository.deleteById(id);
                     log.info("Brand deleted: {}", id);
-                }, () -> log.error("User does not have role SELLER or does not exist"));
+                }, () -> log.error("User does not have role ADMIN or does not exist"));
     }
 
     private Optional<String> validateUser(String token) {
         /* TODO 휘재형이 뽑는거 따로 가져오게 되면 JwtClaims claims = jwtUtil.extractClaims(token); 으로 정보 담아서 String userId=claims.getUserId(); 이런식으로 userId 뽑아서 사용할 것*/
         log.info("Validate User started");
         return Optional.of(token)
-                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_SELLER"))
+                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_ADMIN"))
                 .filter(t -> userRepository.existsByEmail(jwtUtil.getEmail(t)))
                 .or(() -> {
-                    log.error("User does not have role SELLER or does not exist");
+                    log.error("User does not have role ADMIN or does not exist");
                     return Optional.empty();
                 });
     }

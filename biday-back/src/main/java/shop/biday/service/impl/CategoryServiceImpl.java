@@ -87,16 +87,16 @@ public class CategoryServiceImpl implements CategoryService {
                 .ifPresentOrElse(t -> {
                     categoryRepository.deleteById(id);
                     log.info("Category deleted: {}", id);
-                }, () -> log.error("User does not have role SELLER or does not exist"));
+                }, () -> log.error("User does not have role ADMIN or does not exist"));
     }
 
     private Optional<String> validateUser(String token) {
         log.info("Validate User started for token: {}", token);
         return Optional.of(token)
-                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_SELLER"))
+                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_ADMIN"))
                 .filter(t -> userRepository.existsByEmail(jwtUtil.getEmail(t)))
                 .or(() -> {
-                    log.error("User does not have role SELLER or does not exist for token: {}", token);
+                    log.error("User does not have role ADMIN or does not exist for token: {}", token);
                     return Optional.empty();
                 });
     }

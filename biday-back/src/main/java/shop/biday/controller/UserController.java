@@ -118,7 +118,7 @@ public class UserController {
 
     @GetMapping("/findById/{id}")
     public UserDto findById(@PathVariable String id) {
-        return userService.findById(id);
+        return userService.findByUserId(id);
     }
 
     @GetMapping("/existsById/{id}")

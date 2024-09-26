@@ -9,7 +9,8 @@ import java.util.Optional;
 
 public interface UserService {
     List<UserEntity> findAll();
-    UserDto findById(String id);
+    Optional<UserEntity> findById(Long id);
+    UserDto findByUserId(String id);
     UserEntity save(UserModel userModel);
     boolean existsById(Long id);
     long count();

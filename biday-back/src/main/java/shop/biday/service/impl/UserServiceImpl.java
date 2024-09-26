@@ -35,7 +35,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto findById(String id) {
+    public Optional<UserEntity> findById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    public UserDto findByUserId(String id) {
         log.info("Find User: {}", id);
         UserEntity user = userRepository.findByEmail(id);
 
@@ -47,7 +52,7 @@ public class UserServiceImpl implements UserService {
                             ? imageService.findByOriginalNameAndType(String.valueOf(rate), "평점")
                             : imageService.findByOriginalNameAndType("2", "평점");
 
-                    UserDto userDto = new UserDto(u.getEmail(), userImage);
+                    UserDto userDto = new UserDto(u.getEmail(), u.getName(), userImage);
                     log.debug("Find User success: {}", userDto);
                     return userDto;
                 })

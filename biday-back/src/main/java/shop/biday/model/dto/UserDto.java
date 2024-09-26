@@ -12,5 +12,6 @@ import shop.biday.model.domain.ImageModel;
 @AllArgsConstructor
 public class UserDto {
     private String id;
+    private String name;
     private ImageModel image;
 }

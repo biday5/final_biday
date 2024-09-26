@@ -48,6 +48,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                         qAuction.id,
                         Projections.constructor(UserDto.class,
                                 qAuction.sellerId,
+                                "user_name", // 이게 과연 될까???
                                 createDefaultImageProjection()),
 //                        qAuction.user,
                         createSizeDtoProjection(),
