@@ -37,11 +37,6 @@ public class ImageServiceImpl implements ImageService {
     @Value("${spring.s3.bucket}")
     private String bucketName;
 
-    public String getUuidFileName(String fileName) {
-        String ext = fileName.substring(fileName.indexOf(".") + 1);
-        return UUID.randomUUID().toString() + "." + ext;
-    }
-
     @Override // 수정 해야함
     public String uploadFiles(List<MultipartFile> multipartFiles, String filePath, String type, Long referencedId) {
         log.info("Image upload started");
@@ -83,7 +78,8 @@ public class ImageServiceImpl implements ImageService {
                 uploadFileUrl = "https://kr.object.ncloudstorage.com/" + bucketName + "/" + keyName;
 
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Error uploading file: {}", e.getMessage());
+                resultMessage.append("파일 업로드 실패: ").append(originalFileName).append("\n");
             }
 
             ImageModel imageModel = ImageModel.builder()
@@ -94,6 +90,7 @@ public class ImageServiceImpl implements ImageService {
                     .type(type)
                     .referencedId(referencedId)
                     .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
                     .build();
 
             ImageDocument image = imageRepository.save(createImageDocument(originalFileName, uploadFileName, filePath, uploadFileUrl, type, referencedId));
@@ -106,17 +103,58 @@ public class ImageServiceImpl implements ImageService {
         return resultMessage.toString();
     }
 
-    private ImageDocument createImageDocument(String originalFileName, String uploadName, String uploadPath, String uploadUrl, String type, Long referencedId) {
-        log.info("Creating image document: {}", originalFileName);
-        return ImageDocument.builder()
-                .originalName(originalFileName)
-                .uploadName(uploadName)
-                .uploadPath(uploadPath)
-                .uploadUrl(uploadUrl)
-                .type(type)
-                .referencedId(referencedId)
-                .createdAt(LocalDateTime.now())
-                .build();
+    @Override
+    public String update(MultipartFile file, String id) {
+        log.info("Image update started for ID: {}", id);
+
+        Optional<ImageDocument> imageModel = imageRepository.findById(id);
+        StringBuilder resultMessage = new StringBuilder();
+
+        if(imageModel.isEmpty()) {
+            log.error("Image not found: {}", id);
+            return "이미지 찾을 수 없습니다.";
+        }
+
+        ImageDocument image = imageModel.get();
+
+        if(file.isEmpty()) {
+            log.error("File is empty");
+            return "업로드할 파일이 비어있습니다.";
+        }
+
+        String originalFileName = file.getOriginalFilename();
+        String uploadFileName = getUuidFileName(originalFileName);
+        String uploadFileUrl = "";
+
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(file.getSize());
+        objectMetadata.setContentType(file.getContentType());
+
+        try (InputStream inputStream = file.getInputStream()) {
+
+            String keyName = image.getUploadPath() + "/" + uploadFileName;
+
+            amazonS3Client.putObject(
+                    new PutObjectRequest(bucketName, keyName, inputStream, objectMetadata)
+                            .withCannedAcl(CannedAccessControlList.PublicRead));
+
+            uploadFileUrl = "https://kr.object.ncloudstorage.com/" + bucketName + "/" + keyName;
+
+        } catch (IOException e) {
+            log.error("Error uploading file: {}", e.getMessage());
+            return "파일 업로드 중 오류가 발생했습니다.";
+        }
+
+        image.setOriginalName(originalFileName);
+        image.setUploadName(uploadFileName);
+        image.setUploadUrl(uploadFileUrl);
+        image.setUpdatedAt(LocalDateTime.now());
+
+        imageRepository.save(image);
+        log.debug("Image updated To Mongo: {}", imageRepository.findById(image.getId()));
+        resultMessage.append("파일 업데이트 성공: ").append(originalFileName).append("\n");
+
+        return resultMessage.toString();
     }
 
     @Override
@@ -145,17 +183,13 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public String update(MultipartFile file, String id) {
-        return "";
-    }
-
-    @Override
     public String deleteById(String id) {
         log.info("Image delete start.");
         return Optional.of(id)
                 .filter(imageRepository::existsById)
                 .map(existingId -> {
                     imageRepository.deleteById(existingId);
+                    log.debug("Image deleted To Mongo: {}", existingId);
                     return "success";
                 })
                 .orElse("fail");
@@ -163,6 +197,7 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public Optional<ImageDocument> findById(String id) {
+        log.info("Find Image By id: {}", id);
         return imageRepository.findById(id);
     }
 
@@ -188,5 +223,23 @@ public class ImageServiceImpl implements ImageService {
     public List<ImageModel> findByTypeAndReferencedId(String type, Long referencedId) {
         log.info("Find Image List by Type: {}, ReferencedId: {}", type, referencedId);
         return imageRepository.findByTypeAndReferencedId(type, referencedId);
+    }
+
+    public String getUuidFileName(String fileName) {
+        String ext = fileName.substring(fileName.indexOf(".") + 1);
+        return UUID.randomUUID() + "." + ext;
+    }
+
+    private ImageDocument createImageDocument(String originalFileName, String uploadName, String uploadPath, String uploadUrl, String type, Long referencedId) {
+        log.info("Creating image document: {}", originalFileName);
+        return ImageDocument.builder()
+                .originalName(originalFileName)
+                .uploadName(uploadName)
+                .uploadPath(uploadPath)
+                .uploadUrl(uploadUrl)
+                .type(type)
+                .referencedId(referencedId)
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 }

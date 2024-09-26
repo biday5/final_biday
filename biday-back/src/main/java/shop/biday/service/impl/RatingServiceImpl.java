@@ -9,6 +9,7 @@ import shop.biday.model.repository.QRatingRepository;
 import shop.biday.model.repository.RatingRepository;
 import shop.biday.model.repository.UserRepository;
 import shop.biday.oauth2.jwt.JWTUtil;
+import shop.biday.service.PaymentService;
 import shop.biday.service.RatingService;
 import shop.biday.service.UserService;
 
@@ -23,12 +24,13 @@ public class RatingServiceImpl implements RatingService {
     private final RatingRepository repository;
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
+    private final PaymentService paymentService;
 
     @Override
     public double findSellerRate(String sellerId) {
         log.info("Calculate Rate by Seller: {}", sellerId);
 
-        if(userRepository.existsById(Long.valueOf(sellerId))){
+        if (userRepository.existsById(Long.valueOf(sellerId))) {
             return repository.findSellerRating(sellerId);
         } else {
             log.error("User doesn't exist : {}", sellerId);
@@ -55,16 +57,28 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public RatingEntity save(String token, RatingModel ratingModel) {
         log.info("Save Rating started");
+
         return validateUser(token)
-                .map(t -> repository.save(RatingEntity.builder()
-                        .paymentId(ratingModel.getPaymentId())
-                        .sellerId(ratingModel.getSellerId())
-                        .rating(ratingModel.getRating())
-                        .createdAt(LocalDateTime.now())
-                        .build()))
+                .flatMap(t -> {
+                    boolean exists = paymentService.existsById(ratingModel.getPaymentId());
+                    if (!exists) {
+                        log.error("Payment doesn't exist: {}", ratingModel.getPaymentId());
+                        return Optional.empty();
+                    } else {
+                        log.debug("Find Payment Success: {}", ratingModel.getPaymentId());
+                        RatingEntity ratingEntity = RatingEntity.builder()
+                                .paymentId(ratingModel.getPaymentId())
+                                .sellerId(ratingModel.getSellerId())
+                                .rating(ratingModel.getRating())
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                        return Optional.of(repository.save(ratingEntity));
+                    }
+                })
                 .orElseThrow(() -> new RuntimeException("Save Rating failed"));
     }
 
+    // TODO user id 기준으로 찾기!! 나중에 한번에 수정
     private Optional<String> validateUser(String token) {
         log.info("Validate User started for token: {}", token);
         return Optional.of(token)

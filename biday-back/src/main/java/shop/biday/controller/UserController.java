@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.UserModel;
+import shop.biday.model.dto.UserDto;
 import shop.biday.model.entity.UserEntity;
 import shop.biday.service.UserService;
 import shop.biday.service.impl.UserServiceImpl;
@@ -116,7 +117,7 @@ public class UserController {
     }
 
     @GetMapping("/findById/{id}")
-    public Optional<UserEntity> findById(@PathVariable Long id) {
+    public UserDto findById(@PathVariable String id) {
         return userService.findById(id);
     }
 

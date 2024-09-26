@@ -43,25 +43,31 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public AuctionModel findById(Long id) {
         log.info("Find Auction by id: {}", id);
-        AuctionModel auction = repository.findByAuctionId(id);
-        if (auction != null) {
-            UserDto user = auction.getUser();
-            int rate = (int) ratingService.findSellerRate(user.getId());
 
-            ImageModel userImage = imageService.findByOriginalNameAndType(String.valueOf(rate), "평점");
-            log.debug("Found UserImage: {}", userImage);
-            user.setImage(userImage != null ? userImage : imageService.findByTypeAndUploadPath("에러", "error"));
+        return Optional.ofNullable(repository.findByAuctionId(id))
+                .map(auction -> {
+                    UserDto user = auction.getUser();
+                    int rate = (int) ratingService.findSellerRate(String.valueOf(user.getId()));
+                    ImageModel userImage = (rate == 0)
+                            ? imageService.findByOriginalNameAndType(String.valueOf(rate), "평점")
+                            : imageService.findByOriginalNameAndType("2", "평점");
+                    user.setImage(userImage);
 
-            ProductDto product = auction.getSize().getProduct();
-            ImageModel productImage = imageService.findByOriginalNameAndType(product.getProductCode(), "상품");
-            log.debug("Found ProductImage: {}", productImage);
-            product.setImage(productImage != null ? productImage : imageService.findByTypeAndUploadPath("에러", "error"));
+                    ProductDto product = auction.getSize().getProduct();
+                    ImageModel productImage = imageService.findByOriginalNameAndType(product.getProductCode(), "상품");
+                    log.debug("Found ProductImage: {}", productImage);
+                    product.setImage(productImage != null ? productImage : imageService.findByTypeAndUploadPath("에러", "error"));
 
-            List<ImageModel> images = imageService.findByTypeAndReferencedId("경매", auction.getId());
-            log.debug("Found Images: {}", images);
-            auction.setImages(images != null ? images : (List<ImageModel>) imageService.findByTypeAndUploadPath("에러", "error"));
-        }
-        return auction;
+                    List<ImageModel> images = imageService.findByTypeAndReferencedId("경매", auction.getId());
+                    log.debug("Found Images: {}", images);
+                    auction.setImages(images != null ? images : (List<ImageModel>) imageService.findByTypeAndUploadPath("에러", "error"));
+
+                    return auction;
+                })
+                .orElseGet(() -> {
+                    log.warn("Auction not found for id: {}", id);
+                    return null;
+                });
     }
 
     @Override
@@ -76,6 +82,7 @@ public class AuctionServiceImpl implements AuctionService {
         return repository.findByProduct(sizeId, order, cursor, pageable);
     }
 
+    // TODO user 호출할 때 id 기준으로 바꿀 것
     @Override
     public Slice<AuctionDto> findByUser(String token, String user, String period, Long cursor, Pageable pageable) {
         log.info("Find All Auctions By User: {}", user);
