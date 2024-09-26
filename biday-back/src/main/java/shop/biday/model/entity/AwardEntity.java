@@ -28,7 +28,7 @@ public class AwardEntity {
     @JoinColumn(name = "auction_id", nullable = false)
     private AuctionEntity auction;
 
-    @Column(name = "user", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private String user;
 
     @Column(name = "bided_at", nullable = false)

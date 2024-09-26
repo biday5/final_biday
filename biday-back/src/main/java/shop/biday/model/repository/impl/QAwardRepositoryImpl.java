@@ -41,7 +41,7 @@ public class QAwardRepositoryImpl implements QAwardRepository {
     }
 
     @Override
-    public Slice<AwardModel> findByUserEmail(String user, String period, LocalDateTime cursor, Pageable pageable) {
+    public Slice<AwardModel> findByUser(String userId, String period, LocalDateTime cursor, Pageable pageable) {
         LocalDateTime startDate = switch (period) {
             case "3개월" -> LocalDateTime.now().minus(3, ChronoUnit.MONTHS);
             case "6개월" -> LocalDateTime.now().minus(6, ChronoUnit.MONTHS);
@@ -63,7 +63,7 @@ public class QAwardRepositoryImpl implements QAwardRepository {
                 .leftJoin(qAward.auction, qAuction)
                 .leftJoin(qAuction.size, qSize)
                 .leftJoin(qSize.product, qProduct)
-                .where(qAward.user.eq(user)
+                .where(qAward.user.eq(userId)
                         .and(datePredicate)
                         .and(cursorPredicate))
                 .orderBy(qAward.bidedAt.desc())

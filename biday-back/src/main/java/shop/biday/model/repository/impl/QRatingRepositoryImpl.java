@@ -17,10 +17,20 @@ public class QRatingRepositoryImpl implements QRatingRepository {
     private final QRatingEntity qRating = QRatingEntity.ratingEntity;
 
     @Override
-    public List<RatingEntity> findBySeller(Long userId) {
+    public List<RatingEntity> findBySeller(String sellerId) {
         return queryFactory
                 .selectFrom(qRating)
-                .where(qRating.userId.eq(userId))
+                .where(qRating.sellerId.eq(sellerId))
+                .fetch();
+    }
+
+    // TODO sellerId 기준으로 해서 rate avg() 해서 가져오게 하기
+    @Override
+    public double findSellerRating(String sellerId) {
+        return queryFactory
+                .select(qRating.rate.avg())
+                .from(qRating)
+                .where(qRating.sellerId.eq(sellerId))
                 .fetch();
     }
 }

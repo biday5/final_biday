@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import shop.biday.model.dto.AwardDto;
 import shop.biday.model.dto.ProductDto;
 import shop.biday.model.dto.SizeDto;
+import shop.biday.model.dto.UserDto;
 import shop.biday.model.entity.AuctionEntity;
 import shop.biday.model.repository.ProductRepository;
 
@@ -18,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AuctionModel {
     private Long id;
-    private String user;
+    private UserDto user;
     private SizeDto size;
     private String description;
     private Long startingBid;

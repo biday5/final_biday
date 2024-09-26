@@ -24,7 +24,7 @@ public class AuctionEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "user", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private String user;
 
     @ManyToOne(fetch = FetchType.LAZY)

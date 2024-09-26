@@ -17,10 +17,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.domain.ImageModel;
-import shop.biday.model.dto.AuctionDto;
-import shop.biday.model.dto.AwardDto;
-import shop.biday.model.dto.ProductDto;
-import shop.biday.model.dto.SizeDto;
+import shop.biday.model.dto.*;
 import shop.biday.model.entity.*;
 import shop.biday.model.repository.QAuctionRepository;
 import shop.biday.service.ImageService;
@@ -43,12 +40,16 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
     private final QSizeEntity qSize = QSizeEntity.sizeEntity;
     private final QWishEntity qWish = QWishEntity.wishEntity;
 
+    // TODO : USER Q클래스 사용할 수 없기 때문에, 그냥 UserDto 클래스 호출해서 Id랑 사진만 담아서 보내지는지 확인 할 것
     @Override
     public AuctionModel findByAuctionId(Long id) {
         AuctionModel auction = queryFactory
                 .select(Projections.constructor(AuctionModel.class,
                         qAuction.id,
-                        qAuction.user,
+                        Projections.constructor(UserDto.class,
+                                qAuction.sellerId,
+                                createDefaultImageProjection()),
+//                        qAuction.user,
                         createSizeDtoProjection(),
                         qAuction.description,
                         qAuction.startingBid,
