@@ -14,6 +14,7 @@ import shop.biday.model.entity.AuctionEntity;
 import shop.biday.model.repository.AuctionRepository;
 import shop.biday.model.repository.UserRepository;
 import shop.biday.oauth2.jwt.JWTUtil;
+import shop.biday.scheduler.QuartzService;
 import shop.biday.service.AuctionService;
 import shop.biday.service.ImageService;
 import shop.biday.service.RatingService;
@@ -35,6 +36,7 @@ public class AuctionServiceImpl implements AuctionService {
     private final ImageService imageService;
     private final SizeService sizeService;
     private final RatingService ratingService;
+    private final QuartzService quartzService;
 
     @Override
     public AuctionModel findById(Long id) {
@@ -99,7 +101,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public AuctionEntity save(String token, AuctionModel auction) {
         log.info("Save Auction started");
-        return validateUser(token)
+        AuctionEntity auctionEntity = validateUser(token)
                 .map(t -> {
                     setStartingBid(auction);
                     return auctionRepository.save(AuctionEntity.builder()
@@ -113,6 +115,9 @@ public class AuctionServiceImpl implements AuctionService {
                             .build());
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token or not a seller"));
+
+        quartzService.createJob(auctionEntity.getId(), auctionEntity.getEndedAt());
+        return auctionEntity;
     }
 
     @Override

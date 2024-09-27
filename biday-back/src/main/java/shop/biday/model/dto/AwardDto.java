@@ -18,5 +18,5 @@ public class AwardDto {
     private String userId;
     private LocalDateTime bidedAt;
     private BigInteger currentBid;
-    private int count;
+    private Long count;
 }

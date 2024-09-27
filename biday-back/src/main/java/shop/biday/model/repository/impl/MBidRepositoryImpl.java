@@ -51,4 +51,12 @@ public class MBidRepositoryImpl implements MBidRepository {
                 )
                 .map(result -> result.getModifiedCount() > 0);
     }
+
+    @Override
+    public Mono<Long> countByAuctionIdAndUserId(Long auctionId, String userId) {
+        Query query = new Query();
+        query.addCriteria(where("auctionId").is(auctionId)
+                .and("userId").is(userId));
+        return mongoTemplate.count(query, BidDocument.class);
+    }
 }

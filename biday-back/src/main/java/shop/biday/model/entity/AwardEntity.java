@@ -39,5 +39,5 @@ public class AwardEntity {
 
     @ColumnDefault("1")
     @Column(name = "count", nullable = false)
-    private int count;
+    private Long count;
 }

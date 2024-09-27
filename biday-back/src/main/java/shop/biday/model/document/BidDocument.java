@@ -27,7 +27,7 @@ public class BidDocument {
     private Long auctionId;
 
     @Field(write = Write.ALWAYS)
-    private Long userId;
+    private String userId;
 
     @Field(write = Write.ALWAYS)
     private BigInteger currentBid;
