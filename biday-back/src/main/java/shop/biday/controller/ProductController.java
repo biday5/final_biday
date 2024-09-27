@@ -21,7 +21,6 @@ import java.util.Map;
 
 @CrossOrigin
 @RestController
-//@Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/products")
 @Tag(name = "products", description = "Product Controller")
