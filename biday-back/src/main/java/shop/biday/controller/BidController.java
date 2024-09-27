@@ -57,4 +57,14 @@ public class BidController {
                     }
                 });
     }
+
+    public boolean doOnClose(Long auctionId) {
+        if (bidSinks.containsKey(auctionId)) {
+            Sinks.Many<BidResponse> bidSink = bidSinks.get(auctionId);
+            bidSink.tryEmitComplete();
+            bidSinks.remove(auctionId);
+            return true;
+        }
+        return false;
+    }
 }

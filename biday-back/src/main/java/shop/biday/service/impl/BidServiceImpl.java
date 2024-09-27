@@ -43,12 +43,21 @@ public class BidServiceImpl implements BidService {
 
     @Override
     public Mono<BidDocument> findTopBidByAuctionId(Long auctionId) {
-        return bidRepository.findFirstByAuctionIdOrderByCurrentBidDescAndBidedAtAsc(auctionId).log();
+        return bidRepository.findFirstByAuctionIdOrderByCurrentBidDescAndBidedAtAsc(auctionId)
+                .next()
+                .log();
     }
 
     @Override
     public Mono<Boolean> updateAward(Long auctionId) {
         return bidRepository.findFirstByAuctionIdOrderByCurrentBidDescAndBidedAtAsc(auctionId)
-                .flatMap(findBid -> bidRepository.updateAward(findBid.getId())).log();
+                .next()
+                .flatMap(findBid -> bidRepository.updateAward(findBid.getId()))
+                .log();
+    }
+
+    @Override
+    public Mono<Long> countBidByAuctionIdAndUserId(Long auctionId, String userId) {
+        return bidRepository.countByAuctionIdAndUserId(auctionId, userId);
     }
 }

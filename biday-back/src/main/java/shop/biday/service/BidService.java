@@ -12,4 +12,6 @@ public interface BidService {
     Mono<BidDocument> findTopBidByAuctionId(Long auctionId);
 
     Mono<Boolean> updateAward(Long auctionId);
+
+    Mono<Long> countBidByAuctionIdAndUserId(Long auctionId, String userId);
 }
