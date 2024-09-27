@@ -11,9 +11,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-import shop.biday.oauth2.OauthDto.CustomOAuth2User;
 import shop.biday.model.domain.UserModel;
 import shop.biday.model.entity.enums.Role;
+import shop.biday.oauth2.OauthDto.CustomOAuth2User;
 
 import java.io.IOException;
 import java.io.PrintWriter;

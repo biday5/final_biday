@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface RatingService {
     double findSellerRate(String sellerId);
+
     List<RatingEntity> findBySeller(String token, String sellerId);
+
     RatingEntity save(String token, RatingModel ratingModel);
 }

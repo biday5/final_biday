@@ -16,7 +16,7 @@ public class CustomOAuth2User implements OAuth2User {
     public CustomOAuth2User(UserModel userModel) {
 
 
-        this.userModel =userModel;
+        this.userModel = userModel;
     }
 
     @Override
@@ -31,6 +31,7 @@ public class CustomOAuth2User implements OAuth2User {
         authorities.add(new SimpleGrantedAuthority(userModel.getRoleAsString()));
         return authorities;
     }
+
     @Override
     public String getName() {
 

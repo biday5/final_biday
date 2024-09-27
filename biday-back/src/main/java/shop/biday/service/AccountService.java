@@ -8,9 +8,14 @@ import java.util.Optional;
 
 public interface AccountService {
     List<AccountEntity> findAll();
+
     Optional<AccountEntity> findById(Long id);
+
     AccountEntity save(AccountModel accountModel);
+
     boolean existsById(Long id);
+
     long count();
+
     void deleteById(Long id);
 }

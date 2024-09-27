@@ -1,6 +1,7 @@
 package shop.biday.model.repository.impl;
 
-import com.querydsl.core.types.*;
+import com.querydsl.core.types.ConstructorExpression;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -24,7 +25,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import static com.querydsl.core.group.GroupBy.*;
+import static com.querydsl.core.group.GroupBy.groupBy;
+import static com.querydsl.core.group.GroupBy.set;
 
 @Slf4j
 @Repository
@@ -93,7 +95,7 @@ public class QProductRepositoryImpl implements QProductRepository {
                         wishCount(),
                         createDefaultImageProjection(),
                         set(createDefaultSizeProjection())
-                        )));
+                )));
     }
 
     private ConstructorExpression<ProductDto> createProductDtoProjection() {

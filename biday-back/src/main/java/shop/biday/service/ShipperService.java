@@ -8,8 +8,12 @@ import java.util.Optional;
 
 public interface ShipperService {
     List<ShipperEntity> findAll();
+
     Optional<ShipperEntity> findById(Long id);
+
     ShipperEntity save(String token, ShipperModel brand);
+
     ShipperEntity update(String token, ShipperModel brand);
+
     String deleteById(String token, Long id);
 }

@@ -38,7 +38,7 @@ public class ShipperEntity {
     @Column(name = "estimated_delivery_date", nullable = false)
     private LocalDateTime estimatedDeliveryDate;
 
-    @Column(name = "delivery_date", nullable = true)
+    @Column(name = "delivery_date")
     private LocalDateTime deliveryDate;
 
     @Column(name = "status", nullable = false)
@@ -52,6 +52,6 @@ public class ShipperEntity {
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = true, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "updated_at", insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 }

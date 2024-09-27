@@ -11,9 +11,14 @@ import java.util.Optional;
 @Repository
 public interface BrandRepository extends JpaRepository<BrandEntity, Long> {
     List<BrandEntity> findAll();
+
     Optional<BrandEntity> findById(Long id);
+
     BrandEntity findByName(String brandName);
+
     boolean existsById(Long id);
+
     BrandEntity save(BrandModel brand);
+
     void deleteById(Long id);
 }

@@ -8,7 +8,6 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.util.IOUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +23,6 @@ import shop.biday.service.ImageService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -151,7 +149,7 @@ public class ImageServiceImpl implements ImageService {
             return "업로드할 파일이 비어있습니다.";
         }
 
-        for(MultipartFile file : multipartFiles) {
+        for (MultipartFile file : multipartFiles) {
             String originalFileName = file.getOriginalFilename();
             String uploadFileName = getUuidFileName(originalFileName);
             String uploadFileUrl = uploadToS3(file, image.getUploadPath(), uploadFileName, originalFileName, resultMessage);

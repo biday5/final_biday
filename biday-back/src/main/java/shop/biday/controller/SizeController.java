@@ -9,14 +9,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import shop.biday.model.domain.BrandModel;
 import shop.biday.model.domain.SizeModel;
-import shop.biday.model.entity.BrandEntity;
 import shop.biday.model.entity.SizeEntity;
 import shop.biday.service.SizeService;
 
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin
 @RestController

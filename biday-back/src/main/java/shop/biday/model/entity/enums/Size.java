@@ -15,7 +15,9 @@ public enum Size {
 
     private final String size;
 
-    public String getSize() { return size; }
+    public String getSize() {
+        return size;
+    }
 
     public static Size fromString(String roleString) {
         for (Size s : Size.values()) {

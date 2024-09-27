@@ -8,8 +8,12 @@ import java.util.Optional;
 
 public interface CategoryService {
     List<CategoryEntity> findAll();
+
     Optional<CategoryEntity> findById(Long id);
+
     CategoryEntity save(String token, CategoryModel category);
+
     CategoryEntity update(String token, CategoryModel category);
+
     String deleteById(String token, Long id);
 }

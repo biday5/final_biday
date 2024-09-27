@@ -1,7 +1,6 @@
 package shop.biday.model.repository.impl;
 
 import com.querydsl.core.types.ConstructorExpression;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -10,22 +9,21 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.domain.ImageModel;
-import shop.biday.model.dto.*;
+import shop.biday.model.dto.AuctionDto;
+import shop.biday.model.dto.AwardDto;
+import shop.biday.model.dto.ProductDto;
+import shop.biday.model.dto.SizeDto;
 import shop.biday.model.entity.*;
 import shop.biday.model.repository.QAuctionRepository;
-import shop.biday.service.ImageService;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository

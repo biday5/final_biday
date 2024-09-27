@@ -66,11 +66,11 @@ public class AuctionController {
     })
     public ResponseEntity<Slice<AuctionDto>> findByUser(
             @RequestHeader("Authorization") String token,
-            @RequestParam(value = "email", required = true) String user,
+            @RequestParam(value = "userId", required = true) String userId,
             @RequestParam(value = "period", required = false, defaultValue = "3개월") String period,
             @RequestParam(value = "cursor", required = false) Long cursor,
             Pageable pageable) {
-        return ResponseEntity.ok(auctionService.findByUser(token, user, period, cursor, pageable));
+        return ResponseEntity.ok(auctionService.findByUser(token, userId, period, cursor, pageable));
     }
 
     @PostMapping
@@ -80,7 +80,7 @@ public class AuctionController {
             @ApiResponse(responseCode = "404", description = "경매 등록 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "email", description = "판매자 email", example = "example123@test.com"),
+            @Parameter(name = "userId", description = "판매자 userId", example = "66f1444c7415bc47b04b3478"),
             @Parameter(name = "product", description = "경매로 등록할 상품, product의 findById 사용해서 선택!", example = "1"),
             @Parameter(name = "description", description = "경매로 등록할 판매자 상품의 사진", example = "경매로 등록할 판매자 상품의 사진"),
             @Parameter(name = "startingBid", description = "경매 시작가, 상품 가격의 반값or40%로 시작", example = "50000"),
@@ -99,7 +99,7 @@ public class AuctionController {
             @ApiResponse(responseCode = "404", description = "경매 수정 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "email", description = "변경 불가, 판매자 email", example = "example123@test.com"),
+            @Parameter(name = "userId", description = "변경 불가, 판매자 userId", example = "66f1444c7415bc47b04b3478"),
             @Parameter(name = "product", description = "변경 불가, 경매로 등록할 상품, product의 findById 사용해서 선택!", example = "1"),
             @Parameter(name = "description", description = "변경 불가, 경매로 등록할 판매자 상품의 사진", example = "경매로 등록할 판매자 상품의 사진"),
             @Parameter(name = "startingBid", description = "변경 불가, 경매 시작가, 상품 가격의 반값or40%로 시작", example = "50000"),

@@ -10,8 +10,6 @@ import shop.biday.model.repository.QPaymentRepository;
 
 import java.util.List;
 
-import static com.querydsl.core.group.GroupBy.*;
-
 @Repository
 @RequiredArgsConstructor
 public class QPaymentRepositoryImpl implements QPaymentRepository {

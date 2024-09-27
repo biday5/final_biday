@@ -15,11 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.UserModel;
 import shop.biday.model.dto.UserDto;
 import shop.biday.model.entity.UserEntity;
-import shop.biday.service.UserService;
 import shop.biday.service.impl.UserServiceImpl;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -38,7 +36,7 @@ public class UserController {
     })
     @Parameter(description = "비밀번호 변경 요청", required = true)
     public ResponseEntity<String> changePassword(@RequestBody UserModel userModel) {
-            return ResponseEntity.ok(userService.changePassword(userModel));
+        return ResponseEntity.ok(userService.changePassword(userModel));
     }
 
     @PostMapping("/email")
@@ -53,7 +51,7 @@ public class UserController {
     @Parameter(name = "phone", description = "이메일을 조회할 전화번호", example = "123-456-7890"
     )
     public ResponseEntity<String> getEmailByPhone(@RequestBody UserModel userModel) {
-            return ResponseEntity.ok(userService.getEmailByPhone(userModel));
+        return ResponseEntity.ok(userService.getEmailByPhone(userModel));
     }
 
     @PostMapping("/password")

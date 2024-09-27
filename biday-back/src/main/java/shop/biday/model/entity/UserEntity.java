@@ -1,9 +1,11 @@
 package shop.biday.model.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 import lombok.*;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -31,8 +33,8 @@ public class UserEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "oauthUser ", nullable = true)
-    private String oauthUser ;
+    @Column(name = "oauthUser ")
+    private String oauthUser;
 
     @Column(name = "phone_number", nullable = false, unique = true)
     private String phone;
@@ -42,7 +44,7 @@ public class UserEntity {
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "updated_at", insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
@@ -56,7 +58,7 @@ public class UserEntity {
 
     @ColumnDefault("2.0")
     @Column(name = "total_rating", nullable = false)
-    private double totalRating ;
+    private double totalRating;
 
     // Role Enum 정의
     public enum Role {

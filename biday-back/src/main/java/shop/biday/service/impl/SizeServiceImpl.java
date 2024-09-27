@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import shop.biday.model.domain.SizeModel;
-import shop.biday.model.entity.ProductEntity;
 import shop.biday.model.entity.SizeEntity;
 import shop.biday.model.entity.enums.Size;
 import shop.biday.model.repository.ProductRepository;
@@ -15,7 +14,6 @@ import shop.biday.service.SizeService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Slf4j

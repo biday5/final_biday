@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface QRatingRepository {
     List<RatingEntity> findBySeller(String sellerId);
+
     double findSellerRating(String sellerId);
 }

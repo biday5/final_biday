@@ -11,9 +11,13 @@ import java.util.Optional;
 @Repository
 public interface ShipperRepository extends JpaRepository<ShipperEntity, Long> {
     List<ShipperEntity> findAll();
+
     Optional<ShipperEntity> findById(Long id);
-//    ShipperEntity findByName(String brandName);
+
+    //    ShipperEntity findByName(String brandName);
     boolean existsById(Long id);
+
     ShipperEntity save(ShipperModel brand);
+
     void deleteById(Long id);
 }

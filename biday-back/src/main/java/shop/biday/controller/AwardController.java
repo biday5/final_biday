@@ -12,7 +12,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.AwardModel;
-import shop.biday.model.dto.AwardDto;
 import shop.biday.service.AwardService;
 
 import java.time.LocalDateTime;
@@ -38,7 +37,7 @@ public class AwardController {
     })
     public ResponseEntity<Slice<AwardModel>> findByUser(
             @RequestHeader("Authorization") String token,
-            @RequestParam(value = "email", required = true) String user,
+            @RequestParam(value = "userId", required = true) String user,
             @RequestParam(value = "period", required = false, defaultValue = "3개월") String period,
             @RequestParam(value = "cursor", required = false) LocalDateTime cursor,
             Pageable pageable) {
@@ -51,7 +50,7 @@ public class AwardController {
             @ApiResponse(responseCode = "200", description = "낙찰 불러오기 성공"),
             @ApiResponse(responseCode = "404", description = "낙찰 찾을 수 없음")
     })
-        @Parameter(name = "id", description = "상세보기할 낙찰의 id", example = "1")
+    @Parameter(name = "id", description = "상세보기할 낙찰의 id", example = "1")
     public ResponseEntity<AwardModel> findById(
             @RequestHeader("Authorization") String token,
             @RequestParam(value = "id", required = true) Long id) {

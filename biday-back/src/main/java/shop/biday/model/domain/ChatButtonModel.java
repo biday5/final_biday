@@ -1,6 +1,5 @@
 package shop.biday.model.domain;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

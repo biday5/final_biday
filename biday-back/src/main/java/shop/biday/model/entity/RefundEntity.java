@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.UpdateTimestamp;
-import shop.biday.model.entity.enums.PaymentStatus;
 
 import java.time.LocalDateTime;
 

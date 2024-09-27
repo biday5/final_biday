@@ -20,30 +20,42 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<AccountEntity> findAll() {
         return accountRepository.findAll();
-    };
+    }
+
+    ;
 
     @Override
     public Optional<AccountEntity> findById(Long id) {
         return accountRepository.findById(id);
-    };
+    }
+
+    ;
 
     @Override
-    public AccountEntity save(AccountModel accountModel){
+    public AccountEntity save(AccountModel accountModel) {
         return null;
-    };
+    }
+
+    ;
 
     @Override
-    public boolean existsById(Long id){
+    public boolean existsById(Long id) {
         return accountRepository.existsById(id);
-    };
+    }
+
+    ;
 
     @Override
     public long count() {
         return accountRepository.count();
-    };
+    }
+
+    ;
 
     @Override
     public void deleteById(Long id) {
         accountRepository.deleteById(id);
-    };
+    }
+
+    ;
 }

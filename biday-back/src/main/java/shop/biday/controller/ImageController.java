@@ -86,7 +86,7 @@ public class ImageController {
     @Operation(summary = "이미지 업데이트", description = "ID로 기존 이미지를 업데이트합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "사진 수정 성공"),
-            @ApiResponse(responseCode = "404", description = "사진 수정 성공")
+            @ApiResponse(responseCode = "404", description = "사진 수정 실패")
     })
     @Parameters(value = {
             @Parameter(description = "업데이트할 이미지 파일"),

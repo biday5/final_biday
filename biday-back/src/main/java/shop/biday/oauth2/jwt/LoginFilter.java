@@ -6,8 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,7 +21,6 @@ import shop.biday.utils.RedisTemplateUtils;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,7 +35,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
-    private final RedisTemplateUtils<String > redisTemplateUtils;
+    private final RedisTemplateUtils<String> redisTemplateUtils;
     private final LoginHistoryServiceImpl loginHistoryService;
 
     @Override
@@ -59,7 +56,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String email = customUserDetails.getEmail();
         String name = customUserDetails.getName();
-        Long   id    = customUserDetails.getId();
+        Long id = customUserDetails.getId();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -67,12 +64,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        String access = jwtUtil.createJwt(ACCESS_TOKEN_TYPE, email, role, name,  ACCESS_TOKEN_EXPIRY_MS);
-        String refresh = jwtUtil.createJwt(REFRESH_TOKEN_TYPE, email, role, name,  REFRESH_TOKEN_EXPIRY_MS);
+        String access = jwtUtil.createJwt(ACCESS_TOKEN_TYPE, email, role, name, ACCESS_TOKEN_EXPIRY_MS);
+        String refresh = jwtUtil.createJwt(REFRESH_TOKEN_TYPE, email, role, name, REFRESH_TOKEN_EXPIRY_MS);
 
         addRefreshEntity(email, refresh, REFRESH_TOKEN_EXPIRY_MS);
 
-        if(loginHistoryService.findByUserId(id).isEmpty()) {
+        if (loginHistoryService.findByUserId(id).isEmpty()) {
             LoginHistoryModel loginHistoryModel = new LoginHistoryModel();
             loginHistoryModel.setUserId(id);
             loginHistoryService.save(loginHistoryModel);
@@ -105,7 +102,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     private void addRefreshEntity(String email, String refresh, Long expiredMs) {
-        redisTemplateUtils.save(email,refresh,expiredMs);
+        redisTemplateUtils.save(email, refresh, expiredMs);
     }
 }
 

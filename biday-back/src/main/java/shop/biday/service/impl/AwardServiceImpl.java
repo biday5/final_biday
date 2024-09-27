@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-import shop.biday.model.dto.AwardDto;
 import shop.biday.model.domain.AwardModel;
 import shop.biday.model.entity.AwardEntity;
 import shop.biday.model.repository.AwardRepository;

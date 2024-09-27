@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import shop.biday.model.domain.BrandModel;
 import shop.biday.model.domain.ShipperModel;
 import shop.biday.model.entity.ShipperEntity;
 import shop.biday.service.ShipperService;
