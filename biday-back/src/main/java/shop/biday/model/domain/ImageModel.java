@@ -1,11 +1,9 @@
 package shop.biday.model.domain;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -17,11 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ImageModel {
     private String id;
-    private String name;
-    private String ext;
-    private String url;
+    private String originalName;
+    private String uploadName;
+    private String uploadPath;
+    private String uploadUrl;
     private String type;
-    private Long referenceId;
+    private Long referencedId;
     private LocalDateTime createdAt;
-//    private int ratingValue;
+    private LocalDateTime updatedAt;
 }

@@ -7,8 +7,12 @@ import java.util.Optional;
 
 public interface AnnouncementService {
     List<AnnouncementModel> findAll();
+
     AnnouncementModel save(AnnouncementModel announcementModel);
+
     Optional<AnnouncementModel> findById(Long id);
+
     void deleteById(Long id);
+
     boolean existsById(Long id);
 }

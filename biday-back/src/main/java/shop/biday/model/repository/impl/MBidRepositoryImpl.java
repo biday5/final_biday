@@ -45,10 +45,10 @@ public class MBidRepositoryImpl implements MBidRepository {
     @Override
     public Mono<Boolean> updateAward(String id) {
         return mongoTemplate.updateFirst(
-                query(where("id").is(id)),
-                update("award", true),
-                BidDocument.class
-        )
+                        query(where("id").is(id)),
+                        update("award", true),
+                        BidDocument.class
+                )
                 .map(result -> result.getModifiedCount() > 0);
     }
 }

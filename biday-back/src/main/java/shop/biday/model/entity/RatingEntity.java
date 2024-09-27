@@ -23,8 +23,11 @@ public class RatingEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(name = "payment_id", nullable = false)
+    private Long paymentId;
+
+    @Column(name = "seller_id", nullable = false)
+    private String sellerId;
 
     @ColumnDefault("1")
     @Column(name = "rating", nullable = false)

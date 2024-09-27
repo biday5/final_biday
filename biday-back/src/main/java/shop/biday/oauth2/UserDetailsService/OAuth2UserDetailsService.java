@@ -1,7 +1,6 @@
 package shop.biday.oauth2.UserDetailsService;
 
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -9,13 +8,13 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import shop.biday.model.domain.UserModel;
+import shop.biday.model.entity.UserEntity;
+import shop.biday.model.entity.enums.Role;
+import shop.biday.model.repository.UserRepository;
 import shop.biday.oauth2.OauthDto.CustomOAuth2User;
 import shop.biday.oauth2.OauthDto.NaverResponse;
 import shop.biday.oauth2.OauthDto.OAuth2Response;
-import shop.biday.model.domain.UserModel;
-import shop.biday.model.entity.enums.Role;
-import shop.biday.model.entity.UserEntity;
-import shop.biday.model.repository.UserRepository;
 
 @Slf4j
 @Service
@@ -77,7 +76,7 @@ public class OAuth2UserDetailsService extends DefaultOAuth2UserService {
                         .totalRating(2.0)
                         .build();
 
-                Long id =userRepository.save(userEntity).getId();
+                Long id = userRepository.save(userEntity).getId();
 
                 UserModel userModel = new UserModel();
                 userModel.setId(id);

@@ -1,8 +1,10 @@
 package shop.biday.model.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
-import shop.biday.model.domain.ImageModel;
 
 import java.time.LocalDateTime;
 
@@ -13,8 +15,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AuctionDto {
     private Long id;
-    private Long userId;
+    private String userId;
     private String product;
+    private String size;
     private Long startingBid;
     private Long currentBid;
     private LocalDateTime startedAt;

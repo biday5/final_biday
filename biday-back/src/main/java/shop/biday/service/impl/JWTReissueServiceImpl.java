@@ -1,20 +1,17 @@
 package shop.biday.service.impl;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.http.Cookie;
 import shop.biday.oauth2.jwt.JWTUtil;
 import shop.biday.utils.RedisTemplateUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -27,7 +24,7 @@ public class JWTReissueServiceImpl {
     private static final String REFRESH_TOKEN_TYPE = "refresh";
 
     private final JWTUtil jwtUtil;
-    private final RedisTemplateUtils<String > redisTemplateUtils;
+    private final RedisTemplateUtils<String> redisTemplateUtils;
 
     public Map<String, String> refreshToken(HttpServletRequest request, HttpServletResponse response) {
 
@@ -73,8 +70,9 @@ public class JWTReissueServiceImpl {
     }
 
     private void addRefreshEntity(String email, String refresh, Long expiredMs) {
-        redisTemplateUtils.save(email,refresh,expiredMs);
+        redisTemplateUtils.save(email, refresh, expiredMs);
     }
+
     private void deleteRefreshToken(String email) {
         redisTemplateUtils.delete(email);
     }

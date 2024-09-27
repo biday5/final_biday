@@ -15,7 +15,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RatingModel {
     private Long id;
-    private Long userId;
+    private Long paymentId;
+    private String sellerId;
     private int rating;
     private LocalDateTime createdAt;
 }

@@ -18,13 +18,12 @@ import shop.biday.model.domain.ImageModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.AwardDto;
 import shop.biday.model.dto.ProductDto;
+import shop.biday.model.dto.SizeDto;
 import shop.biday.model.entity.*;
 import shop.biday.model.repository.QAuctionRepository;
-import shop.biday.service.ImageService;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -37,17 +36,21 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
     private final QBrandEntity qBrand = QBrandEntity.brandEntity;
     private final QCategoryEntity qCategory = QCategoryEntity.categoryEntity;
     private final QAwardEntity qAward = QAwardEntity.awardEntity;
-    private final QUserEntity qUser = QUserEntity.userEntity;
+    private final QSizeEntity qSize = QSizeEntity.sizeEntity;
     private final QWishEntity qWish = QWishEntity.wishEntity;
-    private final ImageService imageRepository;
 
+    // TODO : USER Q클래스 사용할 수 없기 때문에, 그냥 UserDto 클래스 호출해서 Id랑 사진만 담아서 보내지는지 확인 할 것
     @Override
     public AuctionModel findByAuctionId(Long id) {
         AuctionModel auction = queryFactory
                 .select(Projections.constructor(AuctionModel.class,
                         qAuction.id,
+//                        (Expression<?>) Projections.constructor(UserDto.class,
+//                                qAuction.user,
+//                                "user_name", // 이게 과연 될까???
+//                                createDefaultImageProjection()),
                         qAuction.userId,
-                        createProductDtoProjection(),
+                        createSizeDtoProjection(),
                         qAuction.description,
                         qAuction.startingBid,
                         qAuction.currentBid,
@@ -60,33 +63,25 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                         Projections.constructor(AwardDto.class,
                                 qAward.id,
                                 qAward.auction.id.as("auction"),
-                                qAward.user.email.as("user"),
+                                qAward.userId,
                                 qAward.bidedAt,
                                 qAward.currentBid,
                                 qAward.count)))
                 .from(qAuction)
-                .leftJoin(qAuction.product, qProduct)
+                .leftJoin(qAuction.size, qSize)
+                .leftJoin(qSize.product, qProduct)
                 .leftJoin(qProduct.brand, qBrand)
                 .leftJoin(qProduct.category, qCategory)
                 .leftJoin(qAuction.award, qAward)
-                .leftJoin(qAward.user, qUser)
                 .leftJoin(qWish).on(qProduct.id.eq(qWish.product.id))
                 .where(qAuction.id.eq(id))
                 .fetchFirst();
-
-        if (auction != null) {
-            List<ImageModel> images = imageRepository.findByTypeAndReferencedId("경매", auction.getId());
-            auction.setImages(images != null ? images : new ArrayList<>());
-
-            ImageModel productImage = imageRepository.findByNameAndType(auction.getProduct().getProductCode(), "상품");
-            auction.getProduct().setImage(productImage != null ? productImage : imageRepository.findByType("에러"));
-        }
 
         return auction;
     }
 
     @Override
-    public Slice<AuctionDto> findByUser(Long userId, String period, Long cursor, Pageable pageable) {
+    public Slice<AuctionDto> findByUser(String user, String period, Long cursor, Pageable pageable) {
         LocalDateTime startDate = switch (period) {
             case "3개월" -> LocalDateTime.now().minus(3, ChronoUnit.MONTHS);
             case "6개월" -> LocalDateTime.now().minus(6, ChronoUnit.MONTHS);
@@ -105,8 +100,9 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
         List<AuctionDto> auctions = queryFactory
                 .select(createAuctionDtoProjection())
                 .from(qAuction)
-                .leftJoin(qAuction.product, qProduct)
-                .where(qAuction.userId.eq(userId)
+                .leftJoin(qAuction.size, qSize)
+                .leftJoin(qSize.product, qProduct)
+                .where(qAuction.userId.eq(user)
                         .and(datePredicate)
                         .and(cursorPredicate))
                 .orderBy(qAuction.startedAt.desc())
@@ -116,7 +112,9 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
     }
 
     @Override
-    public Slice<AuctionDto> findByTime(String order, Long cursor, Pageable pageable) {
+    public Slice<AuctionDto> findByProduct(Long sizeId, String order, Long cursor, Pageable pageable) {
+        // TODO productId 같이 내려줘야 할 듯
+        BooleanExpression sizePredicate = sizeId != null ? qAuction.size.id.eq(sizeId) : null;
         BooleanExpression cursorPredicate = cursor != null ? qAuction.id.lt(cursor) : null;
 
         OrderSpecifier<?> datePredicate = switch (order) {
@@ -128,10 +126,14 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
         List<AuctionDto> auctions = queryFactory
                 .select(createAuctionDtoProjection())
                 .from(qAuction)
-                .leftJoin(qAuction.product, qProduct)
-                .where(cursorPredicate,
+                .leftJoin(qAuction.size, qSize)
+                .leftJoin(qSize.product, qProduct)
+                .where(
+                        sizePredicate,
+                        cursorPredicate,
                         qAuction.status.eq(false),
-                        qAuction.endedAt.goe(LocalDateTime.now()))
+                        qAuction.endedAt.goe(LocalDateTime.now())
+                )
                 .orderBy(datePredicate)
                 .fetch();
 
@@ -143,7 +145,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                 .select(qAuction.count().coalesce(0L))
                 .from(qAuction)
                 .where(qAuction.status.eq(false),
-                        qAuction.product.id.eq(qProduct.id));
+                        qAuction.size.product.id.eq(qProduct.id));
     }
 
     private JPQLQuery<Long> wishCount() {
@@ -151,6 +153,13 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                 .select(qWish.count().coalesce(0L))
                 .from(qWish)
                 .where(qWish.product.id.eq(qProduct.id));
+    }
+
+    private ConstructorExpression<SizeDto> createSizeDtoProjection() {
+        return Projections.constructor(SizeDto.class,
+                qSize.id,
+                createProductDtoProjection(),
+                qSize.size.stringValue());
     }
 
     private ConstructorExpression<ProductDto> createProductDtoProjection() {
@@ -172,9 +181,10 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
     private ConstructorExpression<ImageModel> createDefaultImageProjection() {
         return Projections.constructor(ImageModel.class,
                 Expressions.constant("defaultImageId"),
-                Expressions.constant("defaultImageName"),
-                Expressions.constant("defaultImageExt"),
-                Expressions.constant("defaultImageUrl"),
+                Expressions.constant("defaultImageOriginalName"),
+                Expressions.constant("defaultImageUploadName"),
+                Expressions.constant("defaultImageUploadName"),
+                Expressions.constant("defaultImageUploadUrl"),
                 Expressions.constant("defaultImageType"),
                 Expressions.constant(0L),
                 Expressions.constant(LocalDateTime.now())
@@ -186,6 +196,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                 qAuction.id,
                 qAuction.userId,
                 qProduct.name.as("product"),
+                qSize.size.stringValue(),
                 qAuction.startingBid,
                 qAuction.currentBid,
                 qAuction.startedAt,

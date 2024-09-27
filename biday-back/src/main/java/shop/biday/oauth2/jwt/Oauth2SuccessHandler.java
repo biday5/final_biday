@@ -7,15 +7,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import shop.biday.model.domain.LoginHistoryModel;
-import shop.biday.model.entity.LoginHistoryEntity;
 import shop.biday.oauth2.OauthDto.CustomOAuth2User;
 import shop.biday.service.impl.LoginHistoryServiceImpl;
 import shop.biday.utils.RedisTemplateUtils;
@@ -23,7 +20,6 @@ import shop.biday.utils.RedisTemplateUtils;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -40,7 +36,7 @@ public class Oauth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final JWTUtil jwtUtil;
     private final LoginHistoryServiceImpl loginHistoryService;
-    private final RedisTemplateUtils<String > redisTemplateUtils;
+    private final RedisTemplateUtils<String> redisTemplateUtils;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -48,20 +44,20 @@ public class Oauth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
         String email = customUserDetails.getEmail();
-        String name  = customUserDetails.getName();
-        Long   id    = customUserDetails.getId();
+        String name = customUserDetails.getName();
+        Long id = customUserDetails.getId();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String access = jwtUtil.createJwt(ACCESS_TOKEN_TYPE, email, role, name,  ACCESS_TOKEN_EXPIRY_MS);
-        String refresh = jwtUtil.createJwt(REFRESH_TOKEN_TYPE, email, role, name,  REFRESH_TOKEN_EXPIRY_MS);
+        String access = jwtUtil.createJwt(ACCESS_TOKEN_TYPE, email, role, name, ACCESS_TOKEN_EXPIRY_MS);
+        String refresh = jwtUtil.createJwt(REFRESH_TOKEN_TYPE, email, role, name, REFRESH_TOKEN_EXPIRY_MS);
 
         addRefreshEntity(email, refresh, REFRESH_TOKEN_EXPIRY_MS);
 
-        if(loginHistoryService.findByUserId(id).isEmpty()) {
+        if (loginHistoryService.findByUserId(id).isEmpty()) {
             LoginHistoryModel loginHistoryModel = new LoginHistoryModel();
             loginHistoryModel.setUserId(id);
             loginHistoryService.save(loginHistoryModel);
@@ -86,6 +82,6 @@ public class Oauth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     private void addRefreshEntity(String email, String refresh, Long expiredMs) {
-        redisTemplateUtils.save(email,refresh,expiredMs);
+        redisTemplateUtils.save(email, refresh, expiredMs);
     }
 }

@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import shop.biday.model.entity.FaqEntity;
 
 @Repository
-public interface FaqRepository extends JpaRepository <FaqEntity, Long>{
+public interface FaqRepository extends JpaRepository<FaqEntity, Long> {
 }

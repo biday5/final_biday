@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import shop.biday.model.domain.ImageModel;
 import shop.biday.model.domain.UserModel;
+import shop.biday.model.dto.UserDto;
 import shop.biday.model.entity.AddressEntity;
-import shop.biday.model.entity.enums.AddressType;
 import shop.biday.model.entity.UserEntity;
+import shop.biday.model.entity.enums.AddressType;
 import shop.biday.model.repository.AddressRepository;
 import shop.biday.model.repository.UserRepository;
+import shop.biday.service.ImageService;
 import shop.biday.service.UserService;
 
 import java.util.List;
@@ -22,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AddressRepository addressRepository;
+    private final ImageService imageService;
 
     @Override
     public List<UserEntity> findAll() {
@@ -33,9 +37,34 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id);
     }
 
+    // TODO 프론트에서 등급, 에러 이미지 관리할 것 UserDto 이미지 다 빼고 totalRate 넣는 걸로 바꾸기
+    @Override
+    public UserDto findByUserId(String id) {
+        log.info("Find User: {}", id);
+        UserEntity user = userRepository.findByEmail(id);
+        log.info("Find User: {}", user);
+        return Optional.ofNullable(user)
+                .map(u -> {
+                    log.info("Find User Image: {}", u.getId());
+                    int rate = (int) u.getTotalRating();
+                    ImageModel userImage = imageService.findByTypeAndReferencedIdAndUploadPath("평점", String.valueOf(rate), "rate");
+                    if (userImage == null) {
+                        imageService.findByTypeAndUploadPath("에러", "error");
+                    }
+
+                    UserDto userDto = new UserDto(u.getEmail(), u.getName(), userImage);
+                    log.debug("Find User success: {}", userDto);
+                    return userDto;
+                })
+                .orElseGet(() -> {
+                    log.error("Find User failed");
+                    return null;
+                });
+    }
+
     @Override
     public UserEntity save(UserModel userModel) {
-        log.info("userModel:{}",userModel);
+        log.info("userModel:{}", userModel);
         UserEntity savedUser = userRepository.save(UserEntity.builder()
                 .name(userModel.getName())
                 .email(userModel.getEmail())

@@ -17,6 +17,8 @@ import shop.biday.model.dto.PaymentRequest;
 import shop.biday.model.dto.PaymentResponse;
 import shop.biday.service.PaymentService;
 
+import java.util.List;
+
 @Slf4j
 @CrossOrigin
 @RestController
@@ -56,5 +58,13 @@ public class PaymentController {
     public ResponseEntity<PaymentResponse> findPaymentByPaymentKey(@RequestParam("id") Long id) {
         log.info("findPaymentByPaymentKey id: {}", id);
         return new ResponseEntity<>(paymentService.findPaymentByPaymentKey(id), HttpStatus.OK);
+    }
+
+    @Operation(summary = "사용자 기준 결제 내역 조회", description = "userId로 결제 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "성공")
+    @GetMapping("/findByUser")
+    public ResponseEntity<List<PaymentRequest>> findByUser(@RequestHeader("Authorization") String token) {
+        log.info("findByUser: {}", token);
+        return new ResponseEntity<>(paymentService.findByUser(token), HttpStatus.OK);
     }
 }

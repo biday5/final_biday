@@ -40,7 +40,7 @@ public class BrandController {
             @ApiResponse(responseCode = "200", description = "브랜드 불러오기 성공"),
             @ApiResponse(responseCode = "404", description = "브랜드 찾을 수 없음")
     })
-    @Parameter(name = "id", description = "상세보기할 브랜드 id", example = "1L")
+    @Parameter(name = "id", description = "상세보기할 브랜드 id", example = "1")
     public ResponseEntity<Optional<BrandEntity>> findById(@RequestParam Long id) {
         return ResponseEntity.ok(brandService.findById(id));
     }
@@ -51,10 +51,8 @@ public class BrandController {
             @ApiResponse(responseCode = "200", description = "브랜드 등록 성공"),
             @ApiResponse(responseCode = "404", description = "브랜드 등록 할 수 없음")
     })
-    @Parameters({
-            @Parameter(name = "name", description = "브랜드 이름", example = "나이키(Nike)")
-    })
-    public ResponseEntity<BrandEntity> create(@RequestHeader("access") String token, @RequestBody BrandModel brand) {
+    @Parameter(name = "name", description = "브랜드 이름", example = "나이키(Nike)")
+    public ResponseEntity<BrandEntity> create(@RequestHeader("Authorization") String token, @RequestBody BrandModel brand) {
         return ResponseEntity.ok(brandService.save(token, brand));
     }
 
@@ -69,7 +67,7 @@ public class BrandController {
             @Parameter(name = "createdAt", description = "등록 시간", example = "localDateTime 값"),
             @Parameter(name = "updatedAt", description = "수정 시간", example = "localDateTime 값")
     })
-    public ResponseEntity<BrandEntity> update(@RequestHeader("access") String token, @RequestBody BrandModel brand) {
+    public ResponseEntity<BrandEntity> update(@RequestHeader("Authorization") String token, @RequestBody BrandModel brand) {
         return ResponseEntity.ok(brandService.update(token, brand));
     }
 
@@ -79,10 +77,8 @@ public class BrandController {
             @ApiResponse(responseCode = "200", description = "브랜드 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "브랜드 삭제 할 수 없음")
     })
-    @Parameters({
-            @Parameter(name = "id", description = "브랜드 id", example = "1L")
-    })
-    public void delete(@RequestHeader("access") String token, @RequestParam Long id) {
-        brandService.deleteById(token, id);
+    @Parameter(name = "id", description = "브랜드 id", example = "1")
+    public ResponseEntity<String> delete(@RequestHeader("Authorization") String token, @RequestParam Long id) {
+        return ResponseEntity.ok(brandService.deleteById(token, id));
     }
 }

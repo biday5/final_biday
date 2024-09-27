@@ -18,12 +18,8 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import shop.biday.oauth2.UserDetailsService.OAuth2UserDetailsService;
-import shop.biday.oauth2.jwt.CustomLogoutFilter;
-import shop.biday.oauth2.jwt.JWTFilter;
-import shop.biday.oauth2.jwt.JWTUtil;
-import shop.biday.oauth2.jwt.LoginFilter;
+import shop.biday.oauth2.jwt.*;
 import shop.biday.oauth2.social.CustomClientRegistrationRepo;
-import shop.biday.oauth2.jwt.Oauth2SuccessHandler;
 import shop.biday.service.impl.LoginHistoryServiceImpl;
 import shop.biday.utils.RedisTemplateUtils;
 
@@ -41,7 +37,7 @@ public class SecurityConfig {
     private final CustomClientRegistrationRepo customClientRegistrationRepo;
     private final Oauth2SuccessHandler oauth2SuccessHandler;
     private final JWTUtil jwtUtil;
-    private final RedisTemplateUtils<String > redisTemplateUtils;
+    private final RedisTemplateUtils<String> redisTemplateUtils;
     private final LoginHistoryServiceImpl loginHistoryService;
 
     @Bean
@@ -69,7 +65,7 @@ public class SecurityConfig {
                         configuration.setMaxAge(3600L);
 
                         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                        configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization","Content-Type"));
+                        configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization", "Content-Type"));
 
                         return configuration;
                     }
@@ -97,8 +93,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisTemplateUtils,loginHistoryService), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil,redisTemplateUtils), LogoutFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisTemplateUtils, loginHistoryService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisTemplateUtils), LogoutFilter.class);
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));

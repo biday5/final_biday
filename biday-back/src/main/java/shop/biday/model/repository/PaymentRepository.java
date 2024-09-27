@@ -7,7 +7,7 @@ import shop.biday.model.entity.PaymentEntity;
 import java.util.Optional;
 
 @Repository
-public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
+public interface PaymentRepository extends JpaRepository<PaymentEntity, Long>, QPaymentRepository {
 
     Optional<PaymentEntity> findById(Long id);
 

@@ -4,8 +4,6 @@ import shop.biday.model.domain.AwardModel;
 import shop.biday.model.domain.PaymentCardModel;
 import shop.biday.model.domain.PaymentEasyPay;
 import shop.biday.model.domain.UserModel;
-import shop.biday.model.entity.AwardEntity;
-import shop.biday.model.entity.UserEntity;
 
 import java.time.LocalDateTime;
 

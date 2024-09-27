@@ -1,10 +1,11 @@
 package shop.biday.model.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 import shop.biday.model.domain.ImageModel;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -21,6 +22,6 @@ public class ProductDto {
     private Long price;
     private String color;
     private ImageModel image;
-    private Long auctions;
     private Long wishes;
+    private Long auctions; // size 리스트르 ㄹ가져와서 거기에 들어잇는 product id로 조회해서 카운트?
 }

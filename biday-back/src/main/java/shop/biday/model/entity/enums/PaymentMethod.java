@@ -22,6 +22,6 @@ public enum PaymentMethod {
                 .filter(m -> m.getName().equals(name))
                 .findFirst()
                 .orElseThrow(PaymentException::new);
-        
+
     }
 }

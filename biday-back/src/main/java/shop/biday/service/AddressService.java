@@ -8,9 +8,14 @@ import java.util.Optional;
 
 public interface AddressService {
     List<AddressEntity> findAll();
+
     Optional<AddressEntity> findById(Long id);
+
     AddressEntity save(AddressModel addressModel);
+
     boolean existsById(Long id);
+
     long count();
+
     void deleteById(Long id);
 }

@@ -1,12 +1,14 @@
 package shop.biday.model.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
-import shop.biday.model.dto.AuctionDto;
-import shop.biday.model.entity.AuctionEntity;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -25,7 +27,7 @@ public class ProductModel {
     private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private ImageModel image;
-    private List<AuctionDto> auctions;
     private Long wishes;
+    private ImageModel image;
+    private Set<SizeModel> sizes = new HashSet<>();
 }

@@ -1,5 +1,6 @@
 package shop.biday.model.repository.impl;
 
+import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -9,11 +10,11 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import shop.biday.model.domain.AwardModel;
-import shop.biday.model.domain.PaymentTempModel;
-import shop.biday.model.domain.UserModel;
 import shop.biday.model.dto.AuctionDto;
-import shop.biday.model.dto.AwardDto;
-import shop.biday.model.entity.*;
+import shop.biday.model.entity.QAuctionEntity;
+import shop.biday.model.entity.QAwardEntity;
+import shop.biday.model.entity.QProductEntity;
+import shop.biday.model.entity.QSizeEntity;
 import shop.biday.model.repository.QAwardRepository;
 
 import java.time.LocalDateTime;
@@ -28,40 +29,22 @@ public class QAwardRepositoryImpl implements QAwardRepository {
     private final QAwardEntity qAward = QAwardEntity.awardEntity;
     private final QAuctionEntity qAuction = QAuctionEntity.auctionEntity;
     private final QProductEntity qProduct = QProductEntity.productEntity;
-    private final QUserEntity qUser = QUserEntity.userEntity;
+    private final QSizeEntity qSize = QSizeEntity.sizeEntity;
 
     @Override
     public AwardModel findByAwardId(Long id) {
         return queryFactory
-                .select(Projections.constructor(AwardModel.class,
-                        qAward.id,
-                        Projections.constructor(AuctionDto.class,
-                                qAuction.id,
-                                qAuction.userId,
-                                qProduct.name.as("product"),
-                                qAuction.startingBid,
-                                qAuction.currentBid,
-                                qAuction.startedAt,
-                                qAuction.endedAt,
-                                qAuction.status,
-                                qAuction.createdAt,
-                                qAuction.updatedAt
-                        ),
-                        qUser.name.as("user"),
-                        qAward.bidedAt,
-                        qAward.currentBid,
-                        qAward.count
-                ))
+                .select(createAwardModelProjection())
                 .from(qAward)
                 .leftJoin(qAward.auction, qAuction)
-                .leftJoin(qAuction.product, qProduct)
-                .leftJoin(qAward.user, qUser)
+                .leftJoin(qAuction.size, qSize)
+                .leftJoin(qSize.product, qProduct)
                 .where(qAward.id.eq(id))
                 .fetchOne();
     }
 
     @Override
-    public Slice<AwardDto> findByUserId(Long userId, String period, LocalDateTime cursor, Pageable pageable) {
+    public Slice<AwardModel> findByUser(String userId, String period, LocalDateTime cursor, Pageable pageable) {
         LocalDateTime startDate = switch (period) {
             case "3개월" -> LocalDateTime.now().minus(3, ChronoUnit.MONTHS);
             case "6개월" -> LocalDateTime.now().minus(6, ChronoUnit.MONTHS);
@@ -77,19 +60,13 @@ public class QAwardRepositoryImpl implements QAwardRepository {
         BooleanExpression cursorPredicate = cursor != null ? qAward.bidedAt.lt(cursor) : null;
 
         // QueryDSL 쿼리 빌더
-        List<AwardDto> auctions = queryFactory
-                .select(Projections.constructor(AwardDto.class,
-                        qAward.id,
-                        qAuction.id.as("auction"),
-                        qUser.name.as("user"),
-                        qAward.bidedAt,
-                        qAward.currentBid,
-                        qAward.count))
+        List<AwardModel> auctions = queryFactory
+                .select(createAwardModelProjection())
                 .from(qAward)
                 .leftJoin(qAward.auction, qAuction)
-                .leftJoin(qAuction.product, qProduct)
-                .leftJoin(qAward.user, qUser)
-                .where(qAward.user.id.eq(userId)
+                .leftJoin(qAuction.size, qSize)
+                .leftJoin(qSize.product, qProduct)
+                .where(qAward.userId.eq(userId)
                         .and(datePredicate)
                         .and(cursorPredicate))
                 .orderBy(qAward.bidedAt.desc())
@@ -102,5 +79,30 @@ public class QAwardRepositoryImpl implements QAwardRepository {
         }
 
         return new SliceImpl<>(auctions, pageable, hasNext);
+    }
+
+    private ConstructorExpression<AwardModel> createAwardModelProjection() {
+        return Projections.constructor(AwardModel.class,
+                qAward.id,
+                createAuctionDtoProjection(),
+                qAward.userId,
+                qAward.bidedAt,
+                qAward.currentBid,
+                qAward.count);
+    }
+
+    private ConstructorExpression<AuctionDto> createAuctionDtoProjection() {
+        return Projections.constructor(AuctionDto.class,
+                qAuction.id,
+                qAuction.userId,
+                qProduct.name.as("product"),
+                qSize.size.stringValue(),
+                qAuction.startingBid,
+                qAuction.currentBid,
+                qAuction.startedAt,
+                qAuction.endedAt,
+                qAuction.status,
+                qAuction.createdAt,
+                qAuction.updatedAt);
     }
 }

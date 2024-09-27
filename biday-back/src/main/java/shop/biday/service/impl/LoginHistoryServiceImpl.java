@@ -21,23 +21,31 @@ public class LoginHistoryServiceImpl implements LoginHistoryService {
     @Override
     public List<LoginHistoryEntity> findAll() {
         return loginHistoryRepository.findAll();
-    };
+    }
+
+    ;
 
     @Override
     public Optional<LoginHistoryEntity> findById(Long id) {
         return loginHistoryRepository.findById(id);
-    };
+    }
+
+    ;
 
 
     @Override
     public boolean existsById(Long id) {
         return loginHistoryRepository.existsById(id);
-    };
+    }
+
+    ;
 
     @Override
     public long count() {
         return loginHistoryRepository.count();
-    };
+    }
+
+    ;
 
     @Override
     public void deleteById(Long id) {
@@ -57,7 +65,9 @@ public class LoginHistoryServiceImpl implements LoginHistoryService {
 
         return loginHistoryRepository.save(loginHistoryEntity);
 
-    };
+    }
+
+    ;
 
     @Override
     public Optional<LoginHistoryEntity> findByUserId(Long userId) {

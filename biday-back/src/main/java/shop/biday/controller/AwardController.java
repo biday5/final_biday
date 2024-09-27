@@ -12,7 +12,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.AwardModel;
-import shop.biday.model.dto.AwardDto;
 import shop.biday.service.AwardService;
 
 import java.time.LocalDateTime;
@@ -36,13 +35,13 @@ public class AwardController {
             @Parameter(name = "period", description = "기간별 정렬", example = "3개월"),
             @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 낙찰의 id", example = "1"),
     })
-    public ResponseEntity<Slice<AwardDto>> findByUser(
-            @RequestHeader("access") String token,
-            @RequestParam(value = "userId", required = true) Long userId,
+    public ResponseEntity<Slice<AwardModel>> findByUser(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(value = "userId", required = true) String user,
             @RequestParam(value = "period", required = false, defaultValue = "3개월") String period,
             @RequestParam(value = "cursor", required = false) LocalDateTime cursor,
             Pageable pageable) {
-        return ResponseEntity.ok(awardService.findByUser(token, userId, period, cursor, pageable));
+        return ResponseEntity.ok(awardService.findByUser(token, user, period, cursor, pageable));
     }
 
     @GetMapping("/findById")
@@ -53,7 +52,7 @@ public class AwardController {
     })
     @Parameter(name = "id", description = "상세보기할 낙찰의 id", example = "1")
     public ResponseEntity<AwardModel> findById(
-            @RequestHeader("access") String token,
+            @RequestHeader("Authorization") String token,
             @RequestParam(value = "id", required = true) Long id) {
         return ResponseEntity.ok(awardService.findByAwardId(token, id));
     }

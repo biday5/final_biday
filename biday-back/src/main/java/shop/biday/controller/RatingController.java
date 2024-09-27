@@ -2,7 +2,6 @@ package shop.biday.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,15 +24,15 @@ public class RatingController {
 
     // 판매자 마이페이지나 경매 페이지에서 보여질 판매자의 총점 반환하는 메서드 만들어야 함
 
-    // 유저의 이메일로 찾아야함
     @GetMapping
     @Operation(summary = "리뷰 목록", description = "판매자에 대한 리뷰 찾기")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "리뷰 불러오기 성공"),
-            @ApiResponse( responseCode = "404", description = "리뷰 찾을 수 없음")
+            @ApiResponse(responseCode = "404", description = "리뷰 찾을 수 없음")
     })
-    @Parameter(name = "id", description = "리뷰 불러올 판매자 id", example = "1L")
-    public ResponseEntity<List<RatingEntity>> findBySeller(@RequestHeader("access") String token, @RequestParam("id") Long sellerId) {
+    @Parameter(name = "id", description = "리뷰 불러올 판매자 id", example = "3sdfe3??")
+    // TODO : TOKEN에서 id 뽑아서 처리 할 것
+    public ResponseEntity<List<RatingEntity>> findBySeller(@RequestHeader("Authorization") String token, @RequestParam("id") String sellerId) {
         return ResponseEntity.ok(ratingService.findBySeller(token, sellerId));
     }
 
@@ -41,13 +40,10 @@ public class RatingController {
     @Operation(summary = "리뷰 등록", description = "새로운 리뷰 작성")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "리뷰 등록 성공"),
-            @ApiResponse( responseCode = "404", description = "리뷰 등록 할 수 없음")
+            @ApiResponse(responseCode = "404", description = "리뷰 등록 할 수 없음")
     })
-    @Parameters({
-            @Parameter(name = "userId", description = "판매자 id", example = "1L"),
-            @Parameter(name = "rating", description = "판매자에 대한 평가", example = "3"),
-    })
-    public ResponseEntity<RatingEntity> save(@RequestHeader("access") String token, @RequestBody RatingModel rating) {
+    @Parameter(name = "rating", description = "판매자에 대한 평가", example = "3")
+    public ResponseEntity<RatingEntity> save(@RequestHeader("Authorization") String token, @RequestBody RatingModel rating) {
         return ResponseEntity.ok(ratingService.save(token, rating));
     }
 }

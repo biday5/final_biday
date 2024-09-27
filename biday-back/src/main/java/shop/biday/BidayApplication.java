@@ -8,9 +8,9 @@ import org.springframework.data.mongodb.config.EnableReactiveMongoAuditing;
 @EnableReactiveMongoAuditing
 public class BidayApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(BidayApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(BidayApplication.class, args);
+    }
 
 }
 

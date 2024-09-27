@@ -13,12 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.UserModel;
+import shop.biday.model.dto.UserDto;
 import shop.biday.model.entity.UserEntity;
-import shop.biday.service.UserService;
 import shop.biday.service.impl.UserServiceImpl;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -37,7 +36,7 @@ public class UserController {
     })
     @Parameter(description = "비밀번호 변경 요청", required = true)
     public ResponseEntity<String> changePassword(@RequestBody UserModel userModel) {
-            return ResponseEntity.ok(userService.changePassword(userModel));
+        return ResponseEntity.ok(userService.changePassword(userModel));
     }
 
     @PostMapping("/email")
@@ -52,7 +51,7 @@ public class UserController {
     @Parameter(name = "phone", description = "이메일을 조회할 전화번호", example = "123-456-7890"
     )
     public ResponseEntity<String> getEmailByPhone(@RequestBody UserModel userModel) {
-            return ResponseEntity.ok(userService.getEmailByPhone(userModel));
+        return ResponseEntity.ok(userService.getEmailByPhone(userModel));
     }
 
     @PostMapping("/password")
@@ -116,8 +115,18 @@ public class UserController {
     }
 
     @GetMapping("/findById/{id}")
-    public Optional<UserEntity> findById(@PathVariable Long id) {
-        return userService.findById(id);
+    @Operation(summary = "아이디로 이메일 조회", description = "제공된 아이디에 연결된 유저 정보를 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "유저가 성공적으로 조회되었습니다.", content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(responseCode = "404", description = "제공된 아이디로 사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")
+            )
+    })
+    @Parameter(name = "id", description = "유저 조회할 아이디", example = "66f1442a7415bc47b04b3477"
+    )
+    public UserDto findById(@PathVariable String id) {
+        return userService.findByUserId(id);
     }
 
     @GetMapping("/existsById/{id}")
