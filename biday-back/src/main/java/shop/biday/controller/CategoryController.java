@@ -52,9 +52,10 @@ public class CategoryController {
             @ApiResponse(responseCode = "404", description = "카테고리 등록 할 수 없음")
     })
     @Parameters({
+            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "name", description = "카테고리 이름", example = "나이키(Nike)")
     })
-    public ResponseEntity<CategoryEntity> create(@RequestHeader("access") String token, @RequestBody CategoryModel category) {
+    public ResponseEntity<CategoryEntity> create(@RequestHeader("Authorization") String token, @RequestBody CategoryModel category) {
         return ResponseEntity.ok(categoryService.save(token, category));
     }
 
@@ -65,11 +66,12 @@ public class CategoryController {
             @ApiResponse(responseCode = "404", description = "카테고리 수정 할 수 없음")
     })
     @Parameters({
+            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "name", description = "카테고리 이름", example = "나이키(Nike)"),
             @Parameter(name = "createdAt", description = "등록 시간", example = "localDateTime 값"),
             @Parameter(name = "updatedAt", description = "수정 시간", example = "localDateTime 값")
     })
-    public ResponseEntity<CategoryEntity> update(@RequestHeader("access") String token, @RequestBody CategoryModel category) {
+    public ResponseEntity<CategoryEntity> update(@RequestHeader("Authorization") String token, @RequestBody CategoryModel category) {
         return ResponseEntity.ok(categoryService.update(token, category));
     }
 
@@ -80,9 +82,10 @@ public class CategoryController {
             @ApiResponse(responseCode = "404", description = "카테고리 삭제 할 수 없음")
     })
     @Parameters({
+            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "id", description = "카테고리 id", example = "1L")
     })
-    public void delete(@RequestHeader("access") String token, @RequestParam Long id) {
+    public void delete(@RequestHeader("Authorization") String token, @RequestParam Long id) {
         categoryService.deleteById(token, id);
     }
 }

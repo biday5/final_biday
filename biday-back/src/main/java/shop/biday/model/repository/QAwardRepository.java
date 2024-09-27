@@ -9,5 +9,5 @@ import java.time.LocalDateTime;
 
 public interface QAwardRepository {
     AwardModel findByAwardId(Long id);
-    Slice<AwardModel> findByUserEmail(String user, String period, LocalDateTime cursor, Pageable pageable);
+    Slice<AwardModel> findByUser(String user, String period, LocalDateTime cursor, Pageable pageable);
 }

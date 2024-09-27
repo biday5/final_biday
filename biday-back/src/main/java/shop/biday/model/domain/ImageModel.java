@@ -24,4 +24,5 @@ public class ImageModel {
     private String type;
     private Long referencedId;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

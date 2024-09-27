@@ -6,6 +6,8 @@ import shop.biday.model.dto.PaymentResponse;
 import shop.biday.model.entity.PaymentEntity;
 import shop.biday.model.entity.enums.PaymentStatus;
 
+import java.util.List;
+
 public interface PaymentService {
 
     void savePaymentTemp(PaymentTempModel paymentTempModel);
@@ -25,4 +27,6 @@ public interface PaymentService {
     PaymentResponse findPaymentByPaymentKey(Long id);
 
     PaymentEntity updateCancelStatus(Long id, PaymentStatus paymentStatus);
+
+    List<PaymentRequest> findByUser(String user);
 }

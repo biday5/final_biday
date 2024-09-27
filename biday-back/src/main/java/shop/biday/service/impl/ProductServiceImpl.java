@@ -17,6 +17,7 @@ import shop.biday.oauth2.jwt.JWTUtil;
 import shop.biday.service.ImageService;
 import shop.biday.service.ProductService;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -32,22 +33,30 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Map.Entry<Long, ProductModel>> findByProductId(Long id) {
-        Map<Long, ProductModel> map = repository.findByProductId(id, removeParentheses(repository.findById(id).get().getName()));
+        log.info("Find Product by id: {}", id);
 
-        if (map != null) {
-            for (Map.Entry<Long, ProductModel> entry : map.entrySet()) {
-                ImageModel imageModel = imageService.findByOriginalNameAndType(entry.getValue().getProductCode(), "상품");
-                if (imageModel != null) {
-                    entry.getValue().setImage(imageModel);
-                    log.debug("Product Image Found : {}", imageModel.getOriginalName());
-                } else {
-                    entry.getValue().setImage(imageService.findByTypeAndUploadPath("에러", "error"));
-                    log.debug("Product Image Not Found : {}", imageService.findByTypeAndUploadPath("에러", "error").getOriginalName());
-                }
-            }
+        if (!repository.existsById(id)) {
+            log.error("Not found product: {}", id);
+            return null;
         }
 
-        return map.entrySet().stream().toList();
+        Map<Long, ProductModel> map = repository.findByProductId(id,
+                removeParentheses(repository.findById(id).get().getName()));
+
+        if (map != null) {
+            map.forEach((key, productModel) -> {
+                ImageModel imageModel = imageService.findByOriginalNameAndType(productModel.getProductCode(), "상품");
+                productModel.setImage(imageModel != null
+                        ? imageModel
+                        : imageService.findByTypeAndUploadPath("에러", "error"));
+                log.debug(imageModel != null
+                                ? "Product Image Found : {}"
+                                : "Product Image Not Found : {}",
+                        imageModel != null ? imageModel.getOriginalName() : imageService.findByTypeAndUploadPath("에러", "error").getOriginalName());
+            });
+        }
+
+        return Objects.requireNonNull(map).entrySet().stream().toList();
     }
 
     public static String removeParentheses(String productName) {
@@ -71,6 +80,8 @@ public class ProductServiceImpl implements ProductService {
                         .price(product.getPrice())
                         .color(product.getColor())
                         .description(product.getDescription())
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
                         .build()))
                 .orElseThrow(() -> new RuntimeException("Save Product failed"));
     }
@@ -96,6 +107,8 @@ public class ProductServiceImpl implements ProductService {
                         .price(product.getPrice())
                         .color(product.getColor())
                         .description(product.getDescription())
+                        .createdAt(product.getCreatedAt())
+                        .updatedAt(LocalDateTime.now())
                         .build()))
                 .orElseThrow(() -> new RuntimeException("Update Product failed: Product not found"));
     }
@@ -173,21 +186,6 @@ public class ProductServiceImpl implements ProductService {
             return groupedProducts;
         } else return null;
     }*/
-
-    public List<ProductModel> findById(Long id) {
-        log.info("Find Product by id: {}", id);
-        return null;
-//        return Optional.of(id)
-//                .filter(t -> {
-//                    boolean exists = repository.existsById(t);
-//                    if (!exists) {
-//                        log.error("Not found product: {}", id);
-//                    }
-//                    return exists;
-//                })
-//                .map(t -> repository.findByProductId(id))
-//                .orElseThrow(() -> new RuntimeException("Product not found"));
-    }
 
     @Override
     public Slice<ProductDto> findByFilter(Pageable pageable, Long categoryId, Long brandId, String keyword, String color, String order, Long lastItemId) {

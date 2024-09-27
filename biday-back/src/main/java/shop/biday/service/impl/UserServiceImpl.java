@@ -4,12 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import shop.biday.model.domain.ImageModel;
 import shop.biday.model.domain.UserModel;
+import shop.biday.model.dto.UserDto;
 import shop.biday.model.entity.AddressEntity;
 import shop.biday.model.entity.enums.AddressType;
 import shop.biday.model.entity.UserEntity;
 import shop.biday.model.repository.AddressRepository;
 import shop.biday.model.repository.UserRepository;
+import shop.biday.service.ImageService;
+import shop.biday.service.RatingService;
 import shop.biday.service.UserService;
 
 import java.util.List;
@@ -22,6 +26,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AddressRepository addressRepository;
+    private final ImageService imageService;
+    private final RatingService ratingService;
 
     @Override
     public List<UserEntity> findAll() {
@@ -34,8 +40,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDto findByUserId(String id) {
+        log.info("Find User: {}", id);
+        UserEntity user = userRepository.findByEmail(id);
+
+        return Optional.ofNullable(user)
+                .map(u -> {
+                    log.info("Find User Image: {}", u.getId());
+                    int rate = (int) ratingService.findSellerRate(String.valueOf(u.getId()));
+                    ImageModel userImage = (rate == 0)
+                            ? imageService.findByOriginalNameAndType(String.valueOf(rate), "평점")
+                            : imageService.findByOriginalNameAndType("2", "평점");
+
+                    UserDto userDto = new UserDto(u.getEmail(), u.getName(), userImage);
+                    log.debug("Find User success: {}", userDto);
+                    return userDto;
+                })
+                .orElseGet(() -> {
+                    log.error("Find User failed");
+                    return null;
+                });
+    }
+
+    @Override
     public UserEntity save(UserModel userModel) {
-        log.info("userModel:{}",userModel);
+        log.info("userModel:{}", userModel);
         UserEntity savedUser = userRepository.save(UserEntity.builder()
                 .name(userModel.getName())
                 .email(userModel.getEmail())

@@ -175,21 +175,6 @@ public class QProductRepositoryImpl implements QProductRepository {
         );
     }
 
-//    private ConstructorExpression<AuctionDto> createAuctionDtoProjection() {
-//        return Projections.constructor(AuctionDto.class,
-//                qAuction.id,
-//                qAuction.user,
-//                qProduct.name,
-//                qSize.size.stringValue(),
-//                qAuction.startingBid,
-//                qAuction.currentBid,
-//                qAuction.startedAt,
-//                qAuction.endedAt,
-//                qAuction.status,
-//                qAuction.createdAt,
-//                qAuction.updatedAt);
-//    }
-
     private JPQLQuery<ProductDto> createBaseQuery(JPAQueryFactory queryFactory, Pageable pageable, Long categoryId, Long brandId, String keyword,
                                                   String color, String order, Long lastItemId) {
         JPQLQuery<ProductDto> query = queryFactory

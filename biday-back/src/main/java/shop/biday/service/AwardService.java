@@ -18,5 +18,5 @@ public interface AwardService {
     AwardEntity save(AwardEntity award);
 
     AwardModel findByAwardId(String token, Long id);
-    Slice<AwardModel> findByUserEmail(String token, String user, String period, LocalDateTime cursor, Pageable pageable);
+    Slice<AwardModel> findByUser(String token, String user, String period, LocalDateTime cursor, Pageable pageable);
 }

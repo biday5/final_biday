@@ -10,6 +10,7 @@ import shop.biday.model.domain.ImageModel;
 import shop.biday.model.domain.ProductModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.ProductDto;
+import shop.biday.model.dto.UserDto;
 import shop.biday.model.entity.AuctionEntity;
 import shop.biday.model.entity.ProductEntity;
 import shop.biday.model.repository.AuctionRepository;
@@ -18,6 +19,8 @@ import shop.biday.model.repository.UserRepository;
 import shop.biday.oauth2.jwt.JWTUtil;
 import shop.biday.service.AuctionService;
 import shop.biday.service.ImageService;
+import shop.biday.service.RatingService;
+import shop.biday.service.SizeService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,24 +37,37 @@ public class AuctionServiceImpl implements AuctionService {
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
     private final ImageService imageService;
+    private final SizeService sizeService;
+    private final RatingService ratingService;
 
     @Override
     public AuctionModel findById(Long id) {
         log.info("Find Auction by id: {}", id);
-        AuctionModel auction = repository.findByAuctionId(id);
-        if (auction != null) {
-            List<ImageModel> images = imageService.findByTypeAndReferencedId("경매", auction.getId());
-            System.out.println("images: " + images);
-            log.debug("Found Images: {}", images);
-            auction.setImages(images != null ? images : (List<ImageModel>) imageService.findByTypeAndUploadPath("에러", "error"));
 
-            ProductDto product = auction.getSize().getProduct();
-            ImageModel productImage = imageService.findByOriginalNameAndType(product.getProductCode(), "상품");
-            System.out.println("image: " + productImage);
-            log.debug("Found ProductImage: {}", productImage);
-            product.setImage(productImage != null ? productImage : imageService.findByTypeAndUploadPath("에러", "error"));
-        }
-        return auction;
+        return Optional.ofNullable(repository.findByAuctionId(id))
+                .map(auction -> {
+                    UserDto user = auction.getUser();
+                    int rate = (int) ratingService.findSellerRate(String.valueOf(user.getId()));
+                    ImageModel userImage = (rate == 0)
+                            ? imageService.findByOriginalNameAndType(String.valueOf(rate), "평점")
+                            : imageService.findByOriginalNameAndType("2", "평점");
+                    user.setImage(userImage);
+
+                    ProductDto product = auction.getSize().getProduct();
+                    ImageModel productImage = imageService.findByOriginalNameAndType(product.getProductCode(), "상품");
+                    log.debug("Found ProductImage: {}", productImage);
+                    product.setImage(productImage != null ? productImage : imageService.findByTypeAndUploadPath("에러", "error"));
+
+                    List<ImageModel> images = imageService.findByTypeAndReferencedId("경매", auction.getId());
+                    log.debug("Found Images: {}", images);
+                    auction.setImages(images != null ? images : (List<ImageModel>) imageService.findByTypeAndUploadPath("에러", "error"));
+
+                    return auction;
+                })
+                .orElseGet(() -> {
+                    log.warn("Auction not found for id: {}", id);
+                    return null;
+                });
     }
 
     @Override
@@ -66,6 +82,7 @@ public class AuctionServiceImpl implements AuctionService {
         return repository.findByProduct(sizeId, order, cursor, pageable);
     }
 
+    // TODO user 호출할 때 id 기준으로 바꿀 것
     @Override
     public Slice<AuctionDto> findByUser(String token, String user, String period, Long cursor, Pageable pageable) {
         log.info("Find All Auctions By User: {}", user);
@@ -91,14 +108,15 @@ public class AuctionServiceImpl implements AuctionService {
                 .map(t -> {
                     setStartingBid(auction);
                     return repository.save(AuctionEntity.builder()
-                            .user(auction.getUser())
-//                            .product(productRepository.findByName(auction.getProduct().getName()))
+                            .user(auction.getUser().getId())
+                            .size(sizeService.findBySize(auction.getSize().getSize()))
                             .description(auction.getDescription())
                             .startingBid(auction.getStartingBid())
                             .currentBid(auction.getCurrentBid())
                             .startedAt(auction.getStartedAt())
                             .endedAt(auction.getEndedAt())
                             .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now())
                             .build());
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token or not a seller"));
@@ -108,23 +126,24 @@ public class AuctionServiceImpl implements AuctionService {
     public AuctionEntity update(String token, AuctionModel auction) {
         log.info("Update Auction started");
         return validateUser(token)
-                .map(t -> {
-                    if (!repository.existsById(auction.getId())) {
-                        log.error("Auction does not exist for id: {}", auction.getId());
-                        return null;
+                .filter(t -> {
+                    boolean exists = repository.existsById(auction.getId());
+                    if (!exists) {
+                        log.error("Not found auction: {}", auction.getId());
                     }
-                    setStartingBid(auction);
-                    return repository.save(AuctionEntity.builder()
-                            .user(auction.getUser())
-//                            .product(productRepository.findByName(auction.getProduct().getName()))
-                            .description(auction.getDescription())
-                            .startingBid(auction.getStartingBid())
-                            .currentBid(auction.getCurrentBid())
-                            .startedAt(auction.getStartedAt())
-                            .endedAt(auction.getEndedAt())
-                            .updatedAt(LocalDateTime.now())
-                            .build());
+                    return exists;
                 })
+                .map(t -> repository.save(AuctionEntity.builder()
+                        .user(auction.getUser().getId())
+                        .size(sizeService.findBySize(auction.getSize().getSize()))
+                        .description(auction.getDescription())
+                        .startingBid(auction.getStartingBid())
+                        .currentBid(auction.getCurrentBid())
+                        .startedAt(auction.getStartedAt())
+                        .endedAt(auction.getEndedAt())
+                        .createdAt(auction.getCreatedAt())
+                        .updatedAt(LocalDateTime.now())
+                        .build()))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token or not a seller"));
     }
 
@@ -137,12 +156,12 @@ public class AuctionServiceImpl implements AuctionService {
                 return;
             }
 
-            String auctionUser = repository.findById(id)
+            String auctionId = repository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Auction not found"))
                     .getUser();
-            String requestingUser = jwtUtil.getEmail(token);
+            String requestingUserId = jwtUtil.getEmail(token);
 
-            if (!auctionUser.equals(requestingUser)) {
+            if (!auctionId.equals(requestingUserId)) {
                 log.error("User does not have Delete Authority for auction id: {}", id);
             } else {
                 repository.deleteById(id);

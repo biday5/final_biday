@@ -70,6 +70,7 @@ public class ProductController {
             @ApiResponse( responseCode = "404", description = "상품 등록 할 수 없음")
     })
     @Parameters({
+            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "brand", description = "브랜드 이름", example = "나이키"),
             @Parameter(name = "category", description = "카테고리 이름", example = "상의(Top)"),
             @Parameter(name = "name", description = "상품명", example = "UF 스타 로고 후디"),
@@ -79,7 +80,7 @@ public class ProductController {
             @Parameter(name = "color", description = "색깔", example = "black"),
             @Parameter(name = "description", description = "상품 설명", example = "대비되는 컬러로 포인트를 줌과 동시에 나염+자수 기법 혼합하여 디자인하였습니다. 원단 및 시보리의 각 색상에 따라 염색 과정이 상이하여 색상 별로 중량, 텐션에 차이가 있을 수 있습니다.")
     })
-    public ResponseEntity<ProductEntity> saveProduct(@RequestHeader("access") String token,
+    public ResponseEntity<ProductEntity> saveProduct(@RequestHeader("Authorization") String token,
                                                      @RequestBody ProductModel product) {
         return ResponseEntity.ok(productService.save(token, product));
     }
@@ -91,6 +92,7 @@ public class ProductController {
             @ApiResponse( responseCode = "404", description = "상품 수정 할 수 없음")
     })
     @Parameters({
+            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "brand", description = "브랜드 이름", example = "나이키"),
             @Parameter(name = "category", description = "카테고리 이름", example = "상의(Top)"),
             @Parameter(name = "name", description = "상품명", example = "UF 스타 로고 후디"),
@@ -100,7 +102,7 @@ public class ProductController {
             @Parameter(name = "color", description = "색깔", example = "black"),
             @Parameter(name = "description", description = "상품 설명", example = "대비되는 컬러로 포인트를 줌과 동시에 나염+자수 기법 혼합하여 디자인하였습니다. 원단 및 시보리의 각 색상에 따라 염색 과정이 상이하여 색상 별로 중량, 텐션에 차이가 있을 수 있습니다.")
     })
-    public ResponseEntity<ProductEntity> updateProduct(@RequestHeader("access") String token, @RequestBody ProductModel product) {
+    public ResponseEntity<ProductEntity> updateProduct(@RequestHeader("Authorization") String token, @RequestBody ProductModel product) {
         return ResponseEntity.ok(productService.update(token, product));
     }
 
@@ -110,8 +112,11 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "상품 삭제 성공"),
             @ApiResponse( responseCode = "404", description = "상품 찾을 수 없음")
     })
-    @Parameter(name = "id", description = "삭제할 상품의 id", example = "1L")
-    public void deleteProduct(@RequestHeader("access") String token, @RequestParam(value = "id", required = true) Long id) {
+    @Parameters({
+            @Parameter(name = "access", description = "{token}", example = "??"),
+            @Parameter(name = "id", description = "삭제할 상품의 id", example = "1L")
+    })
+    public void deleteProduct(@RequestHeader("Authorization") String token, @RequestParam(value = "id", required = true) Long id) {
         productService.deleteById(token, id);
     }
 }

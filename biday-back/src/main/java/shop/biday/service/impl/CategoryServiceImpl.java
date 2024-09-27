@@ -10,6 +10,7 @@ import shop.biday.model.repository.UserRepository;
 import shop.biday.oauth2.jwt.JWTUtil;
 import shop.biday.service.CategoryService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,8 +46,11 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryEntity save(String token, CategoryModel category) {
         log.info("Save Category started");
         return validateUser(token)
-                .map(t -> categoryRepository.save(category))
-                .orElse(null);
+                .map(t -> categoryRepository.save(CategoryEntity.builder()
+                        .name(category.getName())
+                        .createdAt(LocalDateTime.now())
+                        .build()))
+                .orElseThrow(() -> new RuntimeException("Save Category failed"));
     }
 
     @Override
@@ -60,8 +64,13 @@ public class CategoryServiceImpl implements CategoryService {
                     }
                     return exists;
                 })
-                .map(t -> categoryRepository.save(category))
-                .orElse(null);
+                .map(t -> categoryRepository.save(CategoryEntity.builder()
+                        .id(category.getId())
+                        .name(category.getName())
+                        .createdAt(category.getCreatedAt())
+                        .updatedAt(LocalDateTime.now())
+                        .build()))
+                .orElseThrow(() -> new RuntimeException("Update Category failed: Category not found"));
     }
 
     @Override
@@ -78,16 +87,16 @@ public class CategoryServiceImpl implements CategoryService {
                 .ifPresentOrElse(t -> {
                     categoryRepository.deleteById(id);
                     log.info("Category deleted: {}", id);
-                }, () -> log.error("User does not have role SELLER or does not exist"));
+                }, () -> log.error("User does not have role ADMIN or does not exist"));
     }
 
     private Optional<String> validateUser(String token) {
         log.info("Validate User started for token: {}", token);
         return Optional.of(token)
-                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_SELLER"))
+                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_ADMIN"))
                 .filter(t -> userRepository.existsByEmail(jwtUtil.getEmail(t)))
                 .or(() -> {
-                    log.error("User does not have role SELLER or does not exist for token: {}", token);
+                    log.error("User does not have role ADMIN or does not exist for token: {}", token);
                     return Optional.empty();
                 });
     }
