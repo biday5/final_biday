@@ -29,8 +29,5 @@ public class ProductModel {
     private LocalDateTime updatedAt;
     private Long wishes;
     private ImageModel image;
-    //        private List<ImageModel> image;
     private Set<SizeModel> sizes = new HashSet<>();
-//    private Set<AuctionDto> auctions = new HashSet<>();
-//    private List<SizeModel> sizes;
 }

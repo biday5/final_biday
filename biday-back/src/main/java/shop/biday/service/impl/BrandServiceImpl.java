@@ -49,7 +49,6 @@ public class BrandServiceImpl implements BrandService {
                 .map(t -> {
                     return brandRepository.save(BrandEntity.builder()
                             .name(brand.getName())
-                            .createdAt(LocalDateTime.now())
                             .build());
                 })
                 .orElseThrow(() -> new RuntimeException("Save Brand failed"));
@@ -69,27 +68,27 @@ public class BrandServiceImpl implements BrandService {
                 .map(t -> brandRepository.save(BrandEntity.builder()
                         .id(brand.getId())
                         .name(brand.getName())
-                        .createdAt(brand.getCreatedAt())
-                        .updatedAt(LocalDateTime.now())
                         .build()))
                 .orElseThrow(() -> new RuntimeException("Update Brand failed: Brand not found"));
     }
 
     @Override
-    public void deleteById(String token, Long id) {
+    public String deleteById(String token, Long id) {
         log.info("Delete Brand started for id: {}", id);
-        validateUser(token)
-                .filter(t -> {
-                    boolean exists = brandRepository.existsById(id);
-                    if (!exists) {
-                        log.error("Not found brand: {}", id);
-                    }
-                    return exists;
-                })
-                .ifPresentOrElse(t -> {
-                    brandRepository.deleteById(id);
-                    log.info("Brand deleted: {}", id);
-                }, () -> log.error("User does not have role ADMIN or does not exist"));
+
+        return validateUser(token).map(t -> {
+            if (!brandRepository.existsById(id)) {
+                log.error("Not found brand: {}", id);
+                return "브랜드 삭제 실패";
+            }
+
+            brandRepository.deleteById(id);
+            log.info("Brand deleted: {}", id);
+            return "브랜드 삭제 성공";
+        }).orElseGet(() -> {
+            log.error("User does not have role ADMIN or does not exist");
+            return "유효하지 않은 사용자";
+        });
     }
 
     private Optional<String> validateUser(String token) {

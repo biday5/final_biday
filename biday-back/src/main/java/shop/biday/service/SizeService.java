@@ -13,5 +13,5 @@ public interface SizeService {
     SizeEntity findBySize(String size);
     SizeEntity save(String token, SizeModel size);
     SizeEntity update(String token, SizeModel size);
-    void deleteById(String token, Long id);
+    String deleteById(String token, Long id);
 }

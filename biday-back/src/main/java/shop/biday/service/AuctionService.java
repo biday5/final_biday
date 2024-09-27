@@ -17,5 +17,5 @@ public interface AuctionService {
     boolean existsById(Long id);
     AuctionEntity save(String token, AuctionModel auction);
     AuctionEntity update(String token, AuctionModel auction);
-    void deleteById(String token, Long id);
+    String deleteById(String token, Long id);
 }

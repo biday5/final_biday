@@ -31,7 +31,7 @@ public class ProductController {
     @Operation(summary = "상품 목록", description = "메인에서 보여지거나, 검색 조건에 따른 상품 목록")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "상품 목록 가져오기 성공"),
-            @ApiResponse( responseCode = "404", description = "상품 목록 찾을 수 없음")
+            @ApiResponse(responseCode = "404", description = "상품 목록 찾을 수 없음")
     })
     @Parameters({
             @Parameter(name = "brandId", description = "브랜드 id", example = "1L"),
@@ -56,7 +56,7 @@ public class ProductController {
     @Operation(summary = "상품 상세보기", description = "상품 리스트 혹은 마이페이지-찜 등에서 눌렀을 때 이동되는 상품 정보")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "상품 가져오기 성공"),
-            @ApiResponse( responseCode = "404", description = "상품 찾을 수 없음")
+            @ApiResponse(responseCode = "404", description = "상품 찾을 수 없음")
     })
     @Parameter(name = "id", description = "선택된 상품의 id", example = "1L")
     public ResponseEntity<List<Map.Entry<Long, ProductModel>>> findById(@RequestParam(value = "id", required = true) Long id) {
@@ -67,10 +67,9 @@ public class ProductController {
     @Operation(summary = "상품 등록", description = "새로운 상품 등록")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "상품 등록 성공"),
-            @ApiResponse( responseCode = "404", description = "상품 등록 할 수 없음")
+            @ApiResponse(responseCode = "404", description = "상품 등록 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "brand", description = "브랜드 이름", example = "나이키"),
             @Parameter(name = "category", description = "카테고리 이름", example = "상의(Top)"),
             @Parameter(name = "name", description = "상품명", example = "UF 스타 로고 후디"),
@@ -89,10 +88,9 @@ public class ProductController {
     @Operation(summary = "상품 수정", description = "기존 상품 수정")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "상품 수정 성공"),
-            @ApiResponse( responseCode = "404", description = "상품 수정 할 수 없음")
+            @ApiResponse(responseCode = "404", description = "상품 수정 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "brand", description = "브랜드 이름", example = "나이키"),
             @Parameter(name = "category", description = "카테고리 이름", example = "상의(Top)"),
             @Parameter(name = "name", description = "상품명", example = "UF 스타 로고 후디"),
@@ -110,13 +108,10 @@ public class ProductController {
     @Operation(summary = "상품 삭제", description = "상품 삭제")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "상품 삭제 성공"),
-            @ApiResponse( responseCode = "404", description = "상품 찾을 수 없음")
+            @ApiResponse(responseCode = "404", description = "상품 찾을 수 없음")
     })
-    @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
-            @Parameter(name = "id", description = "삭제할 상품의 id", example = "1L")
-    })
-    public void deleteProduct(@RequestHeader("Authorization") String token, @RequestParam(value = "id", required = true) Long id) {
-        productService.deleteById(token, id);
+    @Parameter(name = "id", description = "삭제할 상품의 id", example = "1L")
+    public ResponseEntity<String> deleteProduct(@RequestHeader("Authorization") String token, @RequestParam(value = "id", required = true) Long id) {
+        return ResponseEntity.ok(productService.deleteById(token, id));
     }
 }

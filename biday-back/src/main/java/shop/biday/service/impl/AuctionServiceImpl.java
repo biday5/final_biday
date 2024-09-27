@@ -33,7 +33,7 @@ import java.util.Optional;
 public class AuctionServiceImpl implements AuctionService {
     private static final String ROLE_SELLER = "ROLE_SELLER";
 
-    private final AuctionRepository repository;
+    private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
     private final ImageService imageService;
@@ -43,7 +43,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public AuctionModel findById(Long id) {
         log.info("Find Auction by id: {}", id);
-        return Optional.ofNullable(repository.findByAuctionId(id))
+        return Optional.ofNullable(auctionRepository.findByAuctionId(id))
                 .map(auction -> {
                     UserDto user = auction.getUser();
                     int rate = (int) ratingService.findSellerRate(String.valueOf(user.getId()));
@@ -72,13 +72,13 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public boolean existsById(Long id) {
         log.info("Exists Auction by id: {}", id);
-        return repository.existsById(id);
+        return auctionRepository.existsById(id);
     }
 
     @Override
     public Slice<AuctionDto> findByProduct(Long sizeId, String order, Long cursor, Pageable pageable) {
         log.info("Find All Auctions By Time: {} SizeId: {}", order, sizeId);
-        return repository.findByProduct(sizeId, order, cursor, pageable);
+        return auctionRepository.findByProduct(sizeId, order, cursor, pageable);
     }
 
     // TODO user 호출할 때 id 기준으로 바꿀 것
@@ -87,16 +87,16 @@ public class AuctionServiceImpl implements AuctionService {
         log.info("Find All Auctions By User: {}", user);
         return validateUser(token)
                 .filter(t -> userRepository.existsByEmail(user))
-                .map(t -> repository.findByUser(user, period, cursor, pageable))
+                .map(t -> auctionRepository.findByUser(user, period, cursor, pageable))
                 .orElseThrow(() -> new IllegalArgumentException("User does not exist or invalid token"));
     }
 
     @Override
     public AuctionEntity updateState(Long id) {
         log.info("Update Auction Status by id: {}", id);
-        return repository.findById(id).map(auction -> {
+        return auctionRepository.findById(id).map(auction -> {
             auction.setStatus(true);
-            return repository.save(auction);
+            return auctionRepository.save(auction);
         }).orElseThrow(() -> new NoSuchElementException("Auction not found with id: " + id));
     }
 
@@ -106,16 +106,14 @@ public class AuctionServiceImpl implements AuctionService {
         return validateUser(token)
                 .map(t -> {
                     setStartingBid(auction);
-                    return repository.save(AuctionEntity.builder()
-                            .user(auction.getUser().getId())
+                    return auctionRepository.save(AuctionEntity.builder()
+                            .userId(auction.getUser().getId())
                             .size(sizeService.findBySize(auction.getSize().getSize()))
                             .description(auction.getDescription())
                             .startingBid(auction.getStartingBid())
                             .currentBid(auction.getCurrentBid())
                             .startedAt(auction.getStartedAt())
                             .endedAt(auction.getEndedAt())
-                            .createdAt(LocalDateTime.now())
-                            .updatedAt(LocalDateTime.now())
                             .build());
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token or not a seller"));
@@ -126,47 +124,51 @@ public class AuctionServiceImpl implements AuctionService {
         log.info("Update Auction started");
         return validateUser(token)
                 .filter(t -> {
-                    boolean exists = repository.existsById(auction.getId());
+                    boolean exists = auctionRepository.existsById(auction.getId());
                     if (!exists) {
                         log.error("Not found auction: {}", auction.getId());
                     }
                     return exists;
                 })
-                .map(t -> repository.save(AuctionEntity.builder()
-                        .user(auction.getUser().getId())
+                .map(t -> auctionRepository.save(AuctionEntity.builder()
+                        .userId(auction.getUser().getId())
                         .size(sizeService.findBySize(auction.getSize().getSize()))
                         .description(auction.getDescription())
                         .startingBid(auction.getStartingBid())
                         .currentBid(auction.getCurrentBid())
                         .startedAt(auction.getStartedAt())
                         .endedAt(auction.getEndedAt())
-                        .createdAt(auction.getCreatedAt())
-                        .updatedAt(LocalDateTime.now())
                         .build()))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token or not a seller"));
     }
 
     @Override
-    public void deleteById(String token, Long id) {
+    public String deleteById(String token, Long id) {
         log.info("Delete Auction started for id: {}", id);
-        validateUser(token).ifPresentOrElse(t -> {
-            if (!repository.existsById(id)) {
+
+        return validateUser(token).map(t -> {
+            if (!auctionRepository.existsById(id)) {
                 log.error("Auction does not exist for id: {}", id);
-                return;
+                return "경매 삭제 실패";
             }
 
-            String auctionId = repository.findById(id)
+            String auctionId = auctionRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Auction not found"))
-                    .getUser();
+                    .getUserId();
             String requestingUserId = jwtUtil.getEmail(token);
 
             if (!auctionId.equals(requestingUserId)) {
                 log.error("User does not have Delete Authority for auction id: {}", id);
+                return "삭제 권한이 없습니다"; // Returning an error message
             } else {
-                repository.deleteById(id);
+                auctionRepository.deleteById(id);
                 log.info("Delete Auction By User for id: {}", id);
+                return "경매 삭제 성공";
             }
-        }, () -> log.error("User does not have role SELLER or does not exist"));
+        }).orElseGet(() -> {
+            log.error("User does not have role SELLER or does not exist");
+            return "유효하지 않은 사용자"; // Returning an error message
+        });
     }
 
     private Optional<String> validateUser(String token) {

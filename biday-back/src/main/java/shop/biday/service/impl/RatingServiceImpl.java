@@ -20,7 +20,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class RatingServiceImpl implements RatingService {
-    private final RatingRepository repository;
+    private final RatingRepository ratingRepository;
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
     private final PaymentRepository paymentService;
@@ -29,7 +29,7 @@ public class RatingServiceImpl implements RatingService {
     public double findSellerRate(String sellerId) {
         log.info("Calculate Rate by Seller: {}", sellerId);
         if (userRepository.existsById(Long.valueOf(sellerId))) {
-            return repository.findSellerRating(sellerId);
+            return ratingRepository.findSellerRating(sellerId);
         } else {
             log.error("User doesn't exist : {}", sellerId);
             return 0;
@@ -48,7 +48,7 @@ public class RatingServiceImpl implements RatingService {
                     }
                     return exists;
                 })
-                .map(t -> repository.findBySeller(sellerId))
+                .map(t -> ratingRepository.findBySeller(sellerId))
                 .orElseThrow(() -> new RuntimeException("Find Rating by User failed"));
     }
 
@@ -69,13 +69,12 @@ public class RatingServiceImpl implements RatingService {
                             .paymentId(ratingModel.getPaymentId())
                             .sellerId(ratingModel.getSellerId())
                             .rating(ratingModel.getRating())
-                            .createdAt(LocalDateTime.now())
                             .build();
-                    repository.save(ratingEntity);
+                    ratingRepository.save(ratingEntity);
 
                     UserEntity userEntity = userRepository.findByEmail(ratingEntity.getSellerId());
                     if (userEntity != null) {
-                        userEntity.setTotalRating(repository.findSellerRating(userEntity.getEmail()));
+                        userEntity.setTotalRating(ratingRepository.findSellerRating(userEntity.getEmail()));
                         userRepository.save(userEntity);
                         log.debug("User {} Rate Updated: {}", userEntity.getName(), ratingEntity.getRating());
                     } else {

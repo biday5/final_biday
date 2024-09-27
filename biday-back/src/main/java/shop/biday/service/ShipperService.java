@@ -11,5 +11,5 @@ public interface ShipperService {
     Optional<ShipperEntity> findById(Long id);
     ShipperEntity save(String token, ShipperModel brand);
     ShipperEntity update(String token, ShipperModel brand);
-    void deleteById(String token, Long id);
+    String deleteById(String token, Long id);
 }

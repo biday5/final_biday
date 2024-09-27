@@ -204,9 +204,9 @@ public class ImageServiceImpl implements ImageService {
                 .map(existingId -> {
                     imageRepository.deleteById(existingId);
                     log.debug("Image deleted To Mongo: {}", existingId);
-                    return "success";
+                    return "이미지 삭제 성공";
                 })
-                .orElse("fail");
+                .orElse("이미지 삭제 실패");
     }
 
     @Override

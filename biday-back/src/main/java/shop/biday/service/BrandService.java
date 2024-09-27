@@ -12,5 +12,5 @@ public interface BrandService {
     Optional<BrandEntity> findById(Long id);
     BrandEntity save(String token, BrandModel brand);
     BrandEntity update(String token, BrandModel brand);
-    void deleteById(String token, Long id);
+    String deleteById(String token, Long id);
 }

@@ -63,7 +63,7 @@ public class QAwardRepositoryImpl implements QAwardRepository {
                 .leftJoin(qAward.auction, qAuction)
                 .leftJoin(qAuction.size, qSize)
                 .leftJoin(qSize.product, qProduct)
-                .where(qAward.user.eq(userId)
+                .where(qAward.userId.eq(userId)
                         .and(datePredicate)
                         .and(cursorPredicate))
                 .orderBy(qAward.bidedAt.desc())
@@ -82,7 +82,7 @@ public class QAwardRepositoryImpl implements QAwardRepository {
         return Projections.constructor(AwardModel.class,
                 qAward.id,
                 createAuctionDtoProjection(),
-                qAward.user,
+                qAward.userId,
                 qAward.bidedAt,
                 qAward.currentBid,
                 qAward.count);
@@ -91,7 +91,7 @@ public class QAwardRepositoryImpl implements QAwardRepository {
     private ConstructorExpression<AuctionDto> createAuctionDtoProjection() {
         return Projections.constructor(AuctionDto.class,
                 qAuction.id,
-                qAuction.user,
+                qAuction.userId,
                 qProduct.name.as("product"),
                 qSize.size.stringValue(),
                 qAuction.startingBid,

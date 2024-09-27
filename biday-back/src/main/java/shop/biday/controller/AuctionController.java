@@ -16,9 +16,6 @@ import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.entity.AuctionEntity;
 import shop.biday.service.AuctionService;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor
@@ -64,7 +61,6 @@ public class AuctionController {
             @ApiResponse(responseCode = "404", description = "경매 목록 찾을 수 없음")
     })
     @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "period", description = "기간별 정렬", example = "3개월"),
             @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1"),
     })
@@ -84,7 +80,6 @@ public class AuctionController {
             @ApiResponse(responseCode = "404", description = "경매 등록 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "email", description = "판매자 email", example = "example123@test.com"),
             @Parameter(name = "product", description = "경매로 등록할 상품, product의 findById 사용해서 선택!", example = "1"),
             @Parameter(name = "description", description = "경매로 등록할 판매자 상품의 사진", example = "경매로 등록할 판매자 상품의 사진"),
@@ -104,7 +99,6 @@ public class AuctionController {
             @ApiResponse(responseCode = "404", description = "경매 수정 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "email", description = "변경 불가, 판매자 email", example = "example123@test.com"),
             @Parameter(name = "product", description = "변경 불가, 경매로 등록할 상품, product의 findById 사용해서 선택!", example = "1"),
             @Parameter(name = "description", description = "변경 불가, 경매로 등록할 판매자 상품의 사진", example = "경매로 등록할 판매자 상품의 사진"),
@@ -123,11 +117,8 @@ public class AuctionController {
             @ApiResponse(responseCode = "200", description = "상품 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "상품 찾을 수 없음")
     })
-    @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
-            @Parameter(name = "id", description = "삭제할 상품의 id", example = "1")
-    })
-    public void delete(@RequestHeader("Authorization") String token, @RequestParam Long id) {
-        auctionService.deleteById(token, id);
+    @Parameter(name = "id", description = "삭제할 상품의 id", example = "1")
+    public ResponseEntity<String> delete(@RequestHeader("Authorization") String token, @RequestParam Long id) {
+        return ResponseEntity.ok(auctionService.deleteById(token, id));
     }
 }

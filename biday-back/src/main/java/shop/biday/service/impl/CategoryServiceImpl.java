@@ -48,7 +48,6 @@ public class CategoryServiceImpl implements CategoryService {
         return validateUser(token)
                 .map(t -> categoryRepository.save(CategoryEntity.builder()
                         .name(category.getName())
-                        .createdAt(LocalDateTime.now())
                         .build()))
                 .orElseThrow(() -> new RuntimeException("Save Category failed"));
     }
@@ -67,27 +66,27 @@ public class CategoryServiceImpl implements CategoryService {
                 .map(t -> categoryRepository.save(CategoryEntity.builder()
                         .id(category.getId())
                         .name(category.getName())
-                        .createdAt(category.getCreatedAt())
-                        .updatedAt(LocalDateTime.now())
                         .build()))
                 .orElseThrow(() -> new RuntimeException("Update Category failed: Category not found"));
     }
 
     @Override
-    public void deleteById(String token, Long id) {
+    public String deleteById(String token, Long id) {
         log.info("Delete Category started for id: {}", id);
-        validateUser(token)
-                .filter(t -> {
-                    boolean exists = categoryRepository.existsById(id);
-                    if (!exists) {
-                        log.error("Not found category: {}", id);
-                    }
-                    return exists;
-                })
-                .ifPresentOrElse(t -> {
-                    categoryRepository.deleteById(id);
-                    log.info("Category deleted: {}", id);
-                }, () -> log.error("User does not have role ADMIN or does not exist"));
+
+        return validateUser(token).map(t -> {
+            if (!categoryRepository.existsById(id)) {
+                log.error("Not found category: {}", id);
+                return "카테고리 삭제 실패";
+            }
+
+            categoryRepository.deleteById(id);
+            log.info("Category deleted: {}", id);
+            return "카테고리 삭제 성공";
+        }).orElseGet(() -> {
+            log.error("User does not have role ADMIN or does not exist");
+            return "유효하지 않은 사용자";
+        });
     }
 
     private Optional<String> validateUser(String token) {

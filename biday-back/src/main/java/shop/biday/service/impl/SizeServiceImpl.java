@@ -22,36 +22,36 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class SizeServiceImpl implements SizeService {
-    private final SizeRepository repository;
+    private final SizeRepository sizeRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
 
     @Override
     public List<SizeEntity> findAll() {
-        return repository.findAll();
+        return sizeRepository.findAll();
     }
 
     @Override
     public Optional<SizeEntity> findById(Long id) {
-        return repository.findById(id);
+        return sizeRepository.findById(id);
     }
 
     @Override
     public List<SizeEntity> findAllByProductId(Long productId) {
-        return repository.findAllByProductId(productId);
+        return sizeRepository.findAllByProductId(productId);
     }
 
     @Override
     public SizeEntity findBySize(String size) {
-        return repository.findBySize(Size.valueOf(size));
+        return sizeRepository.findBySize(Size.valueOf(size));
     }
 
     @Override
     public SizeEntity save(String token, SizeModel size) {
         log.info("Save Size started");
         return validateUser(token)
-                .map(t -> repository.save(SizeEntity.builder()
+                .map(t -> sizeRepository.save(SizeEntity.builder()
                         .size(Size.valueOf(size.getSize()))
                         .product(productRepository.findByName(size.getSizeProduct()))
                         .updatedAt(LocalDateTime.now())
@@ -64,13 +64,13 @@ public class SizeServiceImpl implements SizeService {
         log.info("Update Size started");
         return validateUser(token)
                 .filter(t -> {
-                    boolean exists = repository.existsById(size.getId());
+                    boolean exists = sizeRepository.existsById(size.getId());
                     if (!exists) {
                         log.error("Not found product: {}", size.getId());
                     }
                     return exists;
                 })
-                .map(t -> repository.save(SizeEntity.builder()
+                .map(t -> sizeRepository.save(SizeEntity.builder()
                         .id(size.getId())
                         .size(Size.valueOf(size.getSize()))
                         .product(productRepository.findByName(size.getSizeProduct()))
@@ -80,29 +80,31 @@ public class SizeServiceImpl implements SizeService {
     }
 
     @Override
-    public void deleteById(String token, Long id) {
+    public String deleteById(String token, Long id) {
         log.info("Delete Size started");
-        validateUser(token)
-                .filter(t -> {
-                    boolean exists = repository.existsById(id);
-                    if (!exists) {
-                        log.error("Not found product: {}", id);
-                    }
-                    return exists;
-                })
-                .ifPresentOrElse(t -> {
-                    repository.deleteById(id);
-                    log.info("Product deleted: {}", id);
-                }, () -> log.error("User does not have role SELLER or does not exist"));
+
+        return validateUser(token).map(t -> {
+            if (!sizeRepository.existsById(id)) {
+                log.error("Not found size: {}", id);
+                return "사이즈 삭제 실패";
+            }
+
+            sizeRepository.deleteById(id);
+            log.info("Size deleted: {}", id);
+            return "사이즈 삭제 성공";
+        }).orElseGet(() -> {
+            log.error("User does not have role ADMIN or does not exist");
+            return "유효하지 않은 사용자";
+        });
     }
 
     private Optional<String> validateUser(String token) {
         log.info("Validate User started");
         return Optional.of(token)
-                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_SELLER"))
+                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_ADMIN"))
                 .filter(t -> userRepository.existsByEmail(jwtUtil.getEmail(t)))
                 .or(() -> {
-                    log.error("User does not have role SELLER or does not exist");
+                    log.error("User does not have role ADMIN or does not exist");
                     return Optional.empty();
                 });
     }

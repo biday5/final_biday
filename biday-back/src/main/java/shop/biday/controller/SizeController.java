@@ -65,7 +65,6 @@ public class SizeController {
             @ApiResponse(responseCode = "404", description = "사이즈 등록 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "product", description = "사이즈 등록될 상품 이름", example = "T-Shirt"),
             @Parameter(name = "name", description = "사이즈 이름", example = "나이키(Nike)"),
             @Parameter(name = "createdAt", description = "등록 시간", example = "localDateTime 값")
@@ -82,13 +81,12 @@ public class SizeController {
             @ApiResponse(responseCode = "404", description = "사이즈 수정 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "product", description = "사이즈 등록될 상품 이름", example = "T-Shirt"),
             @Parameter(name = "name", description = "사이즈 이름", example = "나이키(Nike)"),
             @Parameter(name = "updatedAt", description = "수정 시간", example = "localDateTime 값")
     })
     public ResponseEntity<SizeEntity> update(@RequestHeader("Authorization") String token,
-                                              @RequestBody SizeModel size) {
+                                             @RequestBody SizeModel size) {
         return ResponseEntity.ok(sizeService.update(token, size));
     }
 
@@ -98,11 +96,8 @@ public class SizeController {
             @ApiResponse(responseCode = "200", description = "사이즈 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "사이즈 삭제 할 수 없음")
     })
-    @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
-            @Parameter(name = "id", description = "사이즈 id", example = "1")
-    })
-    public void delete(@RequestHeader("Authorization") String token, @RequestParam Long id) {
-        sizeService.deleteById(token, id);
+    @Parameter(name = "id", description = "사이즈 id", example = "1")
+    public ResponseEntity<String> delete(@RequestHeader("Authorization") String token, @RequestParam Long id) {
+        return ResponseEntity.ok(sizeService.deleteById(token, id));
     }
 }

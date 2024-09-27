@@ -12,23 +12,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
-import shop.biday.model.AuctionTest;
-import shop.biday.model.ProductTest;
-import shop.biday.model.SizeTest;
 import shop.biday.model.domain.ImageModel;
 import shop.biday.model.domain.ProductModel;
 import shop.biday.model.domain.SizeModel;
-import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.dto.ProductDto;
 import shop.biday.model.entity.*;
 import shop.biday.model.repository.QProductRepository;
 import shop.biday.service.ImageService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.querydsl.core.group.GroupBy.*;
 
@@ -72,25 +66,6 @@ public class QProductRepositoryImpl implements QProductRepository {
         }
 
         return new SliceImpl<>(list, pageable, hasNext);
-    }
-
-    // java.lang.IllegalArgumentException: argument type mismatch 오류 발생
-    public List<ProductTest> findByProductTest(Long id) {
-        List<ProductTest> products = queryFactory
-                .select(Projections.constructor(ProductTest.class,
-                        qProduct.id,
-                        qProduct.name,
-                        Projections.constructor(SizeTest.class,
-                                qSize.size.stringValue(),
-                                Projections.constructor(AuctionTest.class,
-                                        qAuction.id))
-                ))
-                .from(qProduct)
-                .join(qSize).on(qSize.product.id.eq(qProduct.id))
-                .join(qAuction).on(qAuction.size.id.eq(qSize.id))
-                .where(qProduct.id.eq(id))
-                .fetch();
-        return products;
     }
 
     @Override

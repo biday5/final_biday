@@ -29,7 +29,7 @@ public class AwardEntity {
     private AuctionEntity auction;
 
     @Column(name = "user_id", nullable = false)
-    private String user;
+    private String userId;
 
     @Column(name = "bided_at", nullable = false)
     private LocalDateTime bidedAt;

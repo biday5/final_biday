@@ -52,10 +52,7 @@ public class ShipperController {
             @ApiResponse(responseCode = "200", description = "배송 등록 성공"),
             @ApiResponse(responseCode = "404", description = "배송 등록 할 수 없음")
     })
-    @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
-            @Parameter(name = "name", description = "배송 이름", example = "나이키(Nike)")
-    })
+    @Parameter(name = "name", description = "배송 이름", example = "나이키(Nike)")
     public ResponseEntity<ShipperEntity> create(@RequestHeader("Authorization") String token, @RequestBody ShipperModel shipper) {
         return ResponseEntity.ok(shipperService.save(token, shipper));
     }
@@ -67,7 +64,6 @@ public class ShipperController {
             @ApiResponse(responseCode = "404", description = "배송 수정 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "name", description = "배송 이름", example = "나이키(Nike)"),
             @Parameter(name = "createdAt", description = "등록 시간", example = "localDateTime 값"),
             @Parameter(name = "updatedAt", description = "수정 시간", example = "localDateTime 값")
@@ -82,11 +78,8 @@ public class ShipperController {
             @ApiResponse(responseCode = "200", description = "배송 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "배송 삭제 할 수 없음")
     })
-    @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
-            @Parameter(name = "id", description = "배송 id", example = "1")
-    })
-    public void delete(@RequestHeader("Authorization") String token, @RequestParam Long id) {
-        shipperService.deleteById(token, id);
+    @Parameter(name = "id", description = "배송 id", example = "1")
+    public ResponseEntity<String> delete(@RequestHeader("Authorization") String token, @RequestParam Long id) {
+        return ResponseEntity.ok(shipperService.deleteById(token, id));
     }
 }

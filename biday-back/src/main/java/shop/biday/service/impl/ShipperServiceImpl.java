@@ -88,21 +88,24 @@ public class ShipperServiceImpl implements ShipperService {
     }
 
     @Override
-    public void deleteById(String token, Long id) {
+    public String deleteById(String token, Long id) {
         log.info("Delete shipper started for id: {}", id);
-        validateUser(token)
-                .filter(t -> {
-                    boolean exists = shipperRepository.existsById(id);
-                    if (!exists) {
-                        log.error("Not found shipper: {}", id);
-                    }
-                    return exists;
-                })
-                .ifPresentOrElse(t -> {
-                    shipperRepository.deleteById(id);
-                    log.info("shipper deleted: {}", id);
-                }, () -> log.error("User does not have role SELLER or does not exist"));
+
+        return validateUser(token).map(t -> {
+            if (!shipperRepository.existsById(id)) {
+                log.error("Not found shipper: {}", id);
+                return "배송지 삭제 실패";
+            }
+
+            shipperRepository.deleteById(id);
+            log.info("Shipper deleted: {}", id);
+            return "배송지 삭제 성공";
+        }).orElseGet(() -> {
+            log.error("User does not have role SELLER or does not exist");
+            return "유효하지 않은 사용자";
+        });
     }
+
 
     private Optional<String> validateUser(String token) {
         /* TODO 휘재형이 뽑는거 따로 가져오게 되면 JwtClaims claims = jwtUtil.extractClaims(token); 으로 정보 담아서 String userId=claims.getUserId(); 이런식으로 userId 뽑아서 사용할 것*/

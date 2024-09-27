@@ -61,9 +61,6 @@ public class PaymentController {
     }
 
     @Operation(summary = "사용자 기준 결제 내역 조회", description = "userId로 결제 조회합니다.")
-    @Parameters({
-            @Parameter(name = "access", description = "{token}", example = "??"),
-    })
     @ApiResponse(responseCode = "200", description = "성공")
     @GetMapping("/findByUser")
     public ResponseEntity<List<PaymentRequest>> findByUser(@RequestHeader("Authorization") String token) {

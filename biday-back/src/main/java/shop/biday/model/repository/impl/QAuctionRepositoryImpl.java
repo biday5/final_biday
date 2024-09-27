@@ -48,10 +48,10 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                 .select(Projections.constructor(AuctionModel.class,
                         qAuction.id,
 //                        (Expression<?>) Projections.constructor(UserDto.class,
-//                                qAuction.sellerId,
+//                                qAuction.user,
 //                                "user_name", // 이게 과연 될까???
 //                                createDefaultImageProjection()),
-                        qAuction.user,
+                        qAuction.userId,
                         createSizeDtoProjection(),
                         qAuction.description,
                         qAuction.startingBid,
@@ -65,7 +65,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                         Projections.constructor(AwardDto.class,
                                 qAward.id,
                                 qAward.auction.id.as("auction"),
-                                qAward.user,
+                                qAward.userId,
                                 qAward.bidedAt,
                                 qAward.currentBid,
                                 qAward.count)))
@@ -104,7 +104,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                 .from(qAuction)
                 .leftJoin(qAuction.size, qSize)
                 .leftJoin(qSize.product, qProduct)
-                .where(qAuction.user.eq(user)
+                .where(qAuction.userId.eq(user)
                         .and(datePredicate)
                         .and(cursorPredicate))
                 .orderBy(qAuction.startedAt.desc())
@@ -196,7 +196,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
     private ConstructorExpression<AuctionDto> createAuctionDtoProjection() {
         return Projections.constructor(AuctionDto.class,
                 qAuction.id,
-                qAuction.user,
+                qAuction.userId,
                 qProduct.name.as("product"),
                 qSize.size.stringValue(),
                 qAuction.startingBid,

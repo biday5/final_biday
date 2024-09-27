@@ -11,5 +11,5 @@ public interface CategoryService {
     Optional<CategoryEntity> findById(Long id);
     CategoryEntity save(String token, CategoryModel category);
     CategoryEntity update(String token, CategoryModel category);
-    void deleteById(String token, Long id);
+    String deleteById(String token, Long id);
 }

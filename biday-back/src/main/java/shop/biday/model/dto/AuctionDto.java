@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AuctionDto {
     private Long id;
-    private String user;
+    private String userId;
     private String product;
     private String size;
     private Long startingBid;
