@@ -161,6 +161,7 @@ public class QProductRepositoryImpl implements QProductRepository {
                 Expressions.constant("defaultImageUploadUrl"),
                 Expressions.constant("defaultImageType"),
                 Expressions.constant(0L),
+                Expressions.constant(LocalDateTime.now()),
                 Expressions.constant(LocalDateTime.now())
         );
     }
@@ -258,7 +259,7 @@ public class QProductRepositoryImpl implements QProductRepository {
                     query.where(qWish.count().lt(fetchWishByCount(lastItemId)));
                 }
                 query.orderBy(qWish.count().desc());
-                break;
+                break;// 리스트 기준 바꾸기
             default:
                 if (lastItemId != null) {
                     query.where(qProduct.id.gt(lastItemId));

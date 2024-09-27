@@ -1,6 +1,7 @@
 package shop.biday.model.repository.impl;
 
 import com.querydsl.core.types.ConstructorExpression;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -46,11 +47,11 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
         AuctionModel auction = queryFactory
                 .select(Projections.constructor(AuctionModel.class,
                         qAuction.id,
-                        Projections.constructor(UserDto.class,
-                                qAuction.sellerId,
-                                "user_name", // 이게 과연 될까???
-                                createDefaultImageProjection()),
-//                        qAuction.user,
+//                        (Expression<?>) Projections.constructor(UserDto.class,
+//                                qAuction.sellerId,
+//                                "user_name", // 이게 과연 될까???
+//                                createDefaultImageProjection()),
+                        qAuction.user,
                         createSizeDtoProjection(),
                         qAuction.description,
                         qAuction.startingBid,
@@ -114,6 +115,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
 
     @Override
     public Slice<AuctionDto> findByProduct(Long sizeId, String order, Long cursor, Pageable pageable) {
+        // TODO productId 같이 내려줘야 할 듯
         BooleanExpression sizePredicate = sizeId != null ? qAuction.size.id.eq(sizeId) : null;
         BooleanExpression cursorPredicate = cursor != null ? qAuction.id.lt(cursor) : null;
 

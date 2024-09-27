@@ -5,13 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import shop.biday.model.domain.RatingModel;
 import shop.biday.model.entity.RatingEntity;
-import shop.biday.model.repository.QRatingRepository;
+import shop.biday.model.entity.UserEntity;
+import shop.biday.model.repository.PaymentRepository;
 import shop.biday.model.repository.RatingRepository;
 import shop.biday.model.repository.UserRepository;
 import shop.biday.oauth2.jwt.JWTUtil;
-import shop.biday.service.PaymentService;
 import shop.biday.service.RatingService;
-import shop.biday.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,12 +23,11 @@ public class RatingServiceImpl implements RatingService {
     private final RatingRepository repository;
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
-    private final PaymentService paymentService;
+    private final PaymentRepository paymentService;
 
     @Override
     public double findSellerRate(String sellerId) {
         log.info("Calculate Rate by Seller: {}", sellerId);
-
         if (userRepository.existsById(Long.valueOf(sellerId))) {
             return repository.findSellerRating(sellerId);
         } else {
@@ -59,24 +57,36 @@ public class RatingServiceImpl implements RatingService {
         log.info("Save Rating started");
 
         return validateUser(token)
-                .flatMap(t -> {
+                .flatMap(user -> {
                     boolean exists = paymentService.existsById(ratingModel.getPaymentId());
                     if (!exists) {
                         log.error("Payment doesn't exist: {}", ratingModel.getPaymentId());
                         return Optional.empty();
-                    } else {
-                        log.debug("Find Payment Success: {}", ratingModel.getPaymentId());
-                        RatingEntity ratingEntity = RatingEntity.builder()
-                                .paymentId(ratingModel.getPaymentId())
-                                .sellerId(ratingModel.getSellerId())
-                                .rating(ratingModel.getRating())
-                                .createdAt(LocalDateTime.now())
-                                .build();
-                        return Optional.of(repository.save(ratingEntity));
                     }
+                    log.debug("Find Payment Success: {}", ratingModel.getPaymentId());
+
+                    RatingEntity ratingEntity = RatingEntity.builder()
+                            .paymentId(ratingModel.getPaymentId())
+                            .sellerId(ratingModel.getSellerId())
+                            .rating(ratingModel.getRating())
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    repository.save(ratingEntity);
+
+                    UserEntity userEntity = userRepository.findByEmail(ratingEntity.getSellerId());
+                    if (userEntity != null) {
+                        userEntity.setTotalRating(repository.findSellerRating(userEntity.getEmail()));
+                        userRepository.save(userEntity);
+                        log.debug("User {} Rate Updated: {}", userEntity.getName(), ratingEntity.getRating());
+                    } else {
+                        log.warn("User not found: {}", ratingEntity.getSellerId());
+                    }
+
+                    return Optional.of(ratingEntity);
                 })
-                .orElseThrow(() -> new RuntimeException("Save Rating failed"));
+                .orElseThrow(() -> new RuntimeException("Failed to save rating: Payment ID " + ratingModel.getPaymentId() + " does not exist"));
     }
+
 
     // TODO user id 기준으로 찾기!! 나중에 한번에 수정
     private Optional<String> validateUser(String token) {

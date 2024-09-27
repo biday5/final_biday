@@ -14,5 +14,6 @@ public interface ImageRepository extends MongoRepository<ImageDocument, String> 
     ImageModel findByOriginalNameAndType(String name, String type);
     ImageModel findByTypeAndUploadPath(String type, String uploadPath);
     ImageModel findByOriginalNameAndTypeAndReferencedId(String name, String type, Long referencedId);
+    ImageModel findByTypeAndReferencedIdAndUploadPath(String type, String referencedId, String uploadPath);
     List<ImageModel> findByTypeAndReferencedId(String type, Long referencedId);
 }

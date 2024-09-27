@@ -117,6 +117,16 @@ public class UserController {
     }
 
     @GetMapping("/findById/{id}")
+    @Operation(summary = "아이디로 이메일 조회", description = "제공된 아이디에 연결된 유저 정보를 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "유저가 성공적으로 조회되었습니다.", content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(responseCode = "404", description = "제공된 아이디로 사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")
+            )
+    })
+    @Parameter(name = "id", description = "유저 조회할 아이디", example = "66f1442a7415bc47b04b3477"
+    )
     public UserDto findById(@PathVariable String id) {
         return userService.findByUserId(id);
     }

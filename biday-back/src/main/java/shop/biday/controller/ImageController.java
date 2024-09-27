@@ -38,30 +38,58 @@ public class ImageController {
         return imageService.getImage(id);
     }
 
-    @PostMapping("/upload")
-    @Operation(summary = "이미지 업로드", description = "여러 이미지를 업로드합니다.")
+    @PostMapping("/uploadByAdmin")
+    @Operation(summary = "단일 이미지 업로드", description = "관리자가 브랜드/상품/평점/에러 관련 단일 이미지를 업로드합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "사진 등록 성공"),
             @ApiResponse( responseCode = "404", description = "사진 등록 실패")
     })
     @Parameters(value = {
-            @Parameter(description = "업로드할 이미지 파일 목록"),
-            @Parameter(description = "이미지 타입"),
-            @Parameter(description = "이미지의 참조 ID")
+            @Parameter(name = "access", description = "{token}", example = "??"),
+            @Parameter(name = "files", description = "업로드할 이미지 파일", example = "단일 사진 파일"),
+            @Parameter(name = "filePath", description = "NCloud storage 업로드 폴더 경로 지정", example = "brand 혹은 product 혹은 rate 혹은 error"),
+            @Parameter(name = "type", description = "이미지 타입", example = "브랜드 or 상품 or 평점 or 에러"),
+            @Parameter(name = "referencedId", description = "이미지의 참조 ID, 평점이나 에러는 아무 값이나 줘도 상관 x")
     })
-    public String uploadImages(
+    public String uploadImage(
+            @RequestHeader("Authorization") String token,
             @RequestPart("files") List<MultipartFile> files,
             @RequestParam("filePath") String filePath,
             @RequestParam("type") String type,
             @RequestParam("referenceId") Long referenceId
     ) {
         log.info("이미지 업로드 중");
-        return imageService.uploadFiles(files, filePath, type, referenceId).toString();
+        return imageService.uploadFileByAdmin(token, files, filePath, type, referenceId).toString();
+    }
+
+    @PostMapping("/uploadByUser")
+    @Operation(summary = "이미지 업로드", description = "판매자 혹은 구매자가 경매와 환불 관련된 여러 이미지를 업로드합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "사진 등록 성공"),
+            @ApiResponse( responseCode = "404", description = "사진 등록 실패")
+    })
+    @Parameters(value = {
+            @Parameter(name = "access", description = "{token}", example = "??"),
+            @Parameter(name = "files", description = "업로드할 이미지 파일 목록", example = "여러 사진 파일"),
+            @Parameter(name = "filePath", description = "NCloud storage 업로드 폴더 경로 지정", example = "auctions 혹은 refunds"),
+            @Parameter(name = "type", description = "이미지 타입", example = "경매 or 환불"),
+            @Parameter(name = "referencedId", description = "이미지의 참조 ID")
+    })
+    public String uploadImages(
+            @RequestHeader("Authorization") String token,
+            @RequestPart("files") List<MultipartFile> files,
+            @RequestParam("filePath") String filePath,
+            @RequestParam("type") String type,
+            @RequestParam("referenceId") Long referenceId
+    ) {
+        log.info("이미지 업로드 중");
+        return imageService.uploadFilesByUser(token, files, filePath, type, referenceId).toString();
     }
 
     @PatchMapping
     @Operation(summary = "이미지 업데이트", description = "ID로 기존 이미지를 업데이트합니다.")
     @ApiResponses(value = {
+//            @Parameter(name = "access", description = "{token}", example = "??"),
             @ApiResponse(responseCode = "200", description = "사진 수정 성공"),
             @ApiResponse( responseCode = "404", description = "사진 수정 성공")
     })
@@ -70,10 +98,12 @@ public class ImageController {
             @Parameter(description = "업데이트할 이미지의 ID")
     })
     public String updateImages(
-            @RequestParam("files") MultipartFile file,
+//            @RequestHeader("Authorization") String token,
+            @RequestParam("files") List<MultipartFile> files,
             @RequestParam("id") String id) {
         log.info("이미지 업데이트 중");
-        return imageService.update(file, id);
+//        return imageService.update(token, files, id);
+        return imageService.update(files, id);
     }
 
     @DeleteMapping

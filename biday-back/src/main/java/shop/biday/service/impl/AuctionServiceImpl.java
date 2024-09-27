@@ -43,7 +43,6 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public AuctionModel findById(Long id) {
         log.info("Find Auction by id: {}", id);
-
         return Optional.ofNullable(repository.findByAuctionId(id))
                 .map(auction -> {
                     UserDto user = auction.getUser();

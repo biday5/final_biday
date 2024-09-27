@@ -127,7 +127,7 @@ public class ProductServiceImpl implements ProductService {
                 .ifPresentOrElse(t -> {
                     repository.deleteById(id);
                     log.info("Product deleted: {}", id);
-                }, () -> log.error("User does not have role SELLER or does not exist"));
+                }, () -> log.error("User does not have role ADMIN or does not exist"));
     }
 
     // 강사님이 말씀하신대로 한 것
@@ -197,10 +197,10 @@ public class ProductServiceImpl implements ProductService {
     private Optional<String> validateUser(String token) {
         log.info("Validate User started");
         return Optional.of(token)
-                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_SELLER"))
+                .filter(t -> jwtUtil.getRole(t).equalsIgnoreCase("ROLE_ADMIN"))
                 .filter(t -> userRepository.existsByEmail(jwtUtil.getEmail(t)))
                 .or(() -> {
-                    log.error("User does not have role SELLER or does not exist");
+                    log.error("User does not have role ADMIN or does not exist");
                     return Optional.empty();
                 });
     }

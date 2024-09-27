@@ -28,9 +28,9 @@ public class QRatingRepositoryImpl implements QRatingRepository {
     @Override
     public double findSellerRating(String sellerId) {
         return queryFactory
-                .select(qRating.rate.avg())
+                .select(qRating.rating.avg())
                 .from(qRating)
                 .where(qRating.sellerId.eq(sellerId))
-                .fetch();
+                .fetchOne();
     }
 }

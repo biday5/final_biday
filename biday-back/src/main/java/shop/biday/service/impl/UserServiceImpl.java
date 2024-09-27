@@ -16,6 +16,7 @@ import shop.biday.service.ImageService;
 import shop.biday.service.RatingService;
 import shop.biday.service.UserService;
 
+import java.awt.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +28,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final AddressRepository addressRepository;
     private final ImageService imageService;
-    private final RatingService ratingService;
 
     @Override
     public List<UserEntity> findAll() {
@@ -39,18 +39,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id);
     }
 
+    // TODO 프론트에서 등급, 에러 이미지 관리할 것 UserDto 이미지 다 빼고 totalRate 넣는 걸로 바꾸기
     @Override
     public UserDto findByUserId(String id) {
         log.info("Find User: {}", id);
         UserEntity user = userRepository.findByEmail(id);
-
+        log.info("Find User: {}", user);
         return Optional.ofNullable(user)
                 .map(u -> {
                     log.info("Find User Image: {}", u.getId());
-                    int rate = (int) ratingService.findSellerRate(String.valueOf(u.getId()));
-                    ImageModel userImage = (rate == 0)
-                            ? imageService.findByOriginalNameAndType(String.valueOf(rate), "평점")
-                            : imageService.findByOriginalNameAndType("2", "평점");
+                    int rate = (int) u.getTotalRating();
+                    ImageModel userImage = imageService.findByTypeAndReferencedIdAndUploadPath("평점", String.valueOf(rate), "rate");
+                    if(userImage == null) {
+                        imageService.findByTypeAndUploadPath("에러", "error");
+                    }
 
                     UserDto userDto = new UserDto(u.getEmail(), u.getName(), userImage);
                     log.debug("Find User success: {}", userDto);

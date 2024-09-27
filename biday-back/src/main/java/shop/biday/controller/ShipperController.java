@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.biday.model.domain.BrandModel;
+import shop.biday.model.domain.ShipperModel;
 import shop.biday.model.entity.ShipperEntity;
 import shop.biday.service.ShipperService;
 
@@ -55,8 +56,8 @@ public class ShipperController {
             @Parameter(name = "access", description = "{token}", example = "??"),
             @Parameter(name = "name", description = "배송 이름", example = "나이키(Nike)")
     })
-    public ResponseEntity<ShipperEntity> create(@RequestHeader("Authorization") String token, @RequestBody BrandModel brand) {
-        return ResponseEntity.ok(shipperService.save(token, brand));
+    public ResponseEntity<ShipperEntity> create(@RequestHeader("Authorization") String token, @RequestBody ShipperModel shipper) {
+        return ResponseEntity.ok(shipperService.save(token, shipper));
     }
 
     @PatchMapping
@@ -71,8 +72,8 @@ public class ShipperController {
             @Parameter(name = "createdAt", description = "등록 시간", example = "localDateTime 값"),
             @Parameter(name = "updatedAt", description = "수정 시간", example = "localDateTime 값")
     })
-    public ResponseEntity<ShipperEntity> update(@RequestHeader("Authorization") String token, @RequestBody BrandModel brand) {
-        return ResponseEntity.ok(shipperService.update(token, brand));
+    public ResponseEntity<ShipperEntity> update(@RequestHeader("Authorization") String token, @RequestBody ShipperModel shipper) {
+        return ResponseEntity.ok(shipperService.update(token, shipper));
     }
 
     @DeleteMapping
