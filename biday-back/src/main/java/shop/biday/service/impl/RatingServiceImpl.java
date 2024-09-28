@@ -71,6 +71,7 @@ public class RatingServiceImpl implements RatingService {
                             .build();
                     ratingRepository.save(ratingEntity);
 
+                    // TODO seller 기본적으로 2점 갖고 있기 때문에 계산할 때 참고할 것
                     UserEntity userEntity = userRepository.findByEmail(ratingEntity.getSellerId());
                     if (userEntity != null) {
                         userEntity.setTotalRating(ratingRepository.findSellerRating(userEntity.getEmail()));
