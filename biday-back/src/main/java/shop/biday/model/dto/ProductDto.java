@@ -21,7 +21,7 @@ public class ProductDto {
     private String productCode;
     private Long price;
     private String color;
-    private ImageModel image;
+//    private ImageModel image;
     private Long wishes;
     private Long auctions; // size 리스트르 ㄹ가져와서 거기에 들어잇는 product id로 조회해서 카운트?
 }

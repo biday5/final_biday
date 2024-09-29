@@ -43,21 +43,21 @@ public class AuctionServiceImpl implements AuctionService {
         log.info("Find Auction by id: {}", id);
         return Optional.ofNullable(auctionRepository.findByAuctionId(id))
                 .map(auction -> {
-                    UserDto user = auction.getUser();
-                    int rate = (int) ratingService.findSellerRate(String.valueOf(user.getId()));
-                    ImageModel userImage = (rate == 0)
-                            ? imageService.findByOriginalNameAndType(String.valueOf(rate), "평점")
-                            : imageService.findByOriginalNameAndType("2", "평점");
-                    user.setImage(userImage);
-
-                    ProductDto product = auction.getSize().getProduct();
-                    ImageModel productImage = imageService.findByOriginalNameAndType(product.getProductCode(), "상품");
-                    log.debug("Found ProductImage: {}", productImage);
-                    product.setImage(productImage != null ? productImage : imageService.findByTypeAndUploadPath("에러", "error"));
-
-                    List<ImageModel> images = imageService.findByTypeAndReferencedId("경매", auction.getId());
-                    log.debug("Found Images: {}", images);
-                    auction.setImages(images != null ? images : (List<ImageModel>) imageService.findByTypeAndUploadPath("에러", "error"));
+//                    UserDto user = auction.getUser();
+//                    int rate = (int) ratingService.findSellerRate(String.valueOf(user.getId()));
+//                    ImageModel userImage = (rate == 0)
+//                            ? imageService.findByOriginalNameAndType(String.valueOf(rate), "평점")
+//                            : imageService.findByOriginalNameAndType("2", "평점");
+//                    user.setImage(userImage);
+//
+//                    ProductDto product = auction.getSize().getProduct();
+//                    ImageModel productImage = imageService.findByOriginalNameAndType(product.getProductCode(), "상품");
+//                    log.debug("Found ProductImage: {}", productImage);
+//                    product.setImage(productImage != null ? productImage : imageService.findByTypeAndUploadPath("에러", "error"));
+//
+//                    List<ImageModel> images = imageService.findByTypeAndReferencedId("경매", auction.getId());
+//                    log.debug("Found Images: {}", images);
+//                    auction.setImages(images != null ? images : (List<ImageModel>) imageService.findByTypeAndUploadPath("에러", "error"));
 
                     return auction;
                 })
@@ -105,7 +105,8 @@ public class AuctionServiceImpl implements AuctionService {
                 .map(t -> {
                     setStartingBid(auction);
                     return auctionRepository.save(AuctionEntity.builder()
-                            .userId(auction.getUser().getId())
+//                            .userId(auction.getUser().getId())
+                            .userId(auction.getUser())
                             .size(sizeService.findBySize(auction.getSize().getSize()))
                             .description(auction.getDescription())
                             .startingBid(auction.getStartingBid())
@@ -132,7 +133,8 @@ public class AuctionServiceImpl implements AuctionService {
                     return exists;
                 })
                 .map(t -> auctionRepository.save(AuctionEntity.builder()
-                        .userId(auction.getUser().getId())
+//                        .userId(auction.getUser().getId())
+                        .userId(auction.getUser())
                         .size(sizeService.findBySize(auction.getSize().getSize()))
                         .description(auction.getDescription())
                         .startingBid(auction.getStartingBid())

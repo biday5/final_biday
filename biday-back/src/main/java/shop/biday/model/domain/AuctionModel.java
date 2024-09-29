@@ -19,7 +19,8 @@ import java.util.List;
 @AllArgsConstructor
 public class AuctionModel {
     private Long id;
-    private UserDto user;
+    private String user;
+//    private UserDto user;
     private SizeDto size;
     private String description;
     private Long startingBid;
@@ -29,6 +30,6 @@ public class AuctionModel {
     private boolean status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<ImageModel> images;
+//    private List<ImageModel> images;
     private AwardDto award;
 }

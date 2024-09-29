@@ -45,18 +45,18 @@ public class ProductServiceImpl implements ProductService {
         Map<Long, ProductModel> map = productRepository.findByProductId(id,
                 removeParentheses(productRepository.findById(id).get().getName()));
 
-        if (map != null) {
-            map.forEach((key, productModel) -> {
-                ImageModel imageModel = imageService.findByOriginalNameAndType(productModel.getProductCode(), "상품");
-                productModel.setImage(imageModel != null
-                        ? imageModel
-                        : imageService.findByTypeAndUploadPath("에러", "error"));
-                log.debug(imageModel != null
-                                ? "Product Image Found : {}"
-                                : "Product Image Not Found : {}",
-                        imageModel != null ? imageModel.getOriginalName() : imageService.findByTypeAndUploadPath("에러", "error").getOriginalName());
-            });
-        }
+//        if (map != null) {
+//            map.forEach((key, productModel) -> {
+//                ImageModel imageModel = imageService.findByOriginalNameAndType(productModel.getProductCode(), "상품");
+//                productModel.setImage(imageModel != null
+//                        ? imageModel
+//                        : imageService.findByTypeAndUploadPath("에러", "error"));
+//                log.debug(imageModel != null
+//                                ? "Product Image Found : {}"
+//                                : "Product Image Not Found : {}",
+//                        imageModel != null ? imageModel.getOriginalName() : imageService.findByTypeAndUploadPath("에러", "error").getOriginalName());
+//            });
+//        }
 
         return Objects.requireNonNull(map).entrySet().stream().toList();
     }

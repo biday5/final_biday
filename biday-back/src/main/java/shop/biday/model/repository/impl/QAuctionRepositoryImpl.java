@@ -59,7 +59,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                         qAuction.status,
                         qAuction.createdAt,
                         qAuction.updatedAt,
-                        Projections.list(createDefaultImageProjection()),
+//                        Projections.list(createDefaultImageProjection()),
                         Projections.constructor(AwardDto.class,
                                 qAward.id,
                                 qAward.auction.id.as("auction"),
@@ -172,7 +172,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                 qProduct.productCode,
                 qProduct.price,
                 qProduct.color,
-                createDefaultImageProjection(),
+//                createDefaultImageProjection(),
                 auctionCount(),
                 wishCount()
         );

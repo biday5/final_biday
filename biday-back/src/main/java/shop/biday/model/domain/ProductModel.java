@@ -28,6 +28,6 @@ public class ProductModel {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long wishes;
-    private ImageModel image;
+//    private ImageModel image;
     private Set<SizeModel> sizes = new HashSet<>();
 }

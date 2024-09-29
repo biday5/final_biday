@@ -55,16 +55,16 @@ public class QProductRepositoryImpl implements QProductRepository {
         }
 
         if (!list.isEmpty()) {
-            for (ProductDto productDto : list) {
-                ImageModel imageModel = imageService.findByOriginalNameAndTypeAndReferencedId(productDto.getProductCode(), "상품", productDto.getId());
-                if (imageModel != null) {
-                    productDto.setImage(imageModel);
-                    log.debug("Product Image Found : {}", imageModel.getOriginalName());
-                } else {
-                    productDto.setImage(imageService.findByTypeAndUploadPath("에러", "error"));
-                    log.debug("Product Image Not Found : {}", imageService.findByTypeAndUploadPath("에러", "error").getOriginalName());
-                }
-            }
+//            for (ProductDto productDto : list) {
+//                ImageModel imageModel = imageService.findByOriginalNameAndTypeAndReferencedId(productDto.getProductCode(), "상품", productDto.getId());
+//                if (imageModel != null) {
+//                    productDto.setImage(imageModel);
+//                    log.debug("Product Image Found : {}", imageModel.getOriginalName());
+//                } else {
+//                    productDto.setImage(imageService.findByTypeAndUploadPath("에러", "error"));
+//                    log.debug("Product Image Not Found : {}", imageService.findByTypeAndUploadPath("에러", "error").getOriginalName());
+//                }
+//            }
         }
 
         return new SliceImpl<>(list, pageable, hasNext);
@@ -93,7 +93,7 @@ public class QProductRepositoryImpl implements QProductRepository {
                         qProduct.createdAt,
                         qProduct.updatedAt,
                         wishCount(),
-                        createDefaultImageProjection(),
+//                        createDefaultImageProjection(),
                         set(createDefaultSizeProjection())
                 )));
     }
@@ -108,7 +108,7 @@ public class QProductRepositoryImpl implements QProductRepository {
                 qProduct.productCode,
                 qProduct.price,
                 qProduct.color,
-                createDefaultImageProjection(),
+//                createDefaultImageProjection(),
                 wishCount(),
                 auctionCount()
         );
