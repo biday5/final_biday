@@ -6,10 +6,14 @@ import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.entity.AuctionEntity;
 
+import java.util.List;
+
 public interface AuctionService {
     AuctionModel findById(Long id);
 
-    Slice<AuctionDto> findByProduct(Long sizeId, String order, Long cursor, Pageable pageable);
+    Slice<AuctionDto> findBySize(Long sizeId, String order, Long cursor, Pageable pageable);
+
+    List<AuctionDto> findAllBySize(Long sizeId, String order);
 
     Slice<AuctionDto> findByUser(String token, String user, String period, Long cursor, Pageable pageable);
 

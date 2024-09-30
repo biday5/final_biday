@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.UpdateTimestamp;
+import shop.biday.model.entity.enums.Color;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,8 +45,9 @@ public class ProductEntity {
     @Column(name = "price", nullable = true)
     private Long price;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "color", nullable = true)
-    private String color;
+    private Color color;
 
     @Column(name = "description", nullable = false)
     private String description;

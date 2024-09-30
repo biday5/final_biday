@@ -74,9 +74,15 @@ public class AuctionServiceImpl implements AuctionService {
     }
 
     @Override
-    public Slice<AuctionDto> findByProduct(Long sizeId, String order, Long cursor, Pageable pageable) {
+    public Slice<AuctionDto> findBySize(Long sizeId, String order, Long cursor, Pageable pageable) {
         log.info("Find All Auctions By Time: {} SizeId: {}", order, sizeId);
-        return auctionRepository.findByProduct(sizeId, order, cursor, pageable);
+        return auctionRepository.findBySize(sizeId, order, cursor, pageable);
+    }
+
+    @Override
+    public List<AuctionDto> findAllBySize(Long sizeId, String order) {
+        log.info("Find All by Size: {} Order: {}", sizeId, order);
+        return auctionRepository.findAllBySize(sizeId, order);
     }
 
     // TODO user 호출할 때 id 기준으로 바꿀 것

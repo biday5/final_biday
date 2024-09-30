@@ -27,6 +27,16 @@ import java.util.Map;
 public class ProductController {
     private final ProductService productService;
 
+    @GetMapping("/findAll")
+    @Operation(summary = "전체 상품 목록", description = "경매 등록 시 사용될 전체 상품 목록")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "상품 전체 목록 가져오기 성공"),
+            @ApiResponse(responseCode = "404", description = "상품 전체 목록 찾을 수 없음")
+    })
+    public ResponseEntity<List<ProductEntity>> findAll() {
+        return ResponseEntity.ok(productService.findAll());
+    }
+
     @GetMapping("/findByFilter")
     @Operation(summary = "상품 목록", description = "메인에서 보여지거나, 검색 조건에 따른 상품 목록")
     @ApiResponses(value = {

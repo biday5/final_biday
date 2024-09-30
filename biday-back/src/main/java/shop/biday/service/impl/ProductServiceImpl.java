@@ -9,6 +9,7 @@ import shop.biday.model.domain.ImageModel;
 import shop.biday.model.domain.ProductModel;
 import shop.biday.model.dto.ProductDto;
 import shop.biday.model.entity.ProductEntity;
+import shop.biday.model.entity.enums.Color;
 import shop.biday.model.repository.BrandRepository;
 import shop.biday.model.repository.CategoryRepository;
 import shop.biday.model.repository.ProductRepository;
@@ -31,7 +32,11 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
-    private final ImageService imageService;
+
+    @Override
+    public List<ProductEntity> findAll() {
+        return productRepository.findAll();
+    }
 
     @Override
     public List<Map.Entry<Long, ProductModel>> findByProductId(Long id) {
@@ -80,7 +85,8 @@ public class ProductServiceImpl implements ProductService {
                         .subName(product.getSubName())
                         .productCode(product.getProductCode())
                         .price(product.getPrice())
-                        .color(product.getColor())
+                        .color(Color.valueOf(product.getColor()))
+                        //                        .color(product.getColor())
                         .description(product.getDescription())
                         .build()))
                 .orElseThrow(() -> new RuntimeException("Save Product failed"));
@@ -105,7 +111,8 @@ public class ProductServiceImpl implements ProductService {
                         .subName(product.getSubName())
                         .productCode(product.getProductCode())
                         .price(product.getPrice())
-                        .color(product.getColor())
+                        .color(Color.valueOf(product.getColor()))
+//                        .color(product.getColor())
                         .description(product.getDescription())
                         .build()))
                 .orElseThrow(() -> new RuntimeException("Update Product failed: Product not found"));

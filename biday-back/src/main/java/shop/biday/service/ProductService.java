@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface ProductService {
+
+    List<ProductEntity> findAll();
+
     List<Map.Entry<Long, ProductModel>> findByProductId(Long id);
 
     Slice<ProductDto> findByFilter(Pageable pageable, Long categoryId, Long brandId, String keyword, String color, String order, Long lastItemId);

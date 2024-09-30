@@ -112,8 +112,7 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
     }
 
     @Override
-    public Slice<AuctionDto> findByProduct(Long sizeId, String order, Long cursor, Pageable pageable) {
-        // TODO productId 같이 내려줘야 할 듯
+    public Slice<AuctionDto> findBySize(Long sizeId, String order, Long cursor, Pageable pageable) {
         BooleanExpression sizePredicate = sizeId != null ? qAuction.size.id.eq(sizeId) : null;
         BooleanExpression cursorPredicate = cursor != null ? qAuction.id.lt(cursor) : null;
 
@@ -136,8 +135,29 @@ public class QAuctionRepositoryImpl implements QAuctionRepository {
                 )
                 .orderBy(datePredicate)
                 .fetch();
-
         return createSlice(auctions, pageable);
+    }
+
+    @Override
+    public List<AuctionDto> findAllBySize(Long sizeId, String order) {
+        OrderSpecifier<?> datePredicate = switch (order) {
+            case "종료 임박 순" -> qAuction.endedAt.asc();
+            case "시작 순" -> qAuction.startedAt.asc();
+            default -> qAuction.createdAt.desc();
+        };
+
+        return queryFactory
+                .select(createAuctionDtoProjection())
+                .from(qAuction)
+                .leftJoin(qAuction.size, qSize)
+                .leftJoin(qSize.product, qProduct)
+                .where(
+                        qAuction.size.id.eq(sizeId),
+                        qAuction.status.eq(false),
+                        qAuction.endedAt.goe(LocalDateTime.now())
+                )
+                .orderBy(datePredicate)
+                .fetch();
     }
 
     private JPQLQuery<Long> auctionCount() {

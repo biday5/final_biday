@@ -186,14 +186,14 @@ public class QProductRepositoryImpl implements QProductRepository {
     }
 
     private BooleanExpression findByColor(String color) {
-        return color != null ? qProduct.color.containsIgnoreCase(color) : null;
+        return color != null ? qProduct.color.stringValue().containsIgnoreCase(color) : null;
     }
 
     private BooleanExpression findByKeyword(String keyword) {
         return keyword != null ? qProduct.name.containsIgnoreCase(keyword)
                 .or(qProduct.subName.containsIgnoreCase(keyword))
                 .or(qProduct.productCode.containsIgnoreCase(keyword))
-                .or(qProduct.color.containsIgnoreCase(keyword))
+                .or(qProduct.color.stringValue().containsIgnoreCase(keyword))
                 .or(qCategory.name.containsIgnoreCase(keyword))
                 .or(qBrand.name.containsIgnoreCase(keyword)) : null;
     }

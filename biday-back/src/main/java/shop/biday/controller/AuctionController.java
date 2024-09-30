@@ -16,6 +16,8 @@ import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.entity.AuctionEntity;
 import shop.biday.service.AuctionService;
 
+import java.util.List;
+
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.findById(id));
     }
 
-    @GetMapping("/findByProduct")
+    @GetMapping("/findBySize")
     @Operation(summary = "헤더 경매 목록", description = "종료 날짜에 따른 경매 목록")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "경매 목록 가져오기 성공"),
@@ -46,12 +48,29 @@ public class AuctionController {
             @Parameter(name = "order", description = "정렬할 시간 기준", example = "종료 임박 순"),
             @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1"),
     })
-    public ResponseEntity<Slice<AuctionDto>> findByTime(
+    public ResponseEntity<Slice<AuctionDto>> findBySize(
             @RequestParam(value = "sizeId", required = false) Long sizeId,
             @RequestParam(value = "order", required = false, defaultValue = "") String order,
             @RequestParam(value = "cursor", required = false) Long cursor,
             Pageable pageable) {
-        return ResponseEntity.ok(auctionService.findByProduct(sizeId, order, cursor, pageable));
+        return ResponseEntity.ok(auctionService.findBySize(sizeId, order, cursor, pageable));
+    }
+
+    @GetMapping("/findAllBySize")
+    @Operation(summary = "상품 상세 경매 목록", description = "상품 상세에서 size 기준으로 보여질 전체 경매 목록")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "경매 목록 가져오기 성공"),
+            @ApiResponse(responseCode = "404", description = "경매 목록 찾을 수 없음")
+    })
+    @Parameters({
+            @Parameter(name = "sizeId", description = "경매에 등록된 상품의 사이즈 id", example = "1"),
+            @Parameter(name = "order", description = "정렬할 시간 기준", example = "종료 임박 순"),
+            @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1"),
+    })
+    public ResponseEntity<List<AuctionDto>> findAllBySize(
+            @RequestParam(value = "sizeId", required = true) Long sizeId,
+            @RequestParam(value = "order", required = false, defaultValue = "") String order) {
+        return ResponseEntity.ok(auctionService.findAllBySize(sizeId, order));
     }
 
     @GetMapping
