@@ -65,7 +65,6 @@ public class AuctionController {
     @Parameters({
             @Parameter(name = "sizeId", description = "경매에 등록된 상품의 사이즈 id", example = "1"),
             @Parameter(name = "order", description = "정렬할 시간 기준", example = "종료 임박 순"),
-            @Parameter(name = "cursor", description = "현재 페이지에서 가장 마지막 경매의 id", example = "1"),
     })
     public ResponseEntity<List<AuctionDto>> findAllBySize(
             @RequestParam(value = "sizeId", required = true) Long sizeId,
